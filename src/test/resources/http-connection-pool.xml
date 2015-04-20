@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hawaii-http-connection-pool>
+  <max-total-connections>200</max-total-connections>
+  <time-to-live-seconds>5</time-to-live-seconds>
+  <default-max-per-route>2</default-max-per-route>
+  <connections>
+    <connection>
+      <description>used for google search results</description>
+      <hostname>www.google.com</hostname>
+      <scheme>https</scheme>
+      <port>443</port>
+      <max-connections>4</max-connections>
+    </connection>
+    <connection>
+      <description>used for google autocomplete</description>
+      <hostname>clients1.google.com</hostname>
+      <scheme>https</scheme>
+      <port>443</port>
+      <max-connections>4</max-connections>
+    </connection>
+    <connection>
+      <description>used for google maps and google places</description>
+      <hostname>maps.googleapis.com</hostname>
+      <scheme>https</scheme>
+      <port>443</port>
+      <max-connections>4</max-connections>
+    </connection>
+  </connections>
+</hawaii-http-connection-pool>

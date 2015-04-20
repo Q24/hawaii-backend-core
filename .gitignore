@@ -1,0 +1,17 @@
+/.classpath
+/.project
+/target/
+/.settings/
+/.idea
+/*.iml
+*.iml
+/log/
+/test-output/
+/uploads/deviceList.json
+/true
+.springBeans
+/tablet-type.txt
+/phone-type.txt
+/uploads/catalogue/dynalean/hawaii.catalog.xml.validations.txt
+/uploads/catalogue/dynalean/hawaii.catalog.xml.errors.txt
+/uploads/catalogue/dynalean/hawaii.catalog.mixmatch.xml.errors.txt
