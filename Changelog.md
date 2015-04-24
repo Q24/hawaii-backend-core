@@ -1,5 +1,13 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.2, 24 April 2015, Hans Lammers, Kevin Beken, Marcel Overdijk
+* Added Jackson object mapper.
+* Added Spring Data Commons.
+* Added Pagination support.
+
+## 0.2.1, 20 April 2015, Marcel Overdijk
+* Removed Jersey in favor of Spring MVC.
+
 ## 0.2.0, 17 April 2015, Marcel Overdijk
 * Removed Jersey in favor of Spring MVC.
 

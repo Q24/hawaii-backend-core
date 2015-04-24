@@ -22,12 +22,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.kahu</groupId>
   <artifactId>hawaii-backend-core</artifactId>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.2.2</version>
   
   <!-- defining versions of multiple dependencies to prevent version conflicts set generic encoding standards -->
   <properties>
     <java.version>1.7</java.version>
     <spring.version>4.1.6.RELEASE</spring.version>
+    <spring.data.commons.version>1.10.0.RELEASE</spring.data.commons.version>
+    <jackson.version>2.5.2</jackson.version>
     <jolokia.version>1.1.0</jolokia.version>
     <cxf.version>2.7.11</cxf.version>
     <encoding>UTF-8</encoding>
@@ -67,6 +69,22 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
       <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
+      <version>${spring.data.commons.version}</version>
+    </dependency>
+    <!-- jackson object mapper -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
     <!-- commons codec provides classes like base64 -->
     <dependency>
