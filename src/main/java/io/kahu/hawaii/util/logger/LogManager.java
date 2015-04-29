@@ -32,41 +32,75 @@ public interface LogManager {
 
     void audit(String message);
 
-    void setLevel(LoggerName name, String level);
+    void setLevel(LoggerName name,
+                    String level);
 
-    void trace(LoggerName name, String message);
+    void trace(LoggerName name,
+                    String message);
 
-    void debug(LoggerName name, String message);
+    void trace(LoggerName name,
+                    String message,
+                    Throwable t);
 
-    void debug(LoggerName name, String message, Throwable t);
+    void debug(LoggerName name,
+                    String message);
 
-    void info(LoggerName name, String message);
+    void debug(LoggerName name,
+                    String message,
+                    Throwable t);
 
-    void info(LoggerName name, String message, Throwable t);
+    void info(LoggerName name,
+                    String message);
 
-    void warn(LoggerName name, String message);
+    void info(LoggerName name,
+                    String message,
+                    Throwable t);
 
-    void warn(LoggerName name, String message, Throwable t);
+    void warn(LoggerName name,
+                    String message);
 
-    void error(LoggerName name, String message);
+    void warn(LoggerName name,
+                    String message,
+                    Throwable t);
 
-    void error(LoggerName name, Throwable t);
+    void error(LoggerName name,
+                    String message);
 
-    void error(LoggerName name, String message, Throwable t);
+    void error(LoggerName name,
+                    Throwable t);
 
-    void fatal(LoggerName name, String message);
+    void error(LoggerName name,
+                    String message,
+                    Throwable t);
 
-    void fatal(LoggerName name, String message, Throwable t);
+    void fatal(LoggerName name,
+                    String message);
 
-    void logIncomingCallStart(String type, String body, JSONObject params);
+    void fatal(LoggerName name,
+                    String message,
+                    Throwable t);
+
+    void logIncomingCallStart(String type,
+                    String body,
+                    JSONObject params);
 
     void logIncomingCallEnd(Throwable t);
 
-    void logIncomingCallEnd(int status, String body);
+    void logIncomingCallEnd(int status,
+                    String body);
 
-    void logOutgoingCallStart(String type, String id, String method, String uri, List<Header> headers, String body, JSONObject params);
+    void logOutgoingCallStart(String type,
+                    String id,
+                    String method,
+                    String uri,
+                    List<Header> headers,
+                    String body,
+                    JSONObject params);
 
-    void logOutgoingCallEnd(String type, String id, Response<?> response, String body);
+    void logOutgoingCallEnd(String type,
+                    String id,
+                    Response<?> response,
+                    String body);
 
     LogManager literalField(String field);
 
@@ -84,7 +118,8 @@ public interface LogManager {
 
     boolean isContextEmpty();
 
-    Object putContext(String key, Object value);
+    Object putContext(String key,
+                    Object value);
 
     Object getContext(String key);
 

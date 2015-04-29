@@ -85,7 +85,8 @@ public class DefaultLogManager implements LogManager {
         return logger;
     }
 
-    public void addLogger(LoggerName loggerName, Logger logger) {
+    public void addLogger(LoggerName loggerName,
+                    Logger logger) {
         loggers.put(loggerName.getName(), logger);
     }
 
@@ -123,7 +124,8 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void setLevel(LoggerName name, String level) {
+    public void setLevel(LoggerName name,
+                    String level) {
         try {
             Level logLevel = null;
             if (level != null) {
@@ -149,72 +151,98 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void trace(LoggerName name, String message) {
+    public void trace(LoggerName name,
+                    String message) {
         if (getLogger(name).isTraceEnabled()) {
             log(name, Level.TRACE, message, null, LogType.NORMAL);
         }
     }
 
     @Override
-    public void debug(LoggerName name, String message) {
+    public void trace(LoggerName name,
+                    String message,
+                    Throwable t) {
+        if (getLogger(name).isTraceEnabled()) {
+            log(name, Level.TRACE, message, t, LogType.NORMAL);
+        }
+    }
+
+    @Override
+    public void debug(LoggerName name,
+                    String message) {
         if (getLogger(name).isDebugEnabled()) {
             log(name, Level.DEBUG, message, null, LogType.NORMAL);
         }
     }
 
     @Override
-    public void debug(LoggerName name, String message, Throwable t) {
+    public void debug(LoggerName name,
+                    String message,
+                    Throwable t) {
         if (getLogger(name).isDebugEnabled()) {
             log(name, Level.DEBUG, message, t, LogType.NORMAL);
         }
     }
 
     @Override
-    public void info(LoggerName name, String message) {
+    public void info(LoggerName name,
+                    String message) {
         if (getLogger(name).isInfoEnabled()) {
             log(name, Level.INFO, message, null, LogType.NORMAL);
         }
     }
 
     @Override
-    public void info(LoggerName name, String message, Throwable t) {
+    public void info(LoggerName name,
+                    String message,
+                    Throwable t) {
         if (getLogger(name).isInfoEnabled()) {
             log(name, Level.INFO, message, t, LogType.NORMAL);
         }
     }
 
     @Override
-    public void warn(LoggerName name, String message) {
+    public void warn(LoggerName name,
+                    String message) {
         log(name, Level.WARN, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void warn(LoggerName name, String message, Throwable t) {
+    public void warn(LoggerName name,
+                    String message,
+                    Throwable t) {
         log(name, Level.WARN, message, t, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, String message) {
+    public void error(LoggerName name,
+                    String message) {
         log(name, Level.ERROR, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, Throwable t) {
+    public void error(LoggerName name,
+                    Throwable t) {
         log(name, Level.ERROR, null, t, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, String message, Throwable t) {
+    public void error(LoggerName name,
+                    String message,
+                    Throwable t) {
         log(name, Level.ERROR, message, t, LogType.NORMAL);
     }
 
     @Override
-    public void fatal(LoggerName name, String message) {
+    public void fatal(LoggerName name,
+                    String message) {
         log(name, Level.FATAL, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void fatal(LoggerName name, String message, Throwable t) {
+    public void fatal(LoggerName name,
+                    String message,
+                    Throwable t) {
         log(name, Level.FATAL, message, t, LogType.NORMAL);
     }
 
@@ -362,7 +390,11 @@ public class DefaultLogManager implements LogManager {
         }
     }
 
-    private void log(LoggerName loggerName, Level level, String message, Throwable t, LogType logType) {
+    private void log(LoggerName loggerName,
+                    Level level,
+                    String message,
+                    Throwable t,
+                    LogType logType) {
         Logger logger = getLogger(loggerName);
         if (!logger.isEnabledFor(level)) {
             return;
@@ -405,7 +437,9 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logIncomingCallStart(String type, String body, JSONObject params) {
+    public void logIncomingCallStart(String type,
+                    String body,
+                    JSONObject params) {
         boolean largeBody = false;
 
         putContext("tx.type", type);
@@ -472,7 +506,8 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logIncomingCallEnd(int status, String body) {
+    public void logIncomingCallEnd(int status,
+                    String body) {
         boolean largeBody = false;
 
         LoggingConfiguration config = getLoggingConfiguration();
@@ -510,7 +545,13 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logOutgoingCallStart(String type, String id, String method, String uri, List<Header> headers, String body, JSONObject params) {
+    public void logOutgoingCallStart(String type,
+                    String id,
+                    String method,
+                    String uri,
+                    List<Header> headers,
+                    String body,
+                    JSONObject params) {
         boolean largeBody = false;
         boolean hasHeaders = headers != null && headers.size() != 0;
 
@@ -563,7 +604,10 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logOutgoingCallEnd(String type, String id, Response<?> response, String body) {
+    public void logOutgoingCallEnd(String type,
+                    String id,
+                    Response<?> response,
+                    String body) {
         boolean largeBody = false;
         boolean hasHeaders = response.getHeaders() != null && response.getHeaders().size() != 0;
 
@@ -733,7 +777,8 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public Object putContext(String key, Object value) {
+    public Object putContext(String key,
+                    Object value) {
         return LoggingContext.get().put(key, value);
     }
 
