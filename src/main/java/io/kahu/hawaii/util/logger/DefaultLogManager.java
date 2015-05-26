@@ -154,7 +154,15 @@ public class DefaultLogManager implements LogManager {
             log(name, Level.TRACE, message, null, LogType.NORMAL);
         }
     }
+    
+    @Override
+    public void trace(LoggerName name, String message, Throwable t) {
+        if (getLogger(name).isTraceEnabled()) {
+            log(name, Level.TRACE, message, t, LogType.NORMAL);
+        }
+    }
 
+    
     @Override
     public void debug(LoggerName name, String message) {
         if (getLogger(name).isDebugEnabled()) {

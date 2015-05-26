@@ -35,6 +35,8 @@ public interface LogManager {
     void setLevel(LoggerName name, String level);
 
     void trace(LoggerName name, String message);
+    
+    void trace(LoggerName name, String message, Throwable t);
 
     void debug(LoggerName name, String message);
 
