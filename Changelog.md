@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.3, 29 April 2015, Rutger Lubbers
+* Added trace method to LogManager.
+
 ## 0.2.2, 24 April 2015, Hans Lammers, Kevin Beken, Marcel Overdijk
 * Added Jackson object mapper.
 * Added Spring Data Commons.
