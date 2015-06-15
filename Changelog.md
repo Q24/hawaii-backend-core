@@ -1,5 +1,9 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.4, 15 Juni 2015, Wouter Eerdekens, Marcel Overdijk
+* Add HandlerMethodAdapter to build a mapping of rest calls per controller.
+* Added Apache Commons Lang 3.4 dependency.
+
 ## 0.2.3, 29 April 2015, Rutger Lubbers
 * Added trace method to LogManager.
 
