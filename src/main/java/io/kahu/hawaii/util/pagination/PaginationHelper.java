@@ -38,4 +38,19 @@ public class PaginationHelper<E> {
         // return the page
         return new PageImpl<E>(pageItems, pageable, rowCount);
     }
+
+    /**
+     * Calculates the start index from the pageable object. As rownums start
+     * with 1 we add 1 to the result of page number * page size.
+     */
+    public static int getStartIndex(Pageable pageable) {
+        return (pageable.getPageNumber() * pageable.getPageSize()) + 1;
+    }
+
+    /**
+     * Calculates the end index from the pageable object.
+     */
+    public static int getEndIndex(Pageable pageable) {
+        return (pageable.getPageNumber() + 1) * pageable.getPageSize();
+    }
 }

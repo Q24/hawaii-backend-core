@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.5, 19 Juni 2015, Marcel Overdijk
+* Added pagination helpers to determine start and end index.
+
 ## 0.2.4, 15 Juni 2015, Wouter Eerdekens, Marcel Overdijk
 * Added HandlerMethodAdapter to build a mapping of rest calls per controller.
 * Added Apache Commons Lang 3.4 dependency.
