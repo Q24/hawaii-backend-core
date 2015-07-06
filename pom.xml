@@ -22,7 +22,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.kahu</groupId>
   <artifactId>hawaii-backend-core</artifactId>
-  <version>0.2.6</version>
+  <version>0.2.7-SNAPSHOT</version>
   
   <!-- defining versions of multiple dependencies to prevent version conflicts set generic encoding standards -->
   <properties>
