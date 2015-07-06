@@ -27,6 +27,7 @@ import io.kahu.hawaii.util.logger.LoggingContext;
 
 import java.util.List;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -39,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 public class DefaultResponseManager implements ResponseManager {
 
     protected static final String X_HAWAII_TRANSACTION_ID_HEADER = "X-Hawaii-Tx-Id";
+    protected static final String X_HAWAII_CALL_IDS_HEADER = "X-Hawaii-Call-Ids";
 
     private final LogManager logManager;
 
@@ -175,16 +177,17 @@ public class DefaultResponseManager implements ResponseManager {
 
     private ResponseEntity<String> myToResponse(JSONObject response) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON); // explicitly
-                                                                    // set the
-                                                                    // application/json
-                                                                    // content
-                                                                    // type
+        // explicitly set the application/json content type
+        headers.setContentType(MediaType.APPLICATION_JSON); 
         if (hawaiiTxIdHeaderEnabled) {
             // note the X-Hawaii-Tx-Id header can be disabled by setting
-            Object hawaiiTxId = LoggingContext.get().get(this.loggingContentTxId);
+            // logging.context.txid=
+            LoggingContext loggingContext = LoggingContext.get();
+            Object hawaiiTxId = loggingContext.get(this.loggingContentTxId);
+            Object callIds = loggingContext.get("call_ids");
             if (hawaiiTxId != null) {
-                headers.set(X_HAWAII_TRANSACTION_ID_HEADER, hawaiiTxId.toString());
+                headers.set(X_HAWAII_TRANSACTION_ID_HEADER, ObjectUtils.toString(hawaiiTxId));
+                headers.set(X_HAWAII_CALL_IDS_HEADER, ObjectUtils.toString(callIds));
             }
         }
         String json = response.toString();
