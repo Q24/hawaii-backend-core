@@ -15,12 +15,21 @@
  */
 package io.kahu.hawaii.service.mail;
 
+import java.io.File;
+
 import io.kahu.hawaii.util.exception.ServerException;
 
 public interface MailSender {
+
     void sendHtmlMail(String to, String subject, String htmlMessage) throws ServerException;
+
     void sendMail(String to, String subject, String text) throws ServerException;
+
     void sendMail(String to, String subject, String text, String from) throws ServerException;
+
     void sendMail(String to, String subject, String text, String from, String attachment) throws ServerException;
-    String getAttachmentFileName(String attachment);
+
+    default String getAttachmentFileName(String attachment) {
+        return attachment.substring(attachment.lastIndexOf(File.separator) + 1);
+    }
 }

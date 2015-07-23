@@ -43,7 +43,8 @@ public class DefaultMailSenderTest {
     private MimeMessage mockedMimeMessage;
     private MailSender mailSender;
 
-    @Before public void setUp() {
+    @Before 
+    public void setUp() {
         mockedMailConnection = mock(MailConnection.class);
         mockedMimeMessage = mock(MimeMessage.class);
         mailProperties = new Properties();
@@ -51,7 +52,8 @@ public class DefaultMailSenderTest {
 
     }
 
-    @Test public void assureThatMailIsSent() throws Exception {
+    @Test
+    public void assureThatMailIsSent() throws Exception {
         String to = "hello@test.com";
         String mailFrom = "jopie@test.nl";
         String subject = "unit test for mail sending";
@@ -69,7 +71,8 @@ public class DefaultMailSenderTest {
         verify(mockedMailConnection).disconnectFromMailServer();
     }
 
-    @Test public void assureThatServerExceptionWithMailErrorIsSent() throws Exception {
+    @Test
+    public void assureThatServerExceptionWithMailErrorIsSent() throws Exception {
         String to = "hello@test.com";
         String subject = "unit test for mail sending";
         String content = "mail body";
@@ -80,7 +83,6 @@ public class DefaultMailSenderTest {
 
             assertThat(exception.getError().getErrorName(), is(equalTo(ServerError.MAIL_ERROR.getErrorName())));
         }
-
     }
 
     @Test

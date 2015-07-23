@@ -1,7 +1,9 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.7, ? ? 2015, Marcel Overdijk
+## 0.2.7, ? ? 2015, Marcel Overdijk, Robby Pelssers
 * Added PropertyHasValue validator.
+* Fixed bug with incorrect attachement name in mail sender.
+* Upgraded to Java 8.
 
 ## 0.2.6, 6 July 2015, Marcel Overdijk
 * Added call ids response header (got lost after Jersey removal).
@@ -28,7 +30,7 @@
 * Removed Jersey in favor of Spring MVC.
 
 ## 0.1.92, 17 Mar 2015, Rutger Lubbers
-* Added xml bind date utilitiy to use JodaTime in SOAP services / clients.
+* Added xml bind date utility to use JodaTime in SOAP services / clients.
 * Allow queries with block comments.
 
 ## 0.1.91, 16 Mrt 2015, Paul Klos

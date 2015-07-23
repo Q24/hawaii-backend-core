@@ -19,8 +19,6 @@ import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
 
-import java.io.File;
-
 public class FakeMailSender implements MailSender {
 
     private final LogManager logManager;
@@ -55,11 +53,6 @@ public class FakeMailSender implements MailSender {
         logInfo(text);
         logInfo("Attachment: " + attachment);
         logInfo("---------------------------------------");
-    }
-
-    @Override
-    public String getAttachmentFileName(String attachment) {
-        return attachment.substring(attachment.lastIndexOf(File.separator) + 1);
     }
 
     private void logInfo(String message) {
