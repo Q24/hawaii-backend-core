@@ -18,9 +18,9 @@ package io.kahu.hawaii.service.mail;
 import io.kahu.hawaii.util.exception.ServerException;
 
 public interface MailSender {
-    // TODO to is of type EmailAddress in unify-b-stream
     void sendHtmlMail(String to, String subject, String htmlMessage) throws ServerException;
     void sendMail(String to, String subject, String text) throws ServerException;
     void sendMail(String to, String subject, String text, String from) throws ServerException;
     void sendMail(String to, String subject, String text, String from, String attachment) throws ServerException;
+    String getAttachmentFileName(String attachment);
 }

@@ -28,6 +28,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.File;
 
 public class DefaultMailSender implements MailSender {
     private static final String MAIL_MIME_TYPE = "text/plain; charset=utf-8";
@@ -99,6 +100,11 @@ public class DefaultMailSender implements MailSender {
                 mailConnection.disconnectFromMailServer();
             }
         }
+    }
+
+    @Override
+    public String getAttachmentFileName(String attachment) {
+        return attachment.substring(attachment.lastIndexOf(File.separator) + 1);
     }
 
 }
