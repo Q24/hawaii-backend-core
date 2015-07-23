@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 
+import java.io.File;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -80,5 +81,13 @@ public class DefaultMailSenderTest {
             assertThat(exception.getError().getErrorName(), is(equalTo(ServerError.MAIL_ERROR.getErrorName())));
         }
 
+    }
+
+    @Test
+    public void assureAttachmentFileNameIsCorrect() throws Exception {
+        String attachment1 = File.separator + "tmp" + File.separator + "001" + File.separator + "demo.txt";
+        String expectedFileName = "demo.txt";
+        String actualFileName1 = mailSender.getAttachmentFileName(attachment1);
+        assertThat("fileName should be correct", expectedFileName.equals(actualFileName1));
     }
 }
