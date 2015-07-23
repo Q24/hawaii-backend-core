@@ -1,7 +1,10 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.7, ? ? 2015, Marcel Overdijk
+* Added PropertyHasValue validator.
+
 ## 0.2.6, 6 July 2015, Marcel Overdijk
-* Added call ids response header (got lost after Jersey removal)
+* Added call ids response header (got lost after Jersey removal).
 
 ## 0.2.5, 19 Juni 2015, Marcel Overdijk
 * Added pagination helpers to determine start and end index.
