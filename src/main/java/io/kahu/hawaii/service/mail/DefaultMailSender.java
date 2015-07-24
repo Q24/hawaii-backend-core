@@ -84,8 +84,7 @@ public class DefaultMailSender implements MailSender {
                 bodyPart = new MimeBodyPart();
                 DataSource source = new FileDataSource(attachment);
                 bodyPart.setDataHandler(new DataHandler(source));
-                int index = attachment.lastIndexOf("/");
-                bodyPart.setFileName(attachment.substring(index != -1 ? index : attachment.indexOf("\\")));
+                bodyPart.setFileName(getAttachmentFileName(attachment));
                 multipart.addBodyPart(bodyPart);
             }
 
