@@ -1,8 +1,10 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.7, ? ? 2015, Marcel Overdijk, Robby Pelssers
-* Added PropertyHasValue validator.
+## 0.2.8, 24 July 2015, Robby Pelssers
 * Fixed bug with incorrect attachement name in mail sender.
+
+## 0.2.7, 23 July 2015, Marcel Overdijk
+* Added PropertyHasValue validator.
 * Upgraded to Java 8.
 
 ## 0.2.6, 6 July 2015, Marcel Overdijk
