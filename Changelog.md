@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.9, 16 October 2015, Cedric Roijakkers
+* Added optional feature to configure pages in the sitemap to be skipped.
+
 ## 0.2.8, 24 July 2015, Robby Pelssers
 * Fixed bug with incorrect attachement name in mail sender.
 
