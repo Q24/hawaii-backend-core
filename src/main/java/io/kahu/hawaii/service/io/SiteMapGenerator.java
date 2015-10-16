@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -40,12 +41,14 @@ import org.w3c.dom.Element;
 public class SiteMapGenerator {
 
     private String sitemapUrlDomain;
+    private List<String> sitemapSkipPages;
 
     public SiteMapGenerator() {
     }
 
-    public SiteMapGenerator(String sitemapUrlDomain) {
+    public SiteMapGenerator(String sitemapUrlDomain, String sitemapSkipPagesProp) {
         this.sitemapUrlDomain = sitemapUrlDomain;
+        this.sitemapSkipPages = ((sitemapSkipPagesProp == null || "".equalsIgnoreCase(sitemapSkipPagesProp)) ? null : Arrays.asList(sitemapSkipPagesProp.split(",")));
     }
 
     public void writeSitemap(Writer writer, List<String> fileList) throws IOException {
@@ -63,11 +66,17 @@ public class SiteMapGenerator {
 
             // URL elements
             for (String fileName : fileList) {
+            	// replace backslashes with forward slashes (on windows)
+            	fileName = fileName.replace('\\', '/');
+            	
+            	// if the file is part of the skip list, don't add it
+            	if (sitemapSkipPages != null && sitemapSkipPages.contains(fileName)) continue;
+
                 Element url = doc.createElement("url");
                 rootElement.appendChild(url);
 
                 Element loc = doc.createElement("loc");
-                loc.appendChild(doc.createTextNode(sitemapUrlDomain + fileName.replace('\\', '/')));
+                loc.appendChild(doc.createTextNode(sitemapUrlDomain + fileName));
                 url.appendChild(loc);
                 rootElement.appendChild(url);
             }

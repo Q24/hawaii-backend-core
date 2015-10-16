@@ -232,7 +232,8 @@ public class KahuConfig {
     @Bean
     public SiteMapGenerator siteMapGenerator() {
         String sitemapUrlDomain = env.getProperty("sitemap.url.domain");
-        return new SiteMapGenerator(sitemapUrlDomain);
+        String sitemapSkipPages = env.getProperty("sitemap.skip.pages");
+        return new SiteMapGenerator(sitemapUrlDomain, sitemapSkipPages);
     }
 
     // *************************************************************************
