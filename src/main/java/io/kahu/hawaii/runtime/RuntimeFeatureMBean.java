@@ -28,21 +28,11 @@ public class RuntimeFeatureMBean {
     }
 
     public String get(String name) throws ServerException {
-        RuntimeFeatures features = runtimeFeaturesService.getRuntimeFeatures();
-        RuntimeFeature feature = features.getFeature(name);
-        if (feature == null) {
-            throw new IllegalArgumentException("Invalid runtime feature: " + name);
-        }
+        RuntimeFeature feature = runtimeFeaturesService.getRuntimeFeature(name);
         return feature.getValue();
     }
 
     public void set(String name, String value) throws ServerException {
-        RuntimeFeatures features = runtimeFeaturesService.getRuntimeFeatures();
-        RuntimeFeature feature = features.getFeature(name);
-        if (feature == null) {
-            throw new IllegalArgumentException("Invalid runtime feature: " + name);
-        }
-        feature.setValue(value);
-        runtimeFeaturesService.updateRuntimeFeatures(features);
+        runtimeFeaturesService.setRuntimeFeature(name, value);
     }
 }
