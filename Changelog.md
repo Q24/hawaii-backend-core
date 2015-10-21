@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.X 21 October 2015, Wouter Eerdekens, Paul Klos
+* Method getRuntimeFeatures(List<String> exclude) now also accepts categories instead of just single features.
+
 ## 0.2.10, 21 October 2015, Wouter Eerdekens, Paul Klos
 * Extended RuntimeFeaturesService, created RuntimeFeaturesHolder.
 
