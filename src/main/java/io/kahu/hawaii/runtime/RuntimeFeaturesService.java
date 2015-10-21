@@ -15,12 +15,24 @@
  */
 package io.kahu.hawaii.runtime;
 
+import java.util.List;
+
 import io.kahu.hawaii.util.exception.ServerException;
 
 public interface RuntimeFeaturesService {
 
-    public RuntimeFeatures getRuntimeFeatures() throws ServerException;
+    @Deprecated
+    RuntimeFeatures getRuntimeFeatures() throws ServerException;
 
-    public void updateRuntimeFeatures(RuntimeFeatures runtimeFeatures) throws ServerException;
+    @Deprecated
+    void updateRuntimeFeatures(RuntimeFeatures runtimeFeatures) throws ServerException;
+
+    RuntimeFeature getRuntimeFeature(String name) throws ServerException, FeatureNotFoundException;
+
+    List<RuntimeFeature> getRuntimeFeatureList() throws ServerException;
+
+    List<RuntimeFeature> getRuntimeFeatureList(List<String> excludedNames) throws ServerException;
+
+    void setRuntimeFeature(String name, String value) throws ServerException, FeatureNotFoundException;
 
 }

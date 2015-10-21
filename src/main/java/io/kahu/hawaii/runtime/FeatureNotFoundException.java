@@ -15,30 +15,14 @@
  */
 package io.kahu.hawaii.runtime;
 
-import java.io.Serializable;
-import java.util.List;
+public class FeatureNotFoundException extends RuntimeException {
 
-@Deprecated
-public class RuntimeFeatures implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private final List<RuntimeFeature> features;
-
-    public RuntimeFeatures(List<RuntimeFeature> features) {
-        this.features = features;
+    public FeatureNotFoundException(String message) {
+        super(message);
     }
 
-    List<RuntimeFeature> getFeatures() {
-        return features;
-    }
-
-    RuntimeFeature getFeature(String name) {
-        for (RuntimeFeature feature : features) {
-            if (feature.getName().equals(name)) {
-                return feature;
-            }
-        }
-        return null;
+    public FeatureNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }
