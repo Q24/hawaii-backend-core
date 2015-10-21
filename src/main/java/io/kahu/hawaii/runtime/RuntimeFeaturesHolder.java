@@ -17,9 +17,7 @@ package io.kahu.hawaii.runtime;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,12 +26,11 @@ import org.springframework.util.Assert;
 
 public class RuntimeFeaturesHolder implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private Map<String, RuntimeFeature> lookupMap;
-    private Map<String, Object> featuresMap;
 
     public RuntimeFeaturesHolder(Map<String, Object> featuresMap) {
-        this.featuresMap = featuresMap;
-        buildLookupMap();
+        buildLookupMap(featuresMap);
     }
 
     public RuntimeFeature getRuntimeFeature(String name) {
@@ -48,29 +45,20 @@ public class RuntimeFeaturesHolder implements Serializable {
         if (exclude == null) {
             return new ArrayList<>(lookupMap.values());
         }
-        return lookupMap.keySet().stream().filter(key -> !exclude.contains(key)).map(key -> lookupMap.get(key)).collect(Collectors.toList());
+        return lookupMap.keySet().stream().filter(key -> !exclude.contains(key)).map(lookupMap::get).collect(Collectors.toList());
     }
 
     public void setRuntimeFeature(RuntimeFeature runtimeFeature) {
-        List<String> keys = Arrays.asList(runtimeFeature.getName().split("\\."));
-        Map<String, Object> map = featuresMap;
-        for (Iterator<String> iterator = keys.iterator(); iterator.hasNext(); ) {
-            String key = iterator.next();
-            if (iterator.hasNext()) {
-                map = (Map) map.get(key);
-            } else {
-                map.put(key, runtimeFeature);
-            }
-        }
         lookupMap.put(runtimeFeature.getName(), runtimeFeature);
     }
 
-    private void buildLookupMap() {
+    private void buildLookupMap(Map<String, Object> featuresMap) {
         Map<String, RuntimeFeature> result = new HashMap<>();
         process(featuresMap, null, result);
         lookupMap = result;
     }
 
+    @SuppressWarnings("unchecked")
     private void process(Map<String, Object> source, String key, Map<String, RuntimeFeature> result) {
         for (Map.Entry<String, Object> entry : source.entrySet()) {
             String newKey = key == null ? entry.getKey() : key + '.' + entry.getKey();
