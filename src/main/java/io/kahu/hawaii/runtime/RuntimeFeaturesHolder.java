@@ -45,7 +45,14 @@ public class RuntimeFeaturesHolder implements Serializable {
         if (exclude == null) {
             return new ArrayList<>(lookupMap.values());
         }
-        return lookupMap.keySet().stream().filter(key -> !exclude.contains(key)).map(lookupMap::get).collect(Collectors.toList());
+        return lookupMap.keySet().stream().filter(key -> {
+            for (String pattern: exclude) {
+                if (key.startsWith(pattern)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(lookupMap::get).collect(Collectors.toList());
     }
 
     public void setRuntimeFeature(RuntimeFeature runtimeFeature) {
