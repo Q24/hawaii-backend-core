@@ -1,6 +1,6 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.X, 21 October 2015, Wouter Eerdekens, Paul Klos
+## 0.2.10, 21 October 2015, Wouter Eerdekens, Paul Klos
 * Extended RuntimeFeaturesService, created RuntimeFeaturesHolder.
 
 ## 0.2.9, 16 October 2015, Cedric Roijakkers
