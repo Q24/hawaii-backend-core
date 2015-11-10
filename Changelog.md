@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.12 10 November 2015, Rutger Lubbers
+* Inject JDBC Operations into Database repository, so a logging JDBC Operations can be configured.
+
 ## 0.2.11 21 October 2015, Wouter Eerdekens, Paul Klos
 * Method getRuntimeFeatures(List<String> exclude) now also accepts categories instead of just single features.
 
