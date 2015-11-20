@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## XXX 20 November 2015, Paul Klos
+* Update PaginationHelper to take a JDBC Operations argument.
+
 ## 0.2.12 10 November 2015, Rutger Lubbers
 * Inject JDBC Operations into Database repository, so a logging JDBC Operations can be configured.
 

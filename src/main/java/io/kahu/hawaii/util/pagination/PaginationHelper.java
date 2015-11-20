@@ -1,3 +1,5 @@
+package io.kahu.hawaii.util.pagination;
+
 /**
  * Copyright 2015 Q24
  *
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.pagination;
 
 import java.util.List;
 import java.util.Map;
@@ -22,35 +23,36 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 public class PaginationHelper<E> {
 
-    public Page<E> fetchPage(final NamedParameterJdbcTemplate jdbcTemplate, final String sqlCountRows, final String sqlFetchRows,
-            final Map<String, Object> paramMap, final Pageable pageable, final RowMapper<E> rowMapper) {
+    public Page<E> fetchPage(final NamedParameterJdbcOperations jt, final String sqlCountRows, final String sqlFetchRows, final Map<String, Object> paramMap,
+            final Pageable pageable, final RowMapper<E> rowMapper) {
 
         // first execute select count (needed for paging metadata)
-        final int rowCount = jdbcTemplate.queryForObject(sqlCountRows, paramMap, Integer.class);
+        final int rowCount = jt.queryForObject(sqlCountRows, paramMap, Integer.class);
 
         // now fetch the actual objects (content)
-        final List<E> pageItems = (List<E>) jdbcTemplate.query(sqlFetchRows, paramMap, rowMapper);
+        final List<E> pageItems = jt.query(sqlFetchRows, paramMap, (resultSet, rowNum) -> {
+            return rowMapper.mapRow(resultSet, rowNum);
+        });
 
         // return the page
         return new PageImpl<E>(pageItems, pageable, rowCount);
     }
 
     /**
-     * Calculates the start index from the pageable object. As rownums start
-     * with 1 we add 1 to the result of page number * page size.
+     * Calculates the start index from the pageable object. As rownums start with 1 we add 1 to the result of page number * page size.
      */
-    public static int getStartIndex(Pageable pageable) {
+    public static int getStartIndex(final Pageable pageable) {
         return (pageable.getPageNumber() * pageable.getPageSize()) + 1;
     }
 
     /**
      * Calculates the end index from the pageable object.
      */
-    public static int getEndIndex(Pageable pageable) {
+    public static int getEndIndex(final Pageable pageable) {
         return (pageable.getPageNumber() + 1) * pageable.getPageSize();
     }
 }
