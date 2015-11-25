@@ -48,12 +48,13 @@ public class LoggingConfiguration {
     private Set<String> bodyFields = Collections.emptySet();
     private Set<String> passwordParameters = Collections.emptySet();
     private Pattern[] bodyPasswordPatterns = new Pattern[] {};
+    private String[] bodyPasswordFields;
 
     public String[] getTracingFields() {
         return tracingFields;
     }
 
-    public void setTracingFields(String[] tracingFields) {
+    public void setTracingFields(final String[] tracingFields) {
         this.tracingFields = tracingFields;
     }
 
@@ -61,7 +62,7 @@ public class LoggingConfiguration {
         return skippedLocationClasses;
     }
 
-    public void setSkippedLocationClasses(String[] skippedLocationClasses) {
+    public void setSkippedLocationClasses(final String[] skippedLocationClasses) {
         this.skippedLocationClasses = skippedLocationClasses;
     }
 
@@ -69,7 +70,7 @@ public class LoggingConfiguration {
         return complexityThreshold;
     }
 
-    public void setComplexityThreshold(int complexityThreshold) {
+    public void setComplexityThreshold(final int complexityThreshold) {
         this.complexityThreshold = complexityThreshold;
     }
 
@@ -77,7 +78,7 @@ public class LoggingConfiguration {
         return maxInfoRequestBodySize;
     }
 
-    public void setMaxInfoRequestBodySize(int maxInfoRequestBodySize) {
+    public void setMaxInfoRequestBodySize(final int maxInfoRequestBodySize) {
         this.maxInfoRequestBodySize = maxInfoRequestBodySize;
     }
 
@@ -85,7 +86,7 @@ public class LoggingConfiguration {
         return maxDebugRequestBodySize;
     }
 
-    public void setMaxDebugRequestBodySize(int maxDebugRequestBodySize) {
+    public void setMaxDebugRequestBodySize(final int maxDebugRequestBodySize) {
         this.maxDebugRequestBodySize = maxDebugRequestBodySize;
     }
 
@@ -93,7 +94,7 @@ public class LoggingConfiguration {
         return maxInfoResponseBodySize;
     }
 
-    public void setMaxInfoResponseBodySize(int maxInfoResponseBodySize) {
+    public void setMaxInfoResponseBodySize(final int maxInfoResponseBodySize) {
         this.maxInfoResponseBodySize = maxInfoResponseBodySize;
     }
 
@@ -101,7 +102,7 @@ public class LoggingConfiguration {
         return maxDebugResponseBodySize;
     }
 
-    public void setMaxDebugResponseBodySize(int maxDebugResponseBodySize) {
+    public void setMaxDebugResponseBodySize(final int maxDebugResponseBodySize) {
         this.maxDebugResponseBodySize = maxDebugResponseBodySize;
     }
 
@@ -109,7 +110,7 @@ public class LoggingConfiguration {
         return maxOutInfoRequestBodySize;
     }
 
-    public void setMaxOutInfoRequestBodySize(int maxOutInfoRequestBodySize) {
+    public void setMaxOutInfoRequestBodySize(final int maxOutInfoRequestBodySize) {
         this.maxOutInfoRequestBodySize = maxOutInfoRequestBodySize;
     }
 
@@ -117,7 +118,7 @@ public class LoggingConfiguration {
         return maxOutDebugRequestBodySize;
     }
 
-    public void setMaxOutDebugRequestBodySize(int maxOutDebugRequestBodySize) {
+    public void setMaxOutDebugRequestBodySize(final int maxOutDebugRequestBodySize) {
         this.maxOutDebugRequestBodySize = maxOutDebugRequestBodySize;
     }
 
@@ -125,7 +126,7 @@ public class LoggingConfiguration {
         return maxOutInfoResponseBodySize;
     }
 
-    public void setMaxOutInfoResponseBodySize(int maxOutInfoResponseBodySize) {
+    public void setMaxOutInfoResponseBodySize(final int maxOutInfoResponseBodySize) {
         this.maxOutInfoResponseBodySize = maxOutInfoResponseBodySize;
     }
 
@@ -133,7 +134,7 @@ public class LoggingConfiguration {
         return maxOutDebugResponseBodySize;
     }
 
-    public void setMaxOutDebugResponseBodySize(int maxOutDebugResponseBodySize) {
+    public void setMaxOutDebugResponseBodySize(final int maxOutDebugResponseBodySize) {
         this.maxOutDebugResponseBodySize = maxOutDebugResponseBodySize;
     }
 
@@ -141,7 +142,7 @@ public class LoggingConfiguration {
         return urlFields;
     }
 
-    public void setUrlFields(String[] urlFields) {
+    public void setUrlFields(final String[] urlFields) {
         this.urlFields = new HashSet<>();
         for (String s : urlFields) {
             this.urlFields.add(s);
@@ -152,7 +153,7 @@ public class LoggingConfiguration {
         return parameterFields;
     }
 
-    public void setParameterFields(String[] parameterFields) {
+    public void setParameterFields(final String[] parameterFields) {
         this.parameterFields = new HashSet<>();
         for (String s : parameterFields) {
             this.parameterFields.add(s);
@@ -163,7 +164,7 @@ public class LoggingConfiguration {
         return headerFields;
     }
 
-    public void setHeaderFields(String[] headerFields) {
+    public void setHeaderFields(final String[] headerFields) {
         this.headerFields = new HashSet<>();
         for (String s : headerFields) {
             this.headerFields.add(s);
@@ -174,7 +175,7 @@ public class LoggingConfiguration {
         return bodyFields;
     }
 
-    public void setBodyFields(String[] bodyFields) {
+    public void setBodyFields(final String[] bodyFields) {
         this.bodyFields = new HashSet<>();
         for (String s : bodyFields) {
             this.bodyFields.add(s);
@@ -185,7 +186,7 @@ public class LoggingConfiguration {
         return passwordParameters;
     }
 
-    public void setPasswordParameters(String[] passwordParameters) {
+    public void setPasswordParameters(final String[] passwordParameters) {
         this.passwordParameters = new HashSet<>();
         for (String s : passwordParameters) {
             this.passwordParameters.add(s);
@@ -196,11 +197,19 @@ public class LoggingConfiguration {
         return bodyPasswordPatterns;
     }
 
-    public void setBodyPasswordPatterns(String[] bodyPasswordPatterns) {
+    public void setBodyPasswordPatterns(final String[] bodyPasswordPatterns) {
         this.bodyPasswordPatterns = new Pattern[bodyPasswordPatterns.length];
         for (int i = 0; i < bodyPasswordPatterns.length; i++) {
             this.bodyPasswordPatterns[i] = Pattern.compile(bodyPasswordPatterns[i], Pattern.DOTALL);
         }
+    }
+
+    public void setBodyPasswordFields(final String[] bodyPasswordFields) {
+        this.bodyPasswordFields = bodyPasswordFields;
+    }
+
+    public String[] getBodyPasswordFields() {
+        return bodyPasswordFields;
     }
 
     @Override
@@ -208,6 +217,7 @@ public class LoggingConfiguration {
         LoggingConfiguration clone = new LoggingConfiguration();
         clone.bodyFields = bodyFields;
         clone.bodyPasswordPatterns = bodyPasswordPatterns;
+        clone.bodyPasswordFields = bodyPasswordFields;
         clone.complexityThreshold = complexityThreshold;
         clone.headerFields = new HashSet<>(headerFields);
 

@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.14 25 November 2015, Rutger Lubbers
+* Password masking for large passwords.
+
 ## 0.2.13 20 November 2015, Paul Klos
 * Update PaginationHelper to take a JDBC Operations argument.
 
