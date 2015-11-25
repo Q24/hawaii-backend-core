@@ -15,21 +15,14 @@
  */
 package io.kahu.hawaii.util.logger;
 
-import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.call.statistics.QueueStatistic;
-import io.kahu.hawaii.util.call.statistics.RequestStatistic;
-import io.kahu.hawaii.util.exception.HawaiiException;
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-import io.kahu.hawaii.util.exception.ValidationException;
-import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -52,6 +45,15 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
+import io.kahu.hawaii.util.call.Response;
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
+import io.kahu.hawaii.util.call.statistics.RequestStatistic;
+import io.kahu.hawaii.util.exception.HawaiiException;
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
+import io.kahu.hawaii.util.exception.ValidationException;
+import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
+
 public class DefaultLogManager implements LogManager {
     public static final String MASKED_PASSWORD = "********";
 
@@ -60,21 +62,21 @@ public class DefaultLogManager implements LogManager {
     private String literalField = null;
     private final LogManagerConfiguration config;
 
-    public DefaultLogManager(LogManagerConfiguration config) {
+    public DefaultLogManager(final LogManagerConfiguration config) {
         this.loggers = new HashMap<String, Logger>();
         this.config = config;
     }
 
     // Private copy constructor for builder pattern, no logging configurations
     // (plural), caller is responsible to pass the appropriate configuration
-    private DefaultLogManager(Map<String, Logger> loggers, LogManagerConfiguration config, String literalField) {
+    private DefaultLogManager(final Map<String, Logger> loggers, final LogManagerConfiguration config, final String literalField) {
         this.loggers = loggers;
         this.config = config;
         this.literalField = literalField;
     }
 
-    private Logger getLogger(LoggerName name) {
-        assert (name != null);
+    private Logger getLogger(final LoggerName name) {
+        assert(name != null);
 
         String loggerName = name.getName();
         Logger logger = loggers.get(loggerName);
@@ -85,13 +87,13 @@ public class DefaultLogManager implements LogManager {
         return logger;
     }
 
-    public void addLogger(LoggerName loggerName, Logger logger) {
+    public void addLogger(final LoggerName loggerName, final Logger logger) {
         loggers.put(loggerName.getName(), logger);
     }
 
     @Override
-    public void error(HawaiiException e) {
-        assert (e != null);
+    public void error(final HawaiiException e) {
+        assert(e != null);
 
         // Horrible hack to prevent validation exceptions to give stacktraces
         // and be logged as errors. Needs changes in validations to fix for real
@@ -123,7 +125,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void setLevel(LoggerName name, String level) {
+    public void setLevel(final LoggerName name, final String level) {
         try {
             Level logLevel = null;
             if (level != null) {
@@ -137,102 +139,101 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void audit(AuditTrail trail) {
-        assert (trail != null);
+    public void audit(final AuditTrail trail) {
+        assert(trail != null);
         getLogger(CoreLoggers.AUDIT).info(trail.toString());
     }
 
     @Override
-    public void audit(String message) {
-        assert (message != null);
+    public void audit(final String message) {
+        assert(message != null);
         getLogger(CoreLoggers.AUDIT).info(message);
     }
 
     @Override
-    public void trace(LoggerName name, String message) {
+    public void trace(final LoggerName name, final String message) {
         if (getLogger(name).isTraceEnabled()) {
             log(name, Level.TRACE, message, null, LogType.NORMAL);
         }
     }
-    
+
     @Override
-    public void trace(LoggerName name, String message, Throwable t) {
+    public void trace(final LoggerName name, final String message, final Throwable t) {
         if (getLogger(name).isTraceEnabled()) {
             log(name, Level.TRACE, message, t, LogType.NORMAL);
         }
     }
 
-    
     @Override
-    public void debug(LoggerName name, String message) {
+    public void debug(final LoggerName name, final String message) {
         if (getLogger(name).isDebugEnabled()) {
             log(name, Level.DEBUG, message, null, LogType.NORMAL);
         }
     }
 
     @Override
-    public void debug(LoggerName name, String message, Throwable t) {
+    public void debug(final LoggerName name, final String message, final Throwable t) {
         if (getLogger(name).isDebugEnabled()) {
             log(name, Level.DEBUG, message, t, LogType.NORMAL);
         }
     }
 
     @Override
-    public void info(LoggerName name, String message) {
+    public void info(final LoggerName name, final String message) {
         if (getLogger(name).isInfoEnabled()) {
             log(name, Level.INFO, message, null, LogType.NORMAL);
         }
     }
 
     @Override
-    public void info(LoggerName name, String message, Throwable t) {
+    public void info(final LoggerName name, final String message, final Throwable t) {
         if (getLogger(name).isInfoEnabled()) {
             log(name, Level.INFO, message, t, LogType.NORMAL);
         }
     }
 
     @Override
-    public void warn(LoggerName name, String message) {
+    public void warn(final LoggerName name, final String message) {
         log(name, Level.WARN, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void warn(LoggerName name, String message, Throwable t) {
+    public void warn(final LoggerName name, final String message, final Throwable t) {
         log(name, Level.WARN, message, t, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, String message) {
+    public void error(final LoggerName name, final String message) {
         log(name, Level.ERROR, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, Throwable t) {
+    public void error(final LoggerName name, final Throwable t) {
         log(name, Level.ERROR, null, t, LogType.NORMAL);
     }
 
     @Override
-    public void error(LoggerName name, String message, Throwable t) {
+    public void error(final LoggerName name, final String message, final Throwable t) {
         log(name, Level.ERROR, message, t, LogType.NORMAL);
     }
 
     @Override
-    public void fatal(LoggerName name, String message) {
+    public void fatal(final LoggerName name, final String message) {
         log(name, Level.FATAL, message, null, LogType.NORMAL);
     }
 
     @Override
-    public void fatal(LoggerName name, String message, Throwable t) {
+    public void fatal(final LoggerName name, final String message, final Throwable t) {
         log(name, Level.FATAL, message, t, LogType.NORMAL);
     }
 
     @Override
-    public DefaultLogManager literalField(String literalField) {
+    public DefaultLogManager literalField(final String literalField) {
         return new DefaultLogManager(loggers, config, literalField);
     }
 
     // Make sure we never log any passwords
-    void maskPasswords(LoggingConfiguration config) throws JSONException {
+    void maskPasswords(final LoggingConfiguration config) throws JSONException {
         // Look at all fields that may contain a URL, and mask passwords in
         // query string parameters
         for (String field : config.getUrlFields()) {
@@ -354,14 +355,19 @@ public class DefaultLogManager implements LogManager {
             // passwords
             String body = (String) value;
             boolean changed = false;
-            for (Pattern pattern : config.getBodyPasswordPatterns()) {
-                Matcher m = pattern.matcher(body);
-                int i = 0;
-                while (m.find(i)) {
-                    body = body.substring(0, m.start(1)) + MASKED_PASSWORD + body.substring(m.end(1));
-                    i = m.end() - m.group(1).length() + MASKED_PASSWORD.length();
-                    m = pattern.matcher(body);
-                    changed = true;
+            if (looksLikeJson(body)) {
+                body = removePasswordFieldsFromJsonBody(body, Arrays.asList(config.getBodyPasswordFields()));
+                changed = (body != null);
+            } else {
+                for (Pattern pattern : config.getBodyPasswordPatterns()) {
+                    Matcher m = pattern.matcher(body);
+                    int i = 0;
+                    while (m.find(i)) {
+                        body = body.substring(0, m.start(1)) + MASKED_PASSWORD + body.substring(m.end(1));
+                        i = m.end() - m.group(1).length() + MASKED_PASSWORD.length();
+                        m = pattern.matcher(body);
+                        changed = true;
+                    }
                 }
             }
             if (changed) {
@@ -370,7 +376,51 @@ public class DefaultLogManager implements LogManager {
         }
     }
 
-    private void log(LoggerName loggerName, Level level, String message, Throwable t, LogType logType) {
+    private String removePasswordFieldsFromJsonBody(final String body, final List<String> passwordFieldNames) throws JSONException {
+        JSONObject json = new JSONObject(body);
+
+        boolean changed = removePasswordFieldsFromJson(json, passwordFieldNames);
+        if (!changed) {
+            return null;
+        } else {
+            return json.toString();
+        }
+    }
+
+    private boolean removePasswordFieldsFromJson(final JSONObject json, final List<String> passwordFieldNames) throws JSONException {
+        boolean changed = false;
+        @SuppressWarnings("unchecked")
+        Iterator<String> keys = json.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (passwordFieldNames.contains(key)) {
+                json.put(key, MASKED_PASSWORD);
+                changed = true;
+            } else {
+                Object object = json.get(key);
+                if (removePasswordFieldFromJsonValue(object, passwordFieldNames)) {
+                    changed = true;
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    private boolean removePasswordFieldFromJsonValue(final Object object, final List<String> passwordFieldNames) throws JSONException {
+        boolean changed = false;
+        if (object instanceof JSONObject) {
+            changed = removePasswordFieldsFromJson((JSONObject) object, passwordFieldNames);
+        } else if (object instanceof JSONArray) {
+            JSONArray array = (JSONArray) object;
+            for (int i = 0; i < array.length(); i++) {
+                changed = removePasswordFieldFromJsonValue(array.get(i), passwordFieldNames);
+            }
+        }
+        return changed;
+    }
+
+    private void log(final LoggerName loggerName, final Level level, final String message, final Throwable t, final LogType logType) {
         Logger logger = getLogger(loggerName);
         if (!logger.isEnabledFor(level)) {
             return;
@@ -413,7 +463,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logIncomingCallStart(String type, String body, JSONObject params) {
+    public void logIncomingCallStart(final String type, final String body, final JSONObject params) {
         boolean largeBody = false;
 
         putContext("tx.type", type);
@@ -449,7 +499,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logIncomingCallEnd(Throwable t) {
+    public void logIncomingCallEnd(final Throwable t) {
         HawaiiException exception = null;
         if (t instanceof HawaiiException) {
             exception = (HawaiiException) t;
@@ -480,7 +530,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logIncomingCallEnd(int status, String body) {
+    public void logIncomingCallEnd(final int status, final String body) {
         boolean largeBody = false;
 
         LoggingConfiguration config = getLoggingConfiguration();
@@ -518,7 +568,8 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logOutgoingCallStart(String type, String id, String method, String uri, List<Header> headers, String body, JSONObject params) {
+    public void logOutgoingCallStart(final String type, final String id, final String method, final String uri, final List<Header> headers, final String body,
+            final JSONObject params) {
         boolean largeBody = false;
         boolean hasHeaders = headers != null && headers.size() != 0;
 
@@ -571,7 +622,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public void logOutgoingCallEnd(String type, String id, Response<?> response, String body) {
+    public void logOutgoingCallEnd(final String type, final String id, final Response<?> response, String body) {
         boolean largeBody = false;
         boolean hasHeaders = response.getHeaders() != null && response.getHeaders().size() != 0;
 
@@ -651,7 +702,7 @@ public class DefaultLogManager implements LogManager {
         }
     }
 
-    private void addHeadersToLoggingContext(Response<?> response) {
+    private void addHeadersToLoggingContext(final Response<?> response) {
         boolean hasHeaders = response.getHeaders() != null && response.getHeaders().size() != 0;
         if (hasHeaders) {
             JSONArray a = new JSONArray();
@@ -662,7 +713,7 @@ public class DefaultLogManager implements LogManager {
         }
     }
 
-    private void addRequestStatisticsToLoggingContext(Response<?> response) {
+    private void addRequestStatisticsToLoggingContext(final Response<?> response) {
         RequestStatistic reqeustStatistic = response.getStatistic();
         double d;
 
@@ -716,7 +767,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public PopResource pushContext(LoggingContextMap newContext) {
+    public PopResource pushContext(final LoggingContextMap newContext) {
         return LoggingContext.get().push(newContext);
     }
 
@@ -726,12 +777,12 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public Object removeContext(String key) {
+    public Object removeContext(final String key) {
         return LoggingContext.get().remove(key);
     }
 
     @Override
-    public boolean containsContextKey(String key) {
+    public boolean containsContextKey(final String key) {
         return LoggingContext.get().containsKey(key);
     }
 
@@ -741,12 +792,12 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public Object putContext(String key, Object value) {
+    public Object putContext(final String key, final Object value) {
         return LoggingContext.get().put(key, value);
     }
 
     @Override
-    public Object getContext(String key) {
+    public Object getContext(final String key) {
         return LoggingContext.get().get(key);
     }
 
@@ -763,11 +814,11 @@ public class DefaultLogManager implements LogManager {
     // A few support methods to deal with request/response bodies
 
     @Override
-    public boolean isComplex(Object o) {
+    public boolean isComplex(final Object o) {
         return LoggingContext.getObjectComplexity(o) > getLoggingConfiguration().getComplexityThreshold();
     }
 
-    private boolean looksLikeJson(String s) {
+    private boolean looksLikeJson(final String s) {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (Character.isWhitespace(c) || c == 0xFEFF) {
@@ -779,7 +830,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public String prettyPrintJson(String s) {
+    public String prettyPrintJson(final String s) {
         try {
             if (s == null) {
                 return null;
@@ -797,7 +848,7 @@ public class DefaultLogManager implements LogManager {
         }
     }
 
-    private boolean looksLikeXml(String s) {
+    private boolean looksLikeXml(final String s) {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (Character.isWhitespace(c) || c == 0xFEFF) {
@@ -809,7 +860,7 @@ public class DefaultLogManager implements LogManager {
     }
 
     @Override
-    public String prettyPrintXml(String s) {
+    public String prettyPrintXml(final String s) {
         try {
             if (s == null) {
                 return null;

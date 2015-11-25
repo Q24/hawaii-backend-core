@@ -15,7 +15,30 @@
  */
 package io.kahu.hawaii.config;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.management.MBeanServer;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jolokia.jmx.JolokiaMBeanServerUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
+import org.springframework.jmx.export.MBeanExporter;
+import org.springframework.jmx.support.MBeanServerFactoryBean;
+import org.springframework.jmx.support.RegistrationPolicy;
+
 import io.kahu.hawaii.rest.DefaultResponseManager;
 import io.kahu.hawaii.rest.ResponseManager;
 import io.kahu.hawaii.service.io.FileChangeListener;
@@ -50,28 +73,6 @@ import io.kahu.hawaii.util.logger.LoggingConfiguration;
 import io.kahu.hawaii.util.logger.LoggingConfigurationMBean;
 import io.kahu.hawaii.util.spring.ApplicationContextProvider;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.management.MBeanServer;
-
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.core.env.Environment;
-import org.springframework.jmx.export.MBeanExporter;
-import org.springframework.jmx.support.MBeanServerFactoryBean;
-import org.springframework.jmx.support.RegistrationPolicy;
-
 @Configuration
 public class KahuConfig {
 
@@ -81,7 +82,7 @@ public class KahuConfig {
         this(false);
     }
 
-    public KahuConfig(boolean isJunit) {
+    public KahuConfig(final boolean isJunit) {
         this.isJunit = isJunit;
     }
 
@@ -100,7 +101,7 @@ public class KahuConfig {
     // Hawaii log manager
     // *************************************************************************
 
-    private String[] getStringArrayFromProperty(String name) {
+    private String[] getStringArrayFromProperty(final String name) {
         String s = env.getProperty(name);
         if (s != null) {
             return s.split("\\s+");
@@ -131,6 +132,7 @@ public class KahuConfig {
         config.setBodyFields(getStringArrayFromProperty("logging.pwdmask.body.fields"));
         config.setPasswordParameters(getStringArrayFromProperty("logging.pwdmask.password.parameters"));
         config.setBodyPasswordPatterns(getStringArrayFromProperty("logging.pwdmask.password.patterns"));
+        config.setBodyPasswordFields(getStringArrayFromProperty("logging.pwdmask.password.fields"));
         return config;
     }
 
@@ -138,7 +140,7 @@ public class KahuConfig {
     public LogManagerConfiguration logManagerConfiguration() {
         LogManagerConfiguration logManagerConfiguration = new LogManagerConfiguration(loggingConfiguration());
 
-        String[] loggers = getStringArrayFromProperty("logging.log.comlete.call");
+        String[] loggers = getStringArrayFromProperty("logging.log.complete.call");
         for (String logger : loggers) {
             logManagerConfiguration.getOrCreateLoggingConfiguration(logger).enableCompleteCallLogging();
         }
