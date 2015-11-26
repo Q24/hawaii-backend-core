@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.15 26 November 2015, Rutger Lubbers
+* Added FileDownload to stream files from backend to frontend.
+
 ## 0.2.14 25 November 2015, Rutger Lubbers
 * Password masking for large passwords.
 

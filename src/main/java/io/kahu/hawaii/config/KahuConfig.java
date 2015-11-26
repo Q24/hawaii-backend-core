@@ -54,9 +54,11 @@ import io.kahu.hawaii.util.call.dispatch.ExecutorServiceRepository;
 import io.kahu.hawaii.util.call.dispatch.LogCallIdListener;
 import io.kahu.hawaii.util.call.dispatch.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
+import io.kahu.hawaii.util.call.http.response.FileDownload;
 import io.kahu.hawaii.util.call.log.CallLoggerImpl;
 import io.kahu.hawaii.util.call.log.request.GenericRequestLogger;
 import io.kahu.hawaii.util.call.log.request.HttpRequestLogger;
+import io.kahu.hawaii.util.call.log.response.FileDownloadResponseLogger;
 import io.kahu.hawaii.util.call.log.response.FileResponseLogger;
 import io.kahu.hawaii.util.call.log.response.JsonArrayResponseLogger;
 import io.kahu.hawaii.util.call.log.response.JsonObjectResponseLogger;
@@ -325,4 +327,8 @@ public class KahuConfig {
         return new CallLoggerImpl<>(logManager(), new HttpRequestLogger(), new StreamResponseLogger());
     }
 
+    @Bean
+    public CallLoggerImpl<FileDownload> fileDownloadCallLogger() {
+        return new CallLoggerImpl<>(logManager(), new HttpRequestLogger(), new FileDownloadResponseLogger());
+    }
 }
