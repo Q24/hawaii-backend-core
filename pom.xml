@@ -15,15 +15,15 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.kahu</groupId>
   <artifactId>hawaii-backend-core</artifactId>
-  <version>0.2.15-SNAPSHOT</version>
-  
+  <version>0.2.15</version>
+
   <!-- defining versions of multiple dependencies to prevent version conflicts set generic encoding standards -->
   <properties>
     <java.version>1.8</java.version>
@@ -232,7 +232,7 @@
       <artifactId>joda-time</artifactId>
       <version>2.4</version>
     </dependency>
-    <!-- Annotation based validation framework. The Hibernate validation framework includes and extends the javax.validation framework. For more 
+    <!-- Annotation based validation framework. The Hibernate validation framework includes and extends the javax.validation framework. For more
       information: http://docs.jboss.org/hibernate/validator/4.3/reference/en-US/html/ -->
     <dependency>
       <groupId>org.hibernate</groupId>

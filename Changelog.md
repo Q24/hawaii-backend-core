@@ -1,6 +1,7 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.15 Xx Xxxxxxxx 2015, Rutger Lubbers
+## 0.2.15 17 February 2016, Paul Klos, Rutger Lubbers
+* Added reload method to RuntimeFeaturesService
 * Added FileDownload to stream files from backend to frontend.
 
 ## 0.2.14 25 November 2015, Rutger Lubbers
