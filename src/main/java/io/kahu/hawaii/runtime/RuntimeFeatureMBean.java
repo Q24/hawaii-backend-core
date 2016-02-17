@@ -35,4 +35,9 @@ public class RuntimeFeatureMBean {
     public void set(String name, String value) throws ServerException {
         runtimeFeaturesService.setRuntimeFeature(name, value);
     }
+
+    public void reload() throws ServerException {
+        runtimeFeaturesService.reload();
+    }
+
 }

@@ -35,4 +35,7 @@ public interface RuntimeFeaturesService {
 
     void setRuntimeFeature(String name, String value) throws ServerException, FeatureNotFoundException;
 
+    default void reload() throws ServerException {
+    }
+
 }
