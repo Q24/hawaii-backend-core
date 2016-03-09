@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.16 Xx Xxxxxxxx Xxxx, Jonathan Brouwers
+ * Added unlimited expiration for ConcurrentMapCacheService. 
+
 ## 0.2.15 17 February 2016, Paul Klos, Rutger Lubbers
 * Added reload method to RuntimeFeaturesService
 * Added FileDownload to stream files from backend to frontend.
