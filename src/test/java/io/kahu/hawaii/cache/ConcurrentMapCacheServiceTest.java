@@ -16,8 +16,12 @@
 package io.kahu.hawaii.cache;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import io.kahu.hawaii.cache.ConcurrentMapCacheService;
 
@@ -127,5 +131,45 @@ public class ConcurrentMapCacheServiceTest {
 
         // assert null value returned from cache
         assertThat(cacheService.get(key), is(nullValue()));
+    }
+    
+    @Test
+    public void testPutWithExpirationUnlimited() throws Exception {
+		String key = "key";
+		Object object = "object";
+
+		// store object in cache with expiration of 0 second = unlimited
+		cacheService.put(key, 0, object);
+
+		// assert expiration is 0 (unlimited)
+		assertThat(cacheService.getExpiration(key), is((long) 0));
+
+		// assert same object returned from cache
+		assertThat(cacheService.get(key), is(sameInstance(object)));	
+    }
+    
+    @Test
+    public void testPutWithExpirationBiggerThanThirtyDays() throws Exception {
+    	String key = "key";
+		Object object = "object";
+
+		// store object in cache with expiration of 2 times thirty days
+		cacheService.put(key,2 * 60 * 60 * 24 * 30, object);
+		
+		// assert expiration is 0 (unlimited)
+		assertThat(cacheService.getExpiration(key), is((long)2 * 60 * 60 * 24 * 30));
+    }
+    
+    @Test
+    public void testPutWithExpirationSmallerThanThirtyDays() throws Exception {
+    	String key = "key";
+		Object object = "object";
+
+		int seconds = 10;
+		// store object in cache with expiration of seconds
+		cacheService.put(key, seconds, object);
+		
+		assertThat(cacheService.getExpiration(key), is(greaterThan((long) seconds)));
+		assertThat(cacheService.getExpiration(key), lessThanOrEqualTo(System.currentTimeMillis() + seconds * 1000));
     }
 }
