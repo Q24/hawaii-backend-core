@@ -16,8 +16,6 @@
 package io.kahu.hawaii.cache;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
@@ -157,7 +155,7 @@ public class ConcurrentMapCacheServiceTest {
 		cacheService.put(key, 2 * 60 * 60 * 24 * 30, object);
 
 		// assert expiration is 0 (unlimited)
-		assertThat(cacheService.getExpiration(key), is(2 * 60 * 60 * 24 * 30));
+		assertThat(cacheService.getExpiration(key), is((long) 2 * 60 * 60 * 24 * 30));
 	}
 
 	@Test
