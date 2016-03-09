@@ -29,7 +29,7 @@ public class ConcurrentMapCacheService implements CacheService {
     /**
      * number of seconds in 30 days
      */
-    private static final int THIRTY_DAYS = 60 * 60 * 24 * 30;
+    public static final int THIRTY_DAYS = 60 * 60 * 24 * 30;
 
     private final ConcurrentMap<String, Object> store;
     private final ConcurrentMap<String, Long> expirations;

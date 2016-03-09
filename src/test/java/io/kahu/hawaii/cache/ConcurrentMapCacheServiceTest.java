@@ -152,14 +152,14 @@ public class ConcurrentMapCacheServiceTest {
         Object object = "object";
 
         // store object in cache with expiration of 2 times thirty days
-        cacheService.put(key, 2 * 60 * 60 * 24 * 30, object);
+        cacheService.put(key, 2 * cacheService.THIRTY_DAYS, object);
 
         // assert expiration is 0 (unlimited)
-        assertThat(cacheService.getExpiration(key), is((long) 2 * 60 * 60 * 24 * 30));
+        assertThat(cacheService.getExpiration(key), is((long) 2 * cacheService.THIRTY_DAYS));
     }
 
     @Test
-    public void testPutWithExpirationSmallerThanThirtyDays() throws Exception {
+    public void testPutWithExpirationLessThanThirtyDays() throws Exception {
         String key = "key";
         Object object = "object";
 
