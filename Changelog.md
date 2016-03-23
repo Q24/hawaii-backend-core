@@ -1,7 +1,8 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.16 Xx Xxxxxxxx Xxxx, Jonathan Brouwers
- * Added unlimited expiration for ConcurrentMapCacheService. 
+## 0.2.16 23 March 2016, Jonathan Brouwers, Wouter Eerdekens
+ * Added unlimited expiration for ConcurrentMapCacheService.
+ * Added HawaiiControllerExceptionHandler and NotFoundException.
 
 ## 0.2.15 17 February 2016, Paul Klos, Rutger Lubbers
 * Added reload method to RuntimeFeaturesService
