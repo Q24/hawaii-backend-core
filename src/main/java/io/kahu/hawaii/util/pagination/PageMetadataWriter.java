@@ -25,10 +25,14 @@ public class PageMetadataWriter extends AbstractJsonWriter<Page<?>> implements P
 
     @Override
     protected void writeJson(Page<?> page, JSONObject json) throws JSONException {
-        json.put(SIZE, page.getSize());
         json.put(TOTAL_ELEMENTS, page.getTotalElements());
-        json.put(TOTAL_PAGES, page.getTotalPages());
-        json.put(NUMBER, page.getNumber());
-        json.put(NUMBER_OF_ELEMENTS, page.getNumberOfElements());
+        if (!page.hasContent() && page.getTotalElements() > 0) {
+            json.put(TOO_MANY_ELEMENTS, true);
+        } else {
+            json.put(SIZE, page.getSize());
+            json.put(TOTAL_PAGES, page.getTotalPages());
+            json.put(NUMBER, page.getNumber());
+            json.put(NUMBER_OF_ELEMENTS, page.getNumberOfElements());
+        }
     }
 }

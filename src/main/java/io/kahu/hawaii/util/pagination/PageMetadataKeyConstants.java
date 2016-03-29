@@ -20,35 +20,41 @@ public interface PageMetadataKeyConstants {
     /**
      * Key indicating the content of the paged result (the actual data).
      */
-    public static final String CONTENT = "content";
-    
+    String CONTENT = "content";
+
     /**
      * Key indicating the page metadata.
      */
-    public static final String PAGE_METADATA = "page_metadata";
-    
+    String PAGE_METADATA = "page_metadata";
+
     /**
      * Key indicating the page size (number of elements per page).
      */
-    public static final String SIZE = "size";
-    
+    String SIZE = "size";
+
     /**
      * Key indicating the total number of elements.
      */
-    public static final String TOTAL_ELEMENTS = "total_elements";
-    
+    String TOTAL_ELEMENTS = "total_elements";
+
     /**
      * Key indicating the total number of pages.
      */
-    public static final String TOTAL_PAGES = "total_pages";
-    
+    String TOTAL_PAGES = "total_pages";
+
     /**
      * Key indicating the current page number.
      */
-    public static final String NUMBER = "number";
-    
+    String NUMBER = "number";
+
     /**
      * Key indicating the number of elements on the current page.
      */
-    public static final String NUMBER_OF_ELEMENTS = "number_of_elements";
+    String NUMBER_OF_ELEMENTS = "number_of_elements";
+
+    /**
+     * Key indicating the number of elements was higher than the maximum.
+     */
+    String TOO_MANY_ELEMENTS = "too_many_elements";
+
 }

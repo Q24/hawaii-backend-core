@@ -1,5 +1,3 @@
-package io.kahu.hawaii.util.pagination;
-
 /**
  * Copyright 2015 Q24
  *
@@ -15,17 +13,26 @@ package io.kahu.hawaii.util.pagination;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.kahu.hawaii.util.pagination;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class PaginationHelper<E> {
+
+    Integer maxRows;
+
+    public PaginationHelper() {
+    }
+
+    public PaginationHelper(Integer maxRows) {
+        this.maxRows = maxRows;
+    }
 
     public Page<E> fetchPage(final NamedParameterJdbcOperations jt, final String sqlCountRows, final String sqlFetchRows, final Map<String, Object> paramMap,
             final Pageable pageable, final RowMapper<E> rowMapper) {
@@ -33,6 +40,10 @@ public class PaginationHelper<E> {
         // first execute select count (needed for paging metadata)
         final int rowCount = jt.queryForObject(sqlCountRows, paramMap, Integer.class);
 
+        if (maxRows != null && (rowCount > maxRows)) {
+            // Threshold defined and total number of records is higher
+            return new PageImpl<E>(new ArrayList<>(), new PageRequest(0, 1), rowCount);
+        }
         // now fetch the actual objects (content)
         final List<E> pageItems = jt.query(sqlFetchRows, paramMap, (resultSet, rowNum) -> {
             return rowMapper.mapRow(resultSet, rowNum);

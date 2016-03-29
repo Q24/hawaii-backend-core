@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.17 29 March 2016, Paul Klos
+ * Limit no. of records to be retrieved in PaginationHelper
+
 ## 0.2.16 23 March 2016, Jonathan Brouwers, Wouter Eerdekens
  * Added unlimited expiration for ConcurrentMapCacheService.
  * Added HawaiiControllerExceptionHandler and NotFoundException.
