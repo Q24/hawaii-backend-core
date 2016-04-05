@@ -20,7 +20,7 @@ import io.kahu.hawaii.util.exception.ServerException;
 public interface Request<T> {
     Response<T> execute() throws ServerException;
 
-    void executeAsync() throws ServerException;
+    Response<T> executeAsync() throws ServerException;
 
     String getId();
 

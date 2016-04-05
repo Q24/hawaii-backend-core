@@ -46,8 +46,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 public class ExecutorServiceRepository implements ApplicationListener<ContextRefreshedEvent> {
     private final RequestConfigurations requestConfigurations;
-    private final Map<String, String> defaultExecutors = new HashMap<String, String>();
-    private final Map<String, HawaiiThreadPoolExecutor> executors = new HashMap<String, HawaiiThreadPoolExecutor>();
+    private final Map<String, String> defaultExecutors = new HashMap<>();
+    private final Map<String, HawaiiThreadPoolExecutor> executors = new HashMap<>();
 
     static final String DEFAULT_POOL_NAME = "default";
     private static final String GUARD_POOL_NAME = "async_executor_guard";
@@ -71,8 +71,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
         RejectedExecutionHandler handler = new RejectedExecutionHandler() {
             @Override
             public void rejectedExecution(Runnable runnable, ThreadPoolExecutor executor) {
-                logManager.info(CoreLoggers.SERVER, "Rejected '" + ((FutureRequest<?>) runnable).getAbortableRequest()
-                        + "' since the pool and queue size has been exceeded.");
+                logManager.info(CoreLoggers.SERVER, "Rejected '" + runnable + "' since the pool and queue size has been exceeded.");
                 throw new RejectedExecutionException();
             }
         };
@@ -89,7 +88,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
             logManager
                     .info(CoreLoggers.SERVER, "Creating queue '" + name + "' with '" + corePoolSize + "'/'" + maxPoolSize + "'/'" + maxPendingRequests + "'.");
             HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(name, corePoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS,
-                    new ArrayBlockingQueue<Runnable>(maxPendingRequests), new HawaiiThreadFactory(name), handler);
+                    new ArrayBlockingQueue<>(maxPendingRequests), new HawaiiThreadFactory(name), handler);
 
             executors.put(name, executor);
         }
@@ -131,7 +130,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
         }
     }
 
-    public <T> HawaiiThreadPoolExecutor getQueue(AbortableRequest<T> request) {
+    private <T> HawaiiThreadPoolExecutor getQueue(AbortableRequest<T> request) {
         RequestContext<T> context = request.getContext();
 
         String executorName = context.getQueue();
@@ -143,26 +142,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
     }
 
     public <T> HawaiiThreadPoolExecutor getService(AbortableRequest<T> request) {
-        HawaiiThreadPoolExecutor service = getQueue(request);
-
-        QueueStatistic queueStatistics = service.getQueueStatistic();
-        request.getStatistic().setQueueStatistic(queueStatistics);
-
-        try (PopResource pushContext = logManager.pushContext()) {
-            logManager.putContext("queue.name", service.getName());
-
-            logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
-            logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
-            logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
-            logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
-            logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
-            logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
-            logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
-
-            logManager.info(CoreLoggers.SERVER, "Scheduling request '" + request + "' with id '" + request.getId() + "'.");
-        }
-
-        return service;
+        return getQueue(request);
     }
 
     private String createLookup(String system, String method) {

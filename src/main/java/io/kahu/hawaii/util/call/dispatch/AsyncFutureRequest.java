@@ -15,15 +15,21 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.logger.LogManager;
 
 import java.util.concurrent.FutureTask;
 
-public class AsyncRequestTimeoutFutureTask<T> extends FutureTask<Response<T>> {
+/**
+ * This class wraps an {@link AbortableRequest} to use inside an executor service.
+ *
+ * It creates a {@link CallableRequest} that does the actual work.
+ * @param <T>
+ */
+public class AsyncFutureRequest<T> extends FutureTask<Response<T>> {
 
-    public AsyncRequestTimeoutFutureTask(FutureRequest<T> asyncRequest, LogManager logManager) {
-        super(new AsyncRequestTimeoutCallable<T>(asyncRequest, logManager));
+    public AsyncFutureRequest(AbortableRequest<T> abortableRequest, RequestDispatcher requestDispatcher) {
+        super(new AsyncCallableRequest<>(abortableRequest, requestDispatcher));
     }
 
 }

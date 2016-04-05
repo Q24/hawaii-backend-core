@@ -20,6 +20,12 @@ import io.kahu.hawaii.util.call.Response;
 
 import java.util.concurrent.FutureTask;
 
+/**
+ * This class wraps an {@link AbortableRequest} to use inside an executor service.
+ *
+ * It creates a {@link CallableRequest} that does the actual work.
+ * @param <T>
+ */
 public class FutureRequest<T> extends FutureTask<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
 
@@ -28,7 +34,8 @@ public class FutureRequest<T> extends FutureTask<Response<T>> {
         this.abortableRequest = abortableRequest;
     }
 
-    public AbortableRequest<T> getAbortableRequest() {
-        return abortableRequest;
+    @Override
+    public String toString() {
+        return abortableRequest.getCallName() + " @ " + abortableRequest.getId();
     }
 }

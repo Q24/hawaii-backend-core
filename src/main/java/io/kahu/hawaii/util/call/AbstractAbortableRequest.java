@@ -42,8 +42,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     private String id;
     private CountDownLatch latch;
 
-    private FutureTask<Response<T>> guardTask;
-
     public AbstractAbortableRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, ResponseHandler<F, T> responseHandler, CallLogger<T> logger) {
         this.requestDispatcher = requestDispatcher;
         this.context = context;
@@ -65,11 +63,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
-    public void setGuardTask(FutureTask<Response<T>> task) {
-        this.guardTask = task;
-    }
-
-    @Override
     public Response<T> execute() throws ServerException {
         try (PopResource pop = logger.getLogManager().pushContext()) {
             setup();
@@ -78,11 +71,11 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
-    public void executeAsync() throws ServerException {
+    public Response<T> executeAsync() throws ServerException {
         try (PopResource pop = logger.getLogManager().pushContext()) {
             setup();
             this.isAsync = true;
-            requestDispatcher.executeAsync(this);
+            return requestDispatcher.executeAsync(this);
         }
     }
 
@@ -105,26 +98,13 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     @Override
     public Response<T> doExecute() throws Throwable {
-        boolean errorCaught = false;
         try {
             statistic.startBackendRequest();
-            executeInternally(new TimingResponseHandler<F, T>(responseHandler, statistic), response);
+            executeInternally(new TimingResponseHandler<>(responseHandler, statistic), response);
         } catch (Throwable t) {
-            errorCaught = true;
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Error executing call.", t);
             throw t;
         } finally {
-            if (latch != null) {
-                latch.countDown();
-            }
-            if (isAsync && guardTask != null) {
-                if (errorCaught && guardTask == null) {
-                    // Ignored
-                } else {
-                    // remove guard task
-                    guardTask.cancel(false);
-                }
-            }
             statistic.endBackendRequest();
         }
         return response;
@@ -160,6 +140,11 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
                 statistic.endCallback();
             }
         }
+
+        if (latch != null) {
+            latch.countDown();
+        }
+
         afterCallback = true;
         if (isAsync) {
             finish();
@@ -215,5 +200,10 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     @Override
     public void logResponse() {
         logger.logResponse(response);
+    }
+
+    @Override
+    public boolean isAsync() {
+        return isAsync;
     }
 }

@@ -41,7 +41,7 @@ public interface AbortableRequest<T> extends Request<T> {
 
     Response<T> getResponse();
 
-    void setGuardTask(FutureTask<Response<T>> task);
-
     void setLatch(CountDownLatch latch);
+
+    boolean isAsync();
 }

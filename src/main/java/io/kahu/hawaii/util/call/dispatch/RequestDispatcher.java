@@ -20,7 +20,9 @@ import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseStatus;
 import io.kahu.hawaii.util.call.http.HttpCall;
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
+import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import io.kahu.hawaii.util.logger.LoggingContext;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 public class RequestDispatcher {
@@ -47,7 +50,7 @@ public class RequestDispatcher {
      * <em>each</em> call. Each listener is invoked before the actual dispatch
      * and this is done <em<sequentially</em>.
      *
-     * So please be very carefull what listeners you register.
+     * So please be very careful what listeners you register.
      *
      * @param executorServiceRepository
      * @param logManager
@@ -65,7 +68,7 @@ public class RequestDispatcher {
     }
 
     public <T> Set<Response<T>> execute(RequestFactory<T> requestFactory, boolean waitForAnswers) throws ServerException {
-        Set<Response<T>> responses = new HashSet<Response<T>>();
+        Set<Response<T>> responses = new HashSet<>();
         CountDownLatch latch = new CountDownLatch(requestFactory.getNumberOfRequests());
         AbortableRequest<T> request = requestFactory.getNextRequest();
         while (request != null) {
@@ -86,65 +89,87 @@ public class RequestDispatcher {
         return responses;
     }
 
-    public <T> Response<T> execute(AbortableRequest<T> request) throws ServerException {
-        Response<T> response = execute(request, true);
-        return response;
-    }
-
+    /**
+     * Non blocking (asynchronous) execute of the request.
+     *
+     * @param request
+     * @param <T>
+     * @return
+     * @throws ServerException
+     */
     public <T> Response<T> executeAsync(AbortableRequest<T> request) throws ServerException {
-        Response<T> response = execute(request, false);
-        return response;
-    }
-
-    private <T> Response<T> execute(AbortableRequest<T> request, boolean synchronous) throws ServerException {
-        if (request instanceof HttpCall) {
-            ((HttpCall) request).setHttpClientBuilder(httpClientBuilder);
-        }
-        RequestContext<T> requestContext = request.getContext();
-        Response<T> response = request.getResponse();
-
-        FutureRequest<T> task = new FutureRequest<T>(request);
+        AsyncFutureRequest asyncFutureRequest = new AsyncFutureRequest(request, this);
         try {
-            HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
-            notifyListeners(request, synchronous, executor);
-            executor.execute(task);
-
-            if (synchronous) {
-                /*
-                 * Block until data is retrieved, but with a time out.
-                 */
-                task.get(requestContext.getTimeOut(), requestContext.getTimeOutUnit());
-                request.logResponse();
-            } else {
-                /*
-                 * Schedule a new task to verify the
-                 */
-                AsyncRequestTimeoutFutureTask<T> guardTask = new AsyncRequestTimeoutFutureTask<T>(task, logManager);
-                request.setGuardTask(guardTask);
-
-                executorServiceRepository.getServiceMonitor(request).execute(guardTask);
-            }
+            executorServiceRepository.getServiceMonitor(request).execute(asyncFutureRequest);
         } catch (RejectedExecutionException e) {
             request.setTooBusy();
             request.logResponse();
-        } catch (InterruptedException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
-            request.logResponse();
-        } catch (ExecutionException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
-            request.logResponse();
-        } catch (TimeoutException e) {
-            request.abort();
-            request.logResponse();
+        }
+        return request.getResponse();
+    }
+
+    /**
+     * Blocking (synchronous) execute of the request.
+     *
+     * @param request
+     * @param <T>
+     * @return
+     * @throws ServerException
+     */
+    public <T> Response<T> execute(AbortableRequest<T> request) throws ServerException {
+        if (request instanceof HttpCall) {
+            ((HttpCall) request).setHttpClientBuilder(httpClientBuilder);
         }
 
-        request.finish();
+        RequestContext<T> requestContext = request.getContext();
+        Response<T> response = request.getResponse();
+
+        FutureRequest<T> task = new FutureRequest<>(request);
+        try {
+            HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
+            QueueStatistic queueStatistics = executor.getQueueStatistic();
+            request.getStatistic().setQueueStatistic(queueStatistics);
+
+            try (LoggingContext.PopResource pushContext = logManager.pushContext()) {
+                logManager.putContext("queue.name", executor.getName());
+
+                logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
+                logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
+                logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
+                logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
+                logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
+                logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
+                logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
+
+                logManager.info(CoreLoggers.SERVER, "Scheduling request '" + request + "' with id '" + request.getId() + "'.");
+            }
+            notifyListeners(request, executor);
+            executor.execute(task);
+
+            /*
+             * Block until data is retrieved, but with a time out.
+             */
+            task.get(requestContext.getTimeOut(), requestContext.getTimeOutUnit());
+
+        } catch (RejectedExecutionException e) {
+            request.setTooBusy();
+        } catch (InterruptedException e) {
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
+        } catch (ExecutionException e) {
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
+        } catch (TimeoutException e) {
+            request.abort();
+        } finally {
+            request.logResponse();
+            request.finish();
+        }
+
         return response;
     }
 
-    private <T> void notifyListeners(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor) {
+    private <T> void notifyListeners(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor) {
         for (RequestDispatchedListener listener : listeners) {
-            listener.notifyBeforeDispatch(request, synchronous, executor);
+            listener.notifyBeforeDispatch(request, request.isAsync(), executor);
         }
     }
 }

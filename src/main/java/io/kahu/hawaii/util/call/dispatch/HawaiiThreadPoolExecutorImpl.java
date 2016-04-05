@@ -31,14 +31,14 @@ public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements 
 
     public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
             BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<Runnable>(workQueue), factory, new HawaiiRejectedExecutionHandler(
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(
                 handler));
         this.name = name;
     }
 
     public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
             BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<Runnable>(workQueue), new HawaiiRejectedExecutionHandler(handler));
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), new HawaiiRejectedExecutionHandler(handler));
         this.name = name;
     }
 

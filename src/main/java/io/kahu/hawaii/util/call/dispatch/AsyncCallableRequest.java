@@ -21,34 +21,18 @@ import io.kahu.hawaii.util.logger.LoggingContext;
 
 import java.util.concurrent.Callable;
 
-public class CallableRequest<T> implements Callable<Response<T>> {
+public class AsyncCallableRequest<T> implements Callable<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
+    private final RequestDispatcher requestDispatcher;
 
-    public CallableRequest(AbortableRequest<T> abortableRequest) {
+    public AsyncCallableRequest(AbortableRequest<T> abortableRequest, RequestDispatcher requestDispatcher) {
         this.abortableRequest = abortableRequest;
+        this.requestDispatcher = requestDispatcher;
     }
 
     @Override
     public Response<T> call() throws Exception {
-        LoggingContext.remove();
-        Response<T> response = abortableRequest.getResponse();
-        try {
-            abortableRequest.doExecute();
-            abortableRequest.doCallback();
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        } catch (Throwable t) {
-            throw new Exception(t);
-        } finally {
-            abortableRequest.logResponse();
-            // TODO Mark request as handled?
-            LoggingContext.remove();
-        }
+        return requestDispatcher.execute(abortableRequest);
     }
 
-    public void abort() {
-        abortableRequest.abort();
-    }
 }

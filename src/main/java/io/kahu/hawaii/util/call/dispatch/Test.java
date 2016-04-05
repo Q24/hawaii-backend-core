@@ -57,9 +57,9 @@ public class Test {
 
         final CountDownLatch start = new CountDownLatch(amount);
         final CountDownLatch stopped = new CountDownLatch(amount);
-        CallLogger<String> callLogger = new CallLoggerImpl<String>(logManager, null, null);
+        CallLogger<String> callLogger = new CallLoggerImpl<>(logManager, null, null);
         for (int i = 0; i < amount; i++) {
-            final MyRequest request = new MyRequest(dispatcher, new RequestContext<String>("test", "test", 100), null, callLogger, i, stopped);
+            final MyRequest request = new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, i, stopped);
             requests.add(request);
             Runnable r = new Runnable() {
 
@@ -79,11 +79,11 @@ public class Test {
         }
 
         stopped.await();
-        MyRequest request = new MyRequest(dispatcher, new RequestContext<String>("test", "test", 100), null, callLogger, -1, new CountDownLatch(0));
+        MyRequest request = new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, -1, new CountDownLatch(0));
         System.out.println("Done");
-        System.out.println(" *" + executorServiceRepository.getQueue(request).getQueueStatistic().toString());
+        System.out.println(" *" + executorServiceRepository.getService(request).getQueueStatistic().toString());
         for (int i = 0; i < 70; i++) {
-            new MyRequest(dispatcher, new RequestContext<String>("test", "test", 100), null, callLogger, 120 + i, stopped).execute();
+            new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, 120 + i, stopped).execute();
             Thread.sleep(980);
         }
         // new MyRequest(dispatcher, new RequestContext<String>("test", "test",
@@ -92,7 +92,7 @@ public class Test {
         // RequestContext<String>("test", "test", 100), null, callLogger, i,
         // stopped);
         //
-        System.out.println(" *" + executorServiceRepository.getQueue(request).getQueueStatistic().toString());
+        System.out.println(" *" + executorServiceRepository.getService(request).getQueueStatistic().toString());
     }
 
     public class MyRequest extends AbstractAbortableRequest<String, String> {
