@@ -25,17 +25,27 @@ public interface AbortableRequest<T> extends Request<T> {
 
     RequestStatistic getStatistic();
 
-    Response<T> doExecute() throws Throwable;
-
-    void abort();
-
     void setCallback(ResponseCallback<T> callback);
+
+
+    Response<T> doExecute() throws Throwable;
 
     void doCallback();
 
+    /**
+     * In case the request takes too long, the request is aborted by invoking this method.
+     */
+    void abort();
+
+    /**
+     * Signal the end of the request, releasing the lock on the response. Clients using Response#get() will be signalled to conintue.
+     */
     void finish();
 
-    void setTooBusy();
+    /**
+     * In case the system is too busy, the request can be rejected.
+     */
+    void reject();
 
     Response<T> getResponse();
 

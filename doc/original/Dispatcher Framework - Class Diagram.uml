@@ -1,0 +1,245 @@
+@startuml
+
+interface Request<T> {
+    + Response<T> execute()
+    + Response<T> executeAsync()
+    + String getId()
+    + String getCallName()
+}
+Request <|-- AbortableRequest
+Request *-r[#grey]- Response
+
+class Response<T> {
+    + T get()
+    + void set(T response)
+    ..
+    + ResponseStatus getStatus()
+    + void setStatus(ResponseStatus status)
+    + void setStatus(ResponseStatus status, String message)
+    + void setStatus(ResponseStatus status, T response)
+    + String getMessage()
+    + void setMessage(String message)
+    ..
+    + String getRawPayload()
+    + void setRawPayload(String rawPayload)
+
+}
+Response *-r[#grey]- ResponseStatus
+
+enum ResponseStatus {
+    + SUCCESS
+    + BACKEND_FAILURE
+    + TIME_OUT
+    + TOO_BUSY
+    + INTERNAL_FAILURE
+}
+
+interface ResponseHandler<F, T> {
+    + void addToResponse(F payload, Response<T> response)
+}
+ResponseHandler *-[#grey]- Response
+
+interface AbortableRequest<T> {
+    + RequestContext<T> getContext()
+
+    + RequestStatistic getStatistic()
+
+    + Response<T> doExecute() throws Throwable
+
+    + void setGuardTask(FutureTask<Response<T>> task)
+
+    + void setCallback(ResponseCallback<T> callback)
+    + void doCallback()
+    + void setTooBusy()
+
+    + void abort()
+    + void finish()
+
+    + void logResponse()
+    + Response<T> getResponse()
+
+    ..Experimental..
+    + void setLatch(CountDownLatch latch)
+}
+AbortableRequest <|-- AbstractAbortableRequest
+
+
+abstract class AbstractAbortableRequest {
+    # {abstract} void executeInternally(ResponseHandler<F, T> responseHandler, Response<T> response)
+    # {abstract} void abortInternally()
+    # void rejectInternally()
+    --
+    + Response<T> execute()
+    + Response<T> executeAsync()
+    + Response<T> doExecute() throws Throwable
+    + void doCallback()
+    + void abort()
+    + void finish()
+    + void setTooBusy()
+    + void setTimeOut()
+    ..
+    + void setCallback(ResponseCallback<T> callback)
+    + void setGuardTask(FutureTask<Response<T>> task)
+    + RequestContext<T> getContext()
+    ..
+    + RequestStatistic getStatistic()
+    + Response<T> getResponse()
+    + String getId()
+    + String getCallName()
+    + void logResponse()
+    ..Experimental..
+    + void setLatch(CountDownLatch latch)
+
+}
+AbstractAbortableRequest <|-- AbortableHttpRequest
+AbstractAbortableRequest <|-- AbortableQuery
+AbstractAbortableRequest *-[#grey]- RequestContext
+AbstractAbortableRequest *-[#grey]- RequestDispatcher
+AbstractAbortableRequest *-[#grey]- RequestStatistic
+AbstractAbortableRequest *-[#grey]- ResponseHandler
+
+interface HttpCall {
+    + void setHttpClientBuilder(HttpClientBuilder builder)
+    + HttpRequest getHttpRequest()
+    + HttpClientContext getHttpClientContext()
+}
+HttpCall <|-- AbortableHttpRequest
+
+class AbortableHttpRequest<HttpResponse, T> {
+    + void executeInternally(ResponseHandler<HttpResponse, T> responseHandler, Response<T> response)
+    + void abortInternally()
+    ---
+    + void setHttpClientBuilder(HttpClientBuilder httpClientBuilder)
+    + HttpRequest getHttpRequest()
+    + HttpClientContext getHttpClientContext()
+}
+
+AbortableHttpRequest <|-- GetRequest
+AbortableHttpRequest <|-- PostRequest
+AbortableHttpRequest <|-- SoapRequest
+
+class GetRequest<T> {
+}
+
+class PostRequest<T> {
+}
+
+class SoapRequest<T> {
+}
+
+
+class AbortableQuery<ResultSet, T> {
+    + void executeInternally(ResponseHandler responseHandler, Response response)
+    + void abortInternally()
+}
+
+
+
+class RequestDispatcher {
+    + Response<T> execute(AbortableRequest<T> request)
+    + Response<T> executeAsync(AbortableRequest<T> request)
+}
+RequestDispatcher ..> ExecutorServiceRepository : <b> getService(request) </b>
+RequestDispatcher ..> FutureRequest : <b> new (request) </b> 
+FutureRequest *-[#grey]- AbortableRequest
+RequestDispatcher ..> AsyncRequestTimeoutFutureTask : <b>new (request)</b>
+AsyncRequestTimeoutFutureTask *-[#grey]- FutureRequest
+
+class HttpRequestBuilder {
+}
+HttpRequestBuilder *-[#grey]- RequestDispatcher
+HttpRequestBuilder ..> GetRequest : <b> new</b>
+HttpRequestBuilder ..> PostRequest : <b> new</b>
+
+
+
+class HawaiiThreadPoolExecutor {
+    + String getName()
+    + void rejectTask()
+    + QueueStatistic getQueueStatistic()
+}
+HawaiiThreadPoolExecutor *-[#grey]- QueueStatistic
+
+interface QueueStatistic {
+    + String getQueueName()
+    + int getPoolSize()
+    + int getCorePoolSize()
+    + int getMaximumPoolSize()
+    + int getLargestPoolSize()
+    + int getQueueSize()
+    + int getActiveTaskCount()
+    + long getCompletedTaskCount()
+    + long getRejectedTaskCount()
+}
+class RequestStatistic {
+    + void setQueueStatistic(QueueStatistic queueStatistic)
+    + QueueStatistic getQueueStatistic()
+    ..
+    + void startRequest()
+    + void endRequest()
+    + double getTotalDuration()
+    + double getQueueTime()
+    ..
+    + void startBackendRequest()
+    + void endBackendRequest()
+    + double getCallTime()
+    ..
+    + void startCallback()
+    + void endCallback()
+    + double getCallbackDuration()
+    ..
+    + void startConversion()
+    + void endConversion()
+    + double getConversionDuration()
+}
+RequestStatistic *-[#grey]- QueueStatistic
+RequestStatistic *-[#grey]- ResponseStatus
+
+class ExecutorServiceRepository {
+    + HawaiiThreadPoolExecutor getQueue(AbortableRequest<T> request)
+    + HawaiiThreadPoolExecutor getService(AbortableRequest<T> request)
+    + ExecutorService getServiceMonitor(AbortableRequest<T> request)
+}
+ExecutorServiceRepository *.d. HawaiiThreadPoolExecutor
+ExecutorServiceRepository *-[#grey]- RequestStatistic : <b>request.setQueueStatistic(...)</b>
+
+class RequestConfiguration {
+    + String getQueue()
+    + void setQueue(String queue)
+    + Integer getTimeOut()
+    + void setTimeOut(Integer timeOut)
+    + TimeUnit getTimeOutUnit()
+    + int getTimeOutOrDefaultIfUnset()
+    ==
+    String defaultQueue = DEFAULT_POOL_NAME
+    Integer defaultTimeOut = 10
+}
+RequestConfiguration *-[#grey]-> ExecutorServiceRepository : DEFAULT_POOL_NAME
+
+class RequestContext<T> {
+    + String getBackendSystem()
+    + String getMethodName()
+    + boolean is(String system, String method)
+    .. delegates to config ..
+    + int getTimeOut()
+    + TimeUnit getTimeOutUnit()
+    + String getQueue()
+    + void setConfiguration(RequestConfiguration configuration)
+    ..<i> unused </i>..
+    + T getRejectResponse()
+    + void setRejectResponse(T rejected)
+    + T getRejectResponse()
+    + void setTimeOutResponse(T aborted)
+    + T getTimeOutResponse()
+}
+RequestContext *-[#grey]- RequestConfiguration : uses
+RequestContext <|-- HttpRequestContext
+
+class HttpRequestContext<T> {
+    + String getBaseUrl()
+    + void setBaseUrl(String baseUrl)
+    + HttpMethod getMethod()
+    + String getPath()
+}
+
+@enduml

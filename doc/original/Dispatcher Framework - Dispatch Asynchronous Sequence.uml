@@ -1,0 +1,253 @@
+@startuml
+
+participant SomeService
+participant RequestStatistic
+participant Response
+participant ResponseHandler
+participant Request
+participant RequestDispatcher
+participant ExecutorServiceRepository
+participant HawaiiThreadPoolExecutor
+
+control Thread_1
+participant FutureTask
+participant CallableRequest
+
+control Thread_2
+participant TimeoutTask
+participant AsyncRequestTimeoutCallable
+
+
+create HawaiiThreadPoolExecutor
+ExecutorServiceRepository -> HawaiiThreadPoolExecutor : <b>new</b>
+
+...
+SomeService -> Request : executeAsync( )
+
+activate Request #ddd
+    Request --> Request : setup( )
+    activate Request #fc9
+        create RequestStatistic
+        Request -> RequestStatistic : <b>new</b>
+        Request -> RequestStatistic : start( )
+        |||
+        create Response
+        Request -> Response : <b>new</b>
+
+    deactivate Request
+
+    Request -> RequestDispatcher : executeAsync( this )
+    activate RequestDispatcher #ddd
+        RequestDispatcher --> RequestDispatcher : execute( request, <b>false</b> )
+
+        activate RequestDispatcher #fc9
+            RequestDispatcher -> Request : getContext()
+            activate Request #fc9
+                Request -> RequestDispatcher : context
+            deactivate Request
+            |||
+
+            RequestDispatcher -> Request : getResponse()
+            activate Request #fc9
+                Request -> RequestDispatcher : response
+            deactivate Request
+
+            create FutureTask
+            RequestDispatcher -> FutureTask : new( request )
+            activate FutureTask #ddd
+              create CallableRequest
+              FutureTask -> CallableRequest : new
+              FutureTask -[#grey]-> RequestDispatcher : task
+            deactivate FutureTask
+
+            |||
+
+            RequestDispatcher -> ExecutorServiceRepository : getService( request )
+            activate ExecutorServiceRepository #ddd
+                ExecutorServiceRepository -> HawaiiThreadPoolExecutor : getQueueStatistics
+                activate HawaiiThreadPoolExecutor #ddd
+                    HawaiiThreadPoolExecutor -> ExecutorServiceRepository : queueStatistics
+                deactivate HawaiiThreadPoolExecutor
+
+                ExecutorServiceRepository -> Request : getRequestStatistics
+                activate Request #fc9
+                    Request -> ExecutorServiceRepository : statistics
+                deactivate Request
+                ExecutorServiceRepository -> RequestStatistic : setQueueStatistics( queueStatistics )
+
+                ExecutorServiceRepository -> RequestDispatcher : executor
+            deactivate ExecutorServiceRepository
+            |||
+            RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
+            activate RequestDispatcher #ffc
+            |||
+            deactivate RequestDispatcher
+
+            RequestDispatcher -> HawaiiThreadPoolExecutor : execute( task )
+            activate HawaiiThreadPoolExecutor #ddd
+                create Thread_1
+                HawaiiThreadPoolExecutor -> Thread_1 : run( task )
+                activate Thread_1 #ddd
+                |||
+                HawaiiThreadPoolExecutor -> RequestDispatcher
+            deactivate HawaiiThreadPoolExecutor
+
+            Thread_1 -> FutureTask : run( )
+            activate FutureTask #ddd
+                FutureTask -> CallableRequest : call( )
+            deactivate FutureTask
+
+            activate CallableRequest #ddd
+
+
+
+            '
+            ' Create timeout guard
+            '
+            create TimeoutTask
+            RequestDispatcher -> TimeoutTask : new( task )
+            activate TimeoutTask #ddd
+              create AsyncRequestTimeoutCallable
+              TimeoutTask -> AsyncRequestTimeoutCallable : new
+              TimeoutTask -[#grey]-> RequestDispatcher : timeout_task
+            deactivate TimeoutTask
+
+            RequestDispatcher -> Request : setGuardTask( timeout_task )
+
+            RequestDispatcher -> HawaiiThreadPoolExecutor : execute( timeout_task )
+            activate HawaiiThreadPoolExecutor #ddd
+                create Thread_2
+                HawaiiThreadPoolExecutor -> Thread_2 : run( timeout_task )
+                activate Thread_2 #ddd
+                |||
+                HawaiiThreadPoolExecutor -> RequestDispatcher
+            deactivate HawaiiThreadPoolExecutor
+
+            Thread_2 -> TimeoutTask : run( )
+            activate TimeoutTask #ddd
+                TimeoutTask -> AsyncRequestTimeoutCallable : call( )
+            deactivate TimeoutTask
+
+            activate AsyncRequestTimeoutCallable #ddd
+                AsyncRequestTimeoutCallable -> FutureTask : getRequest( )
+                activate FutureTask #fc9
+                    FutureTask -> AsyncRequestTimeoutCallable : request
+                deactivate FutureTask
+
+                AsyncRequestTimeoutCallable -> Request : getTimeOut()
+                activate Request #fc9
+                    Request -> AsyncRequestTimeoutCallable : timeOut
+                deactivate Request
+
+                AsyncRequestTimeoutCallable -> FutureTask : get( timeout )
+
+                activate FutureTask #fc9
+                    FutureTask -> FutureTask : awaitDone()
+                activate FutureTask #ffc
+
+
+                CallableRequest -> Request : getResponse( )
+                activate Request #fc9
+                    Request -> CallableRequest : response
+                deactivate Request
+
+                CallableRequest -> Request : doExecute( )
+                activate Request #fc9
+                    Request -> RequestStatistic : startBackendRequest( )
+
+                    Request -> Request : executeInternally( responseHandler )
+
+                    activate Request #ffc
+                        Request -[#blue]> SomeSystem : do_some_call( )
+
+                        |||
+                        ... some what later ...
+                        |||
+
+                        SomeSystem -[#blue]> Request : <F>
+
+                        Request -> ResponseHandler : addToResponse( <F>, response )
+                        activate ResponseHandler #ddd
+                            ResponseHandler -> ResponseHandler : transform( <F> )
+
+                            activate ResponseHandler #fc9
+                                ResponseHandler -> ResponseHandler : <T>
+                            deactivate ResponseHandler
+
+                            ResponseHandler -> Response : set( <T> )
+                            ResponseHandler --> Request
+                        deactivate ResponseHandler
+                    deactivate Request
+
+                    Request -> TimeoutTask : cancel( )
+                    activate TimeoutTask #ddd
+                        TimeoutTask ->
+                    deactivate TimeoutTask
+
+                    Request -> RequestStatistic : endBackendRequest( )
+
+                    Request -> CallableRequest
+                deactivate Request
+
+
+                CallableRequest -> Request : doCallback()
+                activate Request #fc9
+                    Request -> Request : finish( )
+                    activate Request #ffc
+                        Request -> RequestStatistic : finish( )
+                        Request --> Request
+                    deactivate Request
+                    |||
+                    Request -> CallableRequest
+                deactivate Request
+
+                CallableRequest -> Request : logResponse()
+                activate Request #fc9
+                    |||
+                    Request -> CallableRequest
+                deactivate Request
+
+                CallableRequest -> FutureTask  : response
+                deactivate CallableRequest
+                destroy CallableRequest
+
+                activate FutureTask #ddd
+                    FutureTask --> FutureTask : signalDone( )
+                    FutureTask --> Thread_1
+                    destroy Thread_1
+                deactivate FutureTask
+                deactivate FutureTask
+
+                |||
+                FutureTask -> AsyncRequestTimeoutCallable
+                deactivate FutureTask
+                destroy FutureTask
+
+                AsyncRequestTimeoutCallable --> TimeoutTask
+            deactivate AsyncRequestTimeoutCallable
+            destroy AsyncRequestTimeoutCallable
+
+            activate TimeoutTask #ddd
+                TimeoutTask --> TimeoutTask : signalDone( )
+                TimeoutTask --> Thread_2
+                destroy Thread_2
+            deactivate TimeoutTask
+            destroy TimeoutTask
+
+            RequestDispatcher -> Request : finish( )
+            activate Request #fc9
+                Request -> RequestStatistic : finish( )
+                Request --> RequestDispatcher
+            deactivate Request
+
+            RequestDispatcher --> RequestDispatcher : response
+
+        deactivate RequestDispatcher
+
+        RequestDispatcher -> Request : response
+    deactivate RequestDispatcher
+    Request -> SomeService : response
+deactivate Request
+
+
+@enduml

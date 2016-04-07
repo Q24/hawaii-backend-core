@@ -158,7 +158,7 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
-    public void setTooBusy() {
+    public void reject() {
         this.error = true;
         response.setMessage("Request '" + getId() + "' rejected, too busy.");
         response.setStatus(ResponseStatus.TOO_BUSY, getContext().getRejectResponse());

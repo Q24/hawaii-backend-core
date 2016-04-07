@@ -102,7 +102,7 @@ public class RequestDispatcher {
         try {
             executorServiceRepository.getServiceMonitor(request).execute(asyncFutureRequest);
         } catch (RejectedExecutionException e) {
-            request.setTooBusy();
+            request.reject();
             request.finish();
         }
         return request.getResponse();
@@ -149,7 +149,7 @@ public class RequestDispatcher {
             task.get(requestContext.getTimeOut(), requestContext.getTimeOutUnit());
 
         } catch (RejectedExecutionException e) {
-            request.setTooBusy();
+            request.reject();
         } catch (InterruptedException e) {
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
         } catch (ExecutionException e) {

@@ -30,7 +30,7 @@ public class FutureRequest<T> extends FutureTask<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
 
     public FutureRequest(AbortableRequest<T> abortableRequest, Response<T> response) {
-        super(new CallableRequest<T>(abortableRequest, response));
+        super(new CallableRequest<>(abortableRequest, response));
         this.abortableRequest = abortableRequest;
     }
 

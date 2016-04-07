@@ -38,9 +38,6 @@ public class CallableRequest<T> implements Callable<Response<T>> {
             abortableRequest.doCallback();
 
             return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         } catch (Throwable t) {
             throw new Exception(t);
         } finally {
