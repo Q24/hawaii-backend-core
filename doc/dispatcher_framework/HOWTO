@@ -1,0 +1,72 @@
+The request dispatcher framework is used to execute requests in a controlled manner. It allows the requests to be
+aborted and guards against executing too many requests.
+
+This leads to a better performance for both the backend and the frontend.
+
+The frontend has a guarantee that calls will return in a predefined time. This avoids hanging calls. This way the
+frontend can release resources (ports, HTTP clients, ...) earlier (as compared to "hanging" calls). This leads to
+better response times and more throughput.
+
+The frontend can limit the number of outstanding requests per backend call. This limits the number of resources devoted
+to potential heavy calls. Again this leads to better (overall) response times and more throughput. (There are less
+calls that can block the system by waiting to misbehaving backends.)
+
+At the same time, this also acts as a guard for the backend systems. We can limit the number of requests that can be
+executed simultaneously. This way the backend system can devote all it's resources to answering the (lesser) number
+of requests, leading to an improved performance overall. (Less heavy calls at the same time, leading to better resource
+utilization.)
+
+Next to this, the dispatcher framework allows parallel execution of requests. It is possible to execute a request
+asynchronously. This allows the caller to execute multiple requests in parallel. The caller may execute this in a
+"fire and forget" fashion, or the caller may block until one (or all?) requests are done. The fire and forget pattern
+enables the frontend to continue on other tasks, while a backend system is busy executing the request. The response of
+this request can be handled by a "call back". This happens without the frontend waiting for the answer.
+
+So, we have:
+- resource protection
+- protection against misbehaving backend systems
+- parallel requests
+- call backs
+
+Ok, that was the "why do we care" section.
+
+How does it work?
+
+Basically we have a thread pool. Into this pool, we feed tasks. The tasks will execute the requests we're interested in.
+By using the executor framework of Java, we can timeout on the response of the tasks. This will unblock the caller.
+
+To extend this a bit further, we have a set of queues, each with a maximum capacity, behind each queues there is a pool
+of threads. (Number of threads <= queue's maximum capacity). A request is transformed into a task and dispatched to the
+correct queue. The dispatcher waits for the response for a (configurable) period of time.
+
+Usually we're not interested in one on one responses, we have to translate the outcome to something manageable. After
+a response is received the response is fed through a response handler. This may transform the response, for instance
+from some JSON into a domain object of the frontend.
+
+A parallel request uses the same techniques. However, the caller may not be present anymore when the response is
+received. So, how can we act upon such calls? Each requests can have a "callback". After receiving and transforming the
+response the callback is invoked. This callback can then perform the logic to handle the response. Since this is done
+in the thread handling the request, the caller can indeed forget about it.
+
+But wait, how can we have several requests in parallel _and_ still do something with some of the results? Well, each
+request returns a response. The response is blocked until the response is processed, that is after transformation and
+callback are finished. So, we can execute several requests, transform the responses, perhaps do some callbacks to handle
+some of the responses and wait for the requests' answers.
+
+The implementation of the asynchronicity is done by wrapping the request, dispatching the wrapper and returning the
+response of the request itself (instead of the response of the wrapper). The wrapper will dispatch the original request
+and block until it is finished (or generate a timeout).
+
+
+How does this protect us against misbehaving backend systems?
+
+So, we can release callers after a given time? What about the threads that are busy fulfilling the requests? Or other
+resources consumed by the requests? For instance, the socket opened to do a REST call.
+
+After the task is timed out, the request is asked to abort itself. For HTTP connections some libraries allow closing
+the call (or socket) even if the call is not finished. For SQL queries, the JDBC standard allows stopping the query.
+
+This releases the resources of the request and signals the request that "something has happened" (usually by some
+horrible error). The request can then perform the necessary cleanups and stop. This then frees up the thread.
+
+So, if the abort is behaving, the systems resources are guarded and the internal thread pools are protected as well.
