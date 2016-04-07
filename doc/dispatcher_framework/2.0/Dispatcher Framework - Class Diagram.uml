@@ -46,16 +46,13 @@ interface AbortableRequest<T> {
 
     + Response<T> doExecute() throws Throwable
 
-    + void setGuardTask(FutureTask<Response<T>> task)
-
     + void setCallback(ResponseCallback<T> callback)
     + void doCallback()
-    + void setTooBusy()
 
+    + void reject()
     + void abort()
     + void finish()
 
-    + void logResponse()
     + Response<T> getResponse()
 
     ..Experimental..
@@ -75,18 +72,15 @@ abstract class AbstractAbortableRequest {
     + void doCallback()
     + void abort()
     + void finish()
-    + void setTooBusy()
-    + void setTimeOut()
+    + void reject()
     ..
     + void setCallback(ResponseCallback<T> callback)
-    + void setGuardTask(FutureTask<Response<T>> task)
     + RequestContext<T> getContext()
     ..
     + RequestStatistic getStatistic()
     + Response<T> getResponse()
     + String getId()
     + String getCallName()
-    + void logResponse()
     ..Experimental..
     + void setLatch(CountDownLatch latch)
 
@@ -140,10 +134,13 @@ class RequestDispatcher {
     + Response<T> executeAsync(AbortableRequest<T> request)
 }
 RequestDispatcher ..> ExecutorServiceRepository : <b> getService(request) </b>
-RequestDispatcher ..> FutureRequest : <b> new (request) </b> 
-FutureRequest *-[#grey]- AbortableRequest
-RequestDispatcher ..> AsyncRequestTimeoutFutureTask : <b>new (request)</b>
-AsyncRequestTimeoutFutureTask *-[#grey]- FutureRequest
+RequestDispatcher ..> FutureRequest : <b> new (request, response) </b>
+RequestDispatcher ..> AsyncFutureRequest : <b>new (request, dispatcher)</b>
+AsyncFutureRequest *-[#grey]- RequestDispatcher : uses
+
+FutureRequest ..> CallableRequest : <b>new (request, response)</b>
+CallableRequest .[#grey].> AbortableRequest : doExecute()
+CallableRequest .[#grey].> AbortableRequest : doCallback()
 
 class HttpRequestBuilder {
 }
@@ -201,7 +198,6 @@ class ExecutorServiceRepository {
     + ExecutorService getServiceMonitor(AbortableRequest<T> request)
 }
 ExecutorServiceRepository *.d. HawaiiThreadPoolExecutor
-ExecutorServiceRepository *-[#grey]- RequestStatistic : <b>request.setQueueStatistic(...)</b>
 
 class RequestConfiguration {
     + String getQueue()

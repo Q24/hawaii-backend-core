@@ -1,0 +1,58 @@
+== Call Dispatch Framework ==
+
+=== Investigate ===
+[ ] ? Use "call prototype" in "call builders"
+[ ] ? Introduce "CallBuilder" interface
+[ ] ? Cleanup {tx, call} ids?
+[ ] ? Usage of Response.setMessage / getMessage
+[ ] ? What happens in case of exception in CallableRequest?
+[ ] ? Investigate timeout on "Response#get()". (Do not confuse this with releasing of resources by aborting a request, with (possibly) the same time out.)
+	? Why, what is the usage of this?
+[ ] Split Request into internal internface and external interface?
+
+=== Bug ===
+
+=== Todo ===
+[X] Make a request executor, use request executor in dispatcher
+	- Changed request dispatcher to have one simple inner 'execute( request )' method.
+[X] Make an asyc wrapper around request executor
+	- Introduced AsyncFutureRequest, AsyncRequestCallable
+
+[X] Add 'isSynchronous' to Request
+
+[X] Make (a)sync call block on "Response#get()"
+
+[X] Remove getAbortableRequest from FutureRequest
+
+[X] Set queue statistics inside dispatcher (not in executor repository)
+
+[X] Move finish to end of request dispatcher, add logResult to request.finish()
+	- Finish does signalDone, logResponse
+
+[X] Remove finish() call in "AbstractAbortableRequest#doCallBack()"
+
+[ ] Make sure in error situations the response is logged.
+[ ] Log request & queue statistics of async requests
+
+[ ] ! TEST
+
+[ ] ? Remove response from exec and execAsync?
+
+=== Todo (incompatible with 1.0) ====
+[ ] executorServiceRepository should have an 'async pool'
+	! Different branch / pull request, config change needed!
+
+[ ] Remove LogManager from CallLogger
+[ ] Remove LoggingContextMap from Reqsponse
+
+[ ] Introduce "TimeOut" with Unit and Size
+
+[ ] Remove HttpClientBuilder from request dispatcher.
+	! Different branch / pull request
+
+[ ] Create HTTP Response to extend Response
+	! Different branch / pull request
+
+=== New ===
+[ ] SQL
+[ ] Builders
