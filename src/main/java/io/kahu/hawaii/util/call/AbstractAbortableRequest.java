@@ -37,7 +37,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     private boolean isAsync = false;
     private boolean error = false;
-    private boolean afterCallback = false;
     private Response<T> response = null;
     private String id;
     private CountDownLatch latch;
@@ -56,9 +55,10 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     @Override
     public void abort() {
+        this.error = true;
         statistic.endBackendRequest();
-        statistic.endRequest();
-        setTimeOut();
+        response.setMessage("Request '" + getId() + "' timed out.");
+        response.setStatus(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse());
         abortInternally();
     }
 
@@ -90,10 +90,9 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         statistic.startRequest();
         logger.logRequest(this);
 
-        response = new Response<T>(this, statistic, logger.getLogManager().getContextSnapshot());
+        response = new Response<>(this, statistic, logger.getLogManager().getContextSnapshot());
         this.isAsync = false;
         this.error = false;
-        this.afterCallback = false;
     }
 
     @Override
@@ -133,7 +132,7 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         if (callback != null && !error) {
             try {
                 statistic.startCallback();
-                callback.handle(response.get());
+                callback.handle(response.getResponsePayload());
             } catch (Exception e) {
                 logger.getLogManager().error(CoreLoggers.SERVER_CALLS, e);
             } finally {
@@ -144,11 +143,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         if (latch != null) {
             latch.countDown();
         }
-
-        afterCallback = true;
-        if (isAsync) {
-            finish();
-        }
     }
 
     @Override
@@ -158,9 +152,9 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     @Override
     public void finish() {
-        if (afterCallback || error) {
-            statistic.endRequest();
-        }
+        statistic.endRequest();
+        response.signalDone();
+        logResponse();
     }
 
     @Override
@@ -171,11 +165,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         rejectInternally();
     }
 
-    public void setTimeOut() {
-        this.error = true;
-        response.setMessage("Request '" + getId() + "' timed out.");
-        response.setStatus(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse());
-    }
 
     @Override
     public Response<T> getResponse() {
@@ -197,7 +186,6 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         this.latch = latch;
     }
 
-    @Override
     public void logResponse() {
         logger.logResponse(response);
     }

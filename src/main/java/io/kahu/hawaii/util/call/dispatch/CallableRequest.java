@@ -23,18 +23,20 @@ import java.util.concurrent.Callable;
 
 public class CallableRequest<T> implements Callable<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
+    private final Response<T> response;
 
-    public CallableRequest(AbortableRequest<T> abortableRequest) {
+    public CallableRequest(AbortableRequest<T> abortableRequest, Response<T> response) {
         this.abortableRequest = abortableRequest;
+        this.response = response;
     }
 
     @Override
     public Response<T> call() throws Exception {
         LoggingContext.remove();
-        Response<T> response = abortableRequest.getResponse();
         try {
             abortableRequest.doExecute();
             abortableRequest.doCallback();
+
             return response;
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,8 +44,6 @@ public class CallableRequest<T> implements Callable<Response<T>> {
         } catch (Throwable t) {
             throw new Exception(t);
         } finally {
-            abortableRequest.logResponse();
-            // TODO Mark request as handled?
             LoggingContext.remove();
         }
     }

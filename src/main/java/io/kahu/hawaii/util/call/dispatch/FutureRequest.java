@@ -29,8 +29,8 @@ import java.util.concurrent.FutureTask;
 public class FutureRequest<T> extends FutureTask<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
 
-    public FutureRequest(AbortableRequest<T> abortableRequest) {
-        super(new CallableRequest<T>(abortableRequest));
+    public FutureRequest(AbortableRequest<T> abortableRequest, Response<T> response) {
+        super(new CallableRequest<T>(abortableRequest, response));
         this.abortableRequest = abortableRequest;
     }
 

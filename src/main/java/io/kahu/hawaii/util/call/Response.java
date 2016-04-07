@@ -22,6 +22,7 @@ import io.kahu.hawaii.util.logger.LoggingContextMap;
 
 import java.net.SocketException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.http.Header;
 
@@ -29,6 +30,7 @@ public class Response<T> {
     private final Request<T> request;
     private final RequestStatistic statistic;
     private final LoggingContextMap loggingContext;
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     private String rawPayload;
 
@@ -36,6 +38,9 @@ public class Response<T> {
     private ResponseStatus status;
     private String message;
     private T response;
+
+    private boolean logged = false;
+
 
     // These 3 are mostly for responses to HTTP requests, but can hold metadata
     // from other request types as well.
@@ -47,7 +52,6 @@ public class Response<T> {
     private int statusCode = 0;
     private List<Header> headers = null;
 
-    private boolean logged = false;
 
     public Response(Request<T> request, RequestStatistic statistic, LoggingContextMap loggingContext) {
         this.request = request;
@@ -56,6 +60,12 @@ public class Response<T> {
     }
 
     public T get() throws ServerException {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, throwable);
+        }
+
         if (isOk()) {
             return response;
         }
@@ -163,11 +173,19 @@ public class Response<T> {
         this.headers = headers;
     }
 
+    /**
+     * Internal use only! All clients of Response <em>must</em> use get().
+     * @return
+     */
     public T getResponsePayload() {
         return response;
     }
 
     public RequestStatistic getStatistic() {
         return statistic;
+    }
+
+    public void signalDone() {
+        latch.countDown();
     }
 }

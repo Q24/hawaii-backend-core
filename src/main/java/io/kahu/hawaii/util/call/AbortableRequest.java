@@ -23,8 +23,6 @@ import java.util.concurrent.FutureTask;
 public interface AbortableRequest<T> extends Request<T> {
     RequestContext<T> getContext();
 
-    void logResponse();
-
     RequestStatistic getStatistic();
 
     Response<T> doExecute() throws Throwable;

@@ -103,7 +103,7 @@ public class RequestDispatcher {
             executorServiceRepository.getServiceMonitor(request).execute(asyncFutureRequest);
         } catch (RejectedExecutionException e) {
             request.setTooBusy();
-            request.logResponse();
+            request.finish();
         }
         return request.getResponse();
     }
@@ -122,28 +122,25 @@ public class RequestDispatcher {
         }
 
         RequestContext<T> requestContext = request.getContext();
+        /*
+         * Get the response here in order to return it.
+         */
         Response<T> response = request.getResponse();
 
-        FutureRequest<T> task = new FutureRequest<>(request);
         try {
             HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
+
             QueueStatistic queueStatistics = executor.getQueueStatistic();
             request.getStatistic().setQueueStatistic(queueStatistics);
 
-            try (LoggingContext.PopResource pushContext = logManager.pushContext()) {
-                logManager.putContext("queue.name", executor.getName());
-
-                logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
-                logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
-                logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
-                logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
-                logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
-                logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
-                logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
-
-                logManager.info(CoreLoggers.SERVER, "Scheduling request '" + request + "' with id '" + request.getId() + "'.");
-            }
             notifyListeners(request, executor);
+
+            FutureRequest<T> task = new FutureRequest<>(request, response);
+
+            /*
+             * TODO Move into requestLogger.
+             */
+            logScheduleStart(request, executor, queueStatistics);
             executor.execute(task);
 
             /*
@@ -160,11 +157,26 @@ public class RequestDispatcher {
         } catch (TimeoutException e) {
             request.abort();
         } finally {
-            request.logResponse();
             request.finish();
         }
 
         return response;
+    }
+
+    private <T> void logScheduleStart(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor, QueueStatistic queueStatistics) {
+        try (LoggingContext.PopResource pushContext = logManager.pushContext()) {
+            logManager.putContext("queue.name", executor.getName());
+
+            logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
+            logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
+            logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
+            logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
+            logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
+            logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
+            logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
+
+            logManager.info(CoreLoggers.SERVER, "Scheduling request '" + request.getCallName() + "' with id '" + request.getId() + "'.");
+        }
     }
 
     private <T> void notifyListeners(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor) {
