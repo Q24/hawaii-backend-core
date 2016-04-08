@@ -8,7 +8,7 @@
 [ ] ? What happens in case of exception in CallableRequest?
 [ ] ? Investigate timeout on "Response#get()". (Do not confuse this with releasing of resources by aborting a request, with (possibly) the same time out.)
 	? Why, what is the usage of this?
-[ ] Split Request into internal internface and external interface?
+[ ] Split Request into internal interface and external interface?
 
 === Bug ===
 
@@ -31,12 +31,19 @@
 
 [X] Remove finish() call in "AbstractAbortableRequest#doCallBack()"
 
+[ ] ! Mark classes as @Threadsafe / @NotThreadSafe
+
 [ ] Make sure in error situations the response is logged.
 [ ] Log request & queue statistics of async requests
+
+[ ] Move logging of schedule of request to ThreadPoolExecutor.
 
 [ ] ! TEST
 
 [ ] ? Remove response from exec and execAsync?
+    ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
+
+[ ] ? Register timeout count on queue?
 
 === Todo (incompatible with 1.0) ====
 [ ] executorServiceRepository should have an 'async pool'
@@ -56,3 +63,4 @@
 === New ===
 [ ] SQL
 [ ] Builders
+    ? Prototype in builders?

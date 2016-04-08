@@ -194,4 +194,18 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     public boolean isAsync() {
         return isAsync;
     }
+
+    /*
+     * For test purposes
+     */
+    protected void setStatistic(RequestStatistic statistic) {
+        this.statistic = statistic;
+    }
+
+    /*
+     * For test purposes
+     */
+    protected void setResponse(Response<T> response) {
+        this.response = response;
+    }
 }

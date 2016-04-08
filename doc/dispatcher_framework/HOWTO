@@ -70,3 +70,19 @@ This releases the resources of the request and signals the request that "somethi
 horrible error). The request can then perform the necessary cleanups and stop. This then frees up the thread.
 
 So, if the abort is behaving, the systems resources are guarded and the internal thread pools are protected as well.
+
+
+== Queue behaviour
+
+Normally for the executor framework the executor inserts the task in a queue, using the offer mechanism. When the queue
+is full, the framework will create new threads. If both the queue and the thread pool are full the task is rejected.
+
+From our perspective this is not desirable. We want the number of threads to increase first. When the thread pool is
+fully utilized we want the tasks to pole up, until the queue is full. Again, when both are full the task is rejected.
+The difference is that we first want new threads to be created.
+
+For this we have an Hawaii specific implementation of the Executor, Queue and RejectionHandler. Together the behaviour
+is that we wrap the blocking queue given to the executor, for each task that is scheduled the executor is told the
+queue is full, this forces the executor to start a new thread. If no new thread can be started the task is delegated
+to the rejection handler. Our implementation of the rejection handler is that it adds the task to the queue. If this add
+fails, the task is rejected. Otherwise one of the threads of the executor will pick it up and execute it.

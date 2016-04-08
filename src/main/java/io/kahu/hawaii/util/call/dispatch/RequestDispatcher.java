@@ -35,8 +35,10 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import io.kahu.hawaii.util.logger.LoggingContext;
+import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+@ThreadSafe
 public class RequestDispatcher {
     private final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
@@ -121,11 +123,8 @@ public class RequestDispatcher {
             ((HttpCall) request).setHttpClientBuilder(httpClientBuilder);
         }
 
-        RequestContext<T> requestContext = request.getContext();
-        /*
-         * Get the response here in order to return it.
-         */
         Response<T> response = request.getResponse();
+        RequestContext<T> requestContext = request.getContext();
 
         try {
             HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);

@@ -68,14 +68,6 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
     }
 
     private void parseConfig(JSONObject json) throws JSONException {
-        RejectedExecutionHandler handler = new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(Runnable runnable, ThreadPoolExecutor executor) {
-                logManager.info(CoreLoggers.SERVER, "Rejected '" + runnable + "' since the pool and queue size has been exceeded.");
-                throw new RejectedExecutionException();
-            }
-        };
-
         JSONArray queues = json.getJSONArray("queues");
         for (int i = 0; i < queues.length(); i++) {
             JSONObject queue = queues.getJSONObject(i);
@@ -88,7 +80,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
             logManager
                     .info(CoreLoggers.SERVER, "Creating queue '" + name + "' with '" + corePoolSize + "'/'" + maxPoolSize + "'/'" + maxPendingRequests + "'.");
             HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(name, corePoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS,
-                    new ArrayBlockingQueue<>(maxPendingRequests), new HawaiiThreadFactory(name), handler);
+                    new ArrayBlockingQueue<>(maxPendingRequests), new HawaiiThreadFactory(name), null, logManager);
 
             executors.put(name, executor);
         }

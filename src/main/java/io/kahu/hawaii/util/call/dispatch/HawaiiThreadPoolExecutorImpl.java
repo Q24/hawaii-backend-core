@@ -17,12 +17,9 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.QueueStatisticImpl;
+import io.kahu.hawaii.util.logger.LogManager;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements HawaiiThreadPoolExecutor {
@@ -30,16 +27,14 @@ public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements 
     private final String name;
 
     public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-            BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(
+            BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
                 handler));
         this.name = name;
     }
 
-    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-            BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), new HawaiiRejectedExecutionHandler(handler));
-        this.name = name;
+    public void execute(Runnable command) {
+        super.execute(command);
     }
 
     @Override

@@ -47,6 +47,10 @@ public interface AbortableRequest<T> extends Request<T> {
      */
     void reject();
 
+    /**
+     * internal use only
+     * @return
+     */
     Response<T> getResponse();
 
     void setLatch(CountDownLatch latch);
