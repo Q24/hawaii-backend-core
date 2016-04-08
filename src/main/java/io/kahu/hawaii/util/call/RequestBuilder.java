@@ -16,22 +16,10 @@
 package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.exception.ServerException;
-import org.apache.http.annotation.ThreadSafe;
 
-/**
- * Warning, this class exposes the results of the backend request directly to the caller. The result
- * may be stale, closed, null, non existant or faulty g=by then.
- *
- * <em>This leads to considerable resource leaks.</em> Suggested usage: Only for testing purposes.
- * @param <T>
- */
-@ThreadSafe
-public class PassthroughResponseHandler<T> implements ResponseHandler<T, T>{
-    @Override
-    public void addToResponse(T payload, Response<T> response) throws ServerException {
-        if (payload != null) {
-            response.setRawPayload(payload.toString());
-        }
-        response.set(payload);
-    }
+public interface RequestBuilder<T> {
+
+    RequestBuilder<T> newInstance() throws ServerException;
+
+    Request<T> build() throws ServerException;
 }

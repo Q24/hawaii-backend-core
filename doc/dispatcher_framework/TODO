@@ -6,9 +6,16 @@
 [ ] ? Cleanup {tx, call} ids?
 [ ] ? Usage of Response.setMessage / getMessage
 [ ] ? What happens in case of exception in CallableRequest?
+    Is rethrown in ExecutionException, caught in RequestDispatcher
 [ ] ? Investigate timeout on "Response#get()". (Do not confuse this with releasing of resources by aborting a request, with (possibly) the same time out.)
 	? Why, what is the usage of this?
 [ ] Split Request into internal interface and external interface?
+[ ] ? Remove response from exec and execAsync?
+    ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
+
+[ ] ? Register timeout count on queue?
+
+[ ] ? Change configuration of requests (RequestConfiguration / Context / Constructor)
 
 === Bug ===
 
@@ -31,36 +38,39 @@
 
 [X] Remove finish() call in "AbstractAbortableRequest#doCallBack()"
 
-[ ] ! Mark classes as @Threadsafe / @NotThreadSafe
+[X] Mark classes as @Threadsafe / @NotThreadSafe
+
+[X] Remove HttpClientBuilder from request dispatcher.
 
 [ ] Make sure in error situations the response is logged.
 [ ] Log request & queue statistics of async requests
 
-[ ] Move logging of schedule of request to ThreadPoolExecutor.
+[X] Move logging of schedule of request to ThreadPoolExecutor.
+[X] Introduce "TimeOut" with Unit and Size
 
 [ ] ! TEST
 
-[ ] ? Remove response from exec and execAsync?
-    ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
+[ ] Examples
 
-[ ] ? Register timeout count on queue?
+[ ] Document minimal configuration
+    ! Pool names
+    ! ...
 
 === Todo (incompatible with 1.0) ====
 [ ] executorServiceRepository should have an 'async pool'
 	! Different branch / pull request, config change needed!
 
 [ ] Remove LogManager from CallLogger
-[ ] Remove LoggingContextMap from Reqsponse
-
-[ ] Introduce "TimeOut" with Unit and Size
-
-[ ] Remove HttpClientBuilder from request dispatcher.
-	! Different branch / pull request
+[ ] Remove LoggingContextMap from Response
 
 [ ] Create HTTP Response to extend Response
 	! Different branch / pull request
 
+[ ] Create HTTP RequestContext to contain base url
+
 === New ===
 [ ] SQL
 [ ] Builders
-    ? Prototype in builders?
+    [X] Prototype in builders
+    [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
+    [ ] Create SQL Builder

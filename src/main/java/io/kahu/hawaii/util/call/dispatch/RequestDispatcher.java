@@ -15,10 +15,7 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
-import io.kahu.hawaii.util.call.AbortableRequest;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.call.ResponseStatus;
+import io.kahu.hawaii.util.call.*;
 import io.kahu.hawaii.util.call.http.HttpCall;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
@@ -29,10 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 import io.kahu.hawaii.util.logger.LoggingContext;
 import org.apache.http.annotation.ThreadSafe;
@@ -40,8 +34,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 @ThreadSafe
 public class RequestDispatcher {
-    private final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-
     private final LogManager logManager;
     private final ExecutorServiceRepository executorServiceRepository;
 
@@ -66,7 +58,6 @@ public class RequestDispatcher {
                 this.listeners.add(listener);
             }
         }
-        httpClientBuilder.disableContentCompression();
     }
 
     public <T> Set<Response<T>> execute(RequestFactory<T> requestFactory, boolean waitForAnswers) throws ServerException {
@@ -100,9 +91,8 @@ public class RequestDispatcher {
      * @throws ServerException
      */
     public <T> Response<T> executeAsync(AbortableRequest<T> request) throws ServerException {
-        AsyncFutureRequest asyncFutureRequest = new AsyncFutureRequest(request, this);
         try {
-            executorServiceRepository.getServiceMonitor(request).execute(asyncFutureRequest);
+            executorServiceRepository.getServiceMonitor(request).executeAsync(request, this);
         } catch (RejectedExecutionException e) {
             request.reject();
             request.finish();
@@ -119,40 +109,28 @@ public class RequestDispatcher {
      * @throws ServerException
      */
     public <T> Response<T> execute(AbortableRequest<T> request) throws ServerException {
-        if (request instanceof HttpCall) {
-            ((HttpCall) request).setHttpClientBuilder(httpClientBuilder);
-        }
-
         Response<T> response = request.getResponse();
-        RequestContext<T> requestContext = request.getContext();
 
         try {
             HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
 
-            QueueStatistic queueStatistics = executor.getQueueStatistic();
-            request.getStatistic().setQueueStatistic(queueStatistics);
-
             notifyListeners(request, executor);
 
-            FutureRequest<T> task = new FutureRequest<>(request, response);
 
-            /*
-             * TODO Move into requestLogger.
-             */
-            logScheduleStart(request, executor, queueStatistics);
-            executor.execute(task);
+            FutureTask<T> task = executor.execute(request, response);
 
             /*
              * Block until data is retrieved, but with a time out.
              */
-            task.get(requestContext.getTimeOut(), requestContext.getTimeOutUnit());
+            TimeOut timeOut = request.getTimeOut();
+            task.get(timeOut.getDuration(), timeOut.getUnit());
 
         } catch (RejectedExecutionException e) {
             request.reject();
         } catch (InterruptedException e) {
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
         } catch (ExecutionException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Execution exception", e);
         } catch (TimeoutException e) {
             request.abort();
         } finally {
@@ -162,21 +140,7 @@ public class RequestDispatcher {
         return response;
     }
 
-    private <T> void logScheduleStart(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor, QueueStatistic queueStatistics) {
-        try (LoggingContext.PopResource pushContext = logManager.pushContext()) {
-            logManager.putContext("queue.name", executor.getName());
 
-            logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
-            logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
-            logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
-            logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
-            logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
-            logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
-            logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
-
-            logManager.info(CoreLoggers.SERVER, "Scheduling request '" + request.getCallName() + "' with id '" + request.getId() + "'.");
-        }
-    }
 
     private <T> void notifyListeners(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor) {
         for (RequestDispatchedListener listener : listeners) {

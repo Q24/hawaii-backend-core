@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.log.CallLogger;
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
@@ -40,6 +41,13 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     private Response<T> response = null;
     private String id;
     private CountDownLatch latch;
+
+    public AbstractAbortableRequest(RequestPrototype<F, T>  prototype) {
+        this.requestDispatcher = prototype.getRequestDispatcher();
+        this.context = prototype.getContext();
+        this.responseHandler = prototype.getResponseHandler();
+        this.logger = prototype.getLogger();
+    }
 
     public AbstractAbortableRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, ResponseHandler<F, T> responseHandler, CallLogger<T> logger) {
         this.requestDispatcher = requestDispatcher;
@@ -146,6 +154,11 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
+    public void setQueueStatistic(QueueStatistic queueStatistic) {
+        getStatistic().setQueueStatistic(queueStatistic);
+    }
+
+    @Override
     public RequestStatistic getStatistic() {
         return statistic;
     }
@@ -186,13 +199,18 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         this.latch = latch;
     }
 
-    public void logResponse() {
-        logger.logResponse(response);
-    }
-
     @Override
     public boolean isAsync() {
         return isAsync;
+    }
+
+    @Override
+    public TimeOut getTimeOut() {
+        return getContext().getTimeOut();
+    }
+
+    private void logResponse() {
+        logger.logResponse(response);
     }
 
     /*

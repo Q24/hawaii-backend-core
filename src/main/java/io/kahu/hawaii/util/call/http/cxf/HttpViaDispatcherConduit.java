@@ -45,8 +45,11 @@ import org.apache.cxf.transport.AbstractConduit;
 import org.apache.cxf.transport.Conduit;
 import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit {
+    private static final HttpClientBuilder HTTP_CLIENT_BUILDER = HttpClientBuilder.create().disableContentCompression();
+
     private final EndpointInfo endpointInfo;
     private MessageObserver observer;
     private final RequestConfigurations requestConfigurations;
@@ -115,8 +118,10 @@ public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit
 
             HttpRequestContext<String> context = new HttpRequestContext<>(HttpMethod.POST, baseUrl, path, systemName, methodName, 20);
 
-            SoapRequest<String> soapRequest = new SoapRequest<String>(requestDispatcher, context, url, soapMessage, soapAction, new SoapResponseHandler(),
-                    new CallLoggerImpl<String>(logManager, new HttpRequestLogger(), new SoapResponseLogger()));
+            SoapRequest<String> soapRequest = new SoapRequest<>(requestDispatcher, context, url, soapMessage, soapAction, new SoapResponseHandler(),
+                    new CallLoggerImpl<>(logManager, new HttpRequestLogger(), new SoapResponseLogger()));
+
+            soapRequest.setHttpClientBuilder(HTTP_CLIENT_BUILDER);
 
             RequestConfiguration configuration = requestConfigurations.get(context.toString());
             context.setConfiguration(configuration);

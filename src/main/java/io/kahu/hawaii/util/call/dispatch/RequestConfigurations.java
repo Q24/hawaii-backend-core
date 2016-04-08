@@ -17,7 +17,9 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import io.kahu.hawaii.util.call.TimeOut;
 import org.jolokia.jmx.JsonMBean;
 
 @JsonMBean
@@ -34,7 +36,7 @@ public class RequestConfigurations {
     }
 
     public void setTimeOut(String key, int timeOut) {
-        get(key).setTimeOut(timeOut);
+        get(key).setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
     }
 
     public void setQueue(String key, String queue) {

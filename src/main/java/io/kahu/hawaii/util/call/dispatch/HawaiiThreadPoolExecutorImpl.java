@@ -15,9 +15,13 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.call.AbortableRequest;
+import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.QueueStatisticImpl;
+import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
+import io.kahu.hawaii.util.logger.LoggingContext;
 import org.apache.http.annotation.ThreadSafe;
 
 import java.util.concurrent.*;
@@ -27,12 +31,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements HawaiiThreadPoolExecutor {
     private final AtomicLong rejected = new AtomicLong(0L);
     private final String name;
+    private final LogManager logManager;
 
     public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
             BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
                 handler));
         this.name = name;
+        this.logManager = logManager;
     }
 
     public void execute(Runnable command) {
@@ -56,5 +62,43 @@ public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements 
     @Override
     public QueueStatistic getQueueStatistic() {
         return new QueueStatisticImpl(this);
+    }
+
+    public <T> FutureTask<T> execute(AbortableRequest<T> request, Response<T> response) {
+        logScheduleStart(request, getQueueStatistic());
+
+        return doExecute(new FutureRequest(request, response));
+    }
+
+
+    public <T> FutureTask<T> executeAsync(AbortableRequest<T> request, RequestDispatcher dispatcher) {
+        QueueStatistic queueStatistics = getQueueStatistic();
+        request.setQueueStatistic(queueStatistics);
+
+        logScheduleStart(request, queueStatistics);
+
+        return doExecute(new AsyncFutureRequest(request, dispatcher));
+    }
+
+
+    public <T> FutureTask<T> doExecute(FutureTask<T> task) {
+        super.execute(task);
+        return task;
+    }
+
+    private <T> void logScheduleStart(AbortableRequest<T> request, QueueStatistic queueStatistics) {
+        try (LoggingContext.PopResource pushContext = logManager.pushContext()) {
+            logManager.putContext("queue.name", getName());
+
+            logManager.putContext("pool.size.current", queueStatistics.getPoolSize());
+            logManager.putContext("pool.size.max", queueStatistics.getMaximumPoolSize());
+            logManager.putContext("pool.size.largest", queueStatistics.getLargestPoolSize());
+            logManager.putContext("pool.task.pending", queueStatistics.getQueueSize());
+            logManager.putContext("pool.task.active", queueStatistics.getActiveTaskCount());
+            logManager.putContext("pool.task.completed", queueStatistics.getCompletedTaskCount());
+            logManager.putContext("pool.task.rejected", queueStatistics.getRejectedTaskCount());
+
+            logManager.info(CoreLoggers.SERVER, "Scheduling " + (request.isAsync() ? "asynchronous " : "") + "request '" + request.getCallName() + "' with id '" + request.getId() + "'.");
+        }
     }
 }

@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.logger.CoreLoggers;
@@ -118,7 +119,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
                 }
 
                 if (timeOut > 0) {
-                    configuration.setTimeOut(timeOut);
+                    configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
                 }
             }
         }
@@ -143,7 +144,7 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
         return system + "." + method;
     }
 
-    public <T> ExecutorService getServiceMonitor(AbortableRequest<T> request) {
+    public <T> HawaiiThreadPoolExecutor getServiceMonitor(AbortableRequest<T> request) {
         return executors.get(GUARD_POOL_NAME);
     }
 

@@ -33,60 +33,46 @@ activate Request #ddd
 
     Request -> RequestDispatcher : execute( this )
     activate RequestDispatcher #ddd
-        RequestDispatcher -> Request : getContext()
-        activate Request #fc9
-            Request -> RequestDispatcher : context
-        deactivate Request
-        |||
-
         RequestDispatcher -> Request : getResponse()
         activate Request #fc9
             Request -> RequestDispatcher : response
         deactivate Request
 
         |||
+        RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
+        activate RequestDispatcher #ffc
+        deactivate RequestDispatcher
 
         RequestDispatcher -> ExecutorServiceRepository : getService( request )
         activate ExecutorServiceRepository #ddd
-
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository
 
-        RequestDispatcher -> HawaiiThreadPoolExecutor : getQueueStatistics
-        activate HawaiiThreadPoolExecutor #ddd
-            HawaiiThreadPoolExecutor -> RequestDispatcher : queueStatistics
-        deactivate HawaiiThreadPoolExecutor
-
-        RequestDispatcher -> Request : getRequestStatistics
-        activate Request #fc9
-            Request -> RequestDispatcher : statistics
-        deactivate Request
-        RequestDispatcher -> RequestStatistic : setQueueStatistics( queueStatistics )
-
-        |||
-        RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
-        activate RequestDispatcher #ffc
-        |||
-        deactivate RequestDispatcher
-
-        |||
-
-        create FutureRequest
-        RequestDispatcher -> FutureRequest : <b>new( request, response )</b>
-        activate FutureRequest #ddd
-            create CallableRequest
-            FutureRequest -> CallableRequest : <b>new( request, response )</b>
-            FutureRequest -[#grey]-> RequestDispatcher : task
-        deactivate FutureRequest
-
-
-        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( task )
+        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( request, response )
 
         activate HawaiiThreadPoolExecutor #ddd
+
+            HawaiiThreadPoolExecutor -> Request : setQueueStatistics( queueStatistics )
+            activate Request #fc9
+                Request -> RequestStatistic : setQueueStatistics( queueStatistics )
+            deactivate Request
+
+            HawaiiThreadPoolExecutor -> HawaiiThreadPoolExecutor : logScheduleTask( task, queueStatistics )
+            activate HawaiiThreadPoolExecutor #fc9
+            deactivate HawaiiThreadPoolExecutor
+
+            create FutureRequest
+            HawaiiThreadPoolExecutor -> FutureRequest : <b>new( request, response )</b>
+            activate FutureRequest #ddd
+                create CallableRequest
+                FutureRequest -> CallableRequest : <b>new( request, response )</b>
+                FutureRequest -[#grey]-> HawaiiThreadPoolExecutor : task
+            deactivate FutureRequest
+
             create Thread_1
             HawaiiThreadPoolExecutor -> Thread_1 : run( task )
             activate Thread_1 #ddd
-            HawaiiThreadPoolExecutor -> RequestDispatcher
+            HawaiiThreadPoolExecutor -> RequestDispatcher : task
         deactivate HawaiiThreadPoolExecutor
 
         Thread_1 -> FutureRequest : run( )

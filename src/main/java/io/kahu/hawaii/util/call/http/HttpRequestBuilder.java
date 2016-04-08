@@ -15,10 +15,7 @@
  */
 package io.kahu.hawaii.util.call.http;
 
-import io.kahu.hawaii.util.call.Request;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.ResponseCallback;
-import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.call.*;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.util.UriBuilder;
 import io.kahu.hawaii.util.call.log.CallLogger;
@@ -51,13 +48,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.plexus.util.StringUtils;
 
 @NotThreadSafe
-public class HttpRequestBuilder<T> {
+public class HttpRequestBuilder<T> implements RequestBuilder<T> {
+    private static final HttpClientBuilder HTTP_CLIENT_BUILDER = HttpClientBuilder.create().disableContentCompression();
+
     private static final String JSON = "application/json";
     private static final String TEXT = "text/plain";
     private static final String UTF_8 = "UTF-8";
@@ -67,12 +67,7 @@ public class HttpRequestBuilder<T> {
 
     private boolean active = false;
 
-    private final RequestDispatcher requestDispatcher;
-    private final HttpRequestContext<T> requestContext;
-    private ResponseHandler<HttpResponse, T> responseHandler;
-    private final CallLogger<T> logger;
-
-    private final Map<String, String> headers = new HashMap<String, String>();
+    private final Map<String, String> headers = new HashMap<>();
     private String mimeType = TEXT;
     private String characterEncoding = UTF_8;
 
@@ -90,31 +85,48 @@ public class HttpRequestBuilder<T> {
     private String payload;
     private Map<String, Object> payloads;
 
+    @Deprecated
     public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
             CallLogger<T> logger, HttpHeaderProvider httpHeaderProvider, HttpRequestCredentials credentials) throws ServerException {
         this(requestDispatcher, requestContext, responseHandler, logger, httpHeaderProvider);
         this.credentials = credentials;
     }
 
+    @Deprecated
     public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
             CallLogger<T> logger, HttpHeaderProvider httpHeaderProvider) throws ServerException {
         this(requestDispatcher, requestContext, responseHandler, logger);
         this.httpHeaderProvider = httpHeaderProvider;
     }
 
+    @Deprecated
     public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
             CallLogger<T> logger) throws ServerException {
-        this.requestDispatcher = requestDispatcher;
-        this.requestContext = requestContext;
-        this.responseHandler = responseHandler;
-        this.logger = logger;
+        this(new RequestPrototype<>(requestDispatcher, requestContext, responseHandler, logger));
+    }
+
+    public HttpRequestBuilder(RequestPrototype<HttpResponse, T> prototype, HttpHeaderProvider httpHeaderProvider, HttpRequestCredentials credentials) throws ServerException {
+        this(prototype, httpHeaderProvider);
+        this.credentials = credentials;
+
+    }
+
+    public HttpRequestBuilder(RequestPrototype<HttpResponse, T> prototype, HttpHeaderProvider httpHeaderProvider) throws ServerException {
+        this(prototype);
+        this.httpHeaderProvider = httpHeaderProvider;
+    }
+
+    public HttpRequestBuilder(RequestPrototype<HttpResponse, T> prototype) throws ServerException {
+        this.prototype = new RequestPrototype(prototype);
         setConstructor();
     }
 
+    private RequestPrototype<HttpResponse, T>  prototype;
+
+
     private void setConstructor() throws ServerException {
         try {
-            constructor = HttpRequestBuilder.class.getConstructor(RequestDispatcher.class, HttpRequestContext.class, ResponseHandler.class, CallLogger.class,
-                    HttpHeaderProvider.class, HttpRequestCredentials.class);
+            constructor = HttpRequestBuilder.class.getConstructor(RequestPrototype.class, HttpHeaderProvider.class, HttpRequestCredentials.class);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }
@@ -123,7 +135,7 @@ public class HttpRequestBuilder<T> {
     @SuppressWarnings("unchecked")
     public HttpRequestBuilder<T> newInstance() throws ServerException {
         try {
-            return constructor.newInstance(requestDispatcher, requestContext, responseHandler, logger, httpHeaderProvider, credentials).activate();
+            return constructor.newInstance(prototype, httpHeaderProvider, credentials).activate();
         } catch (Exception e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }
@@ -203,7 +215,7 @@ public class HttpRequestBuilder<T> {
     }
 
     public HttpRequestBuilder<T> withResponseHandler(ResponseHandler<HttpResponse, T> responseHandler) {
-        this.responseHandler = responseHandler;
+        prototype.setResponseHandler(responseHandler);
         return this;
     }
 
@@ -217,21 +229,21 @@ public class HttpRequestBuilder<T> {
         AbortableHttpRequest<T> request = null;
         URI uri = getUri();
 
-        HttpMethod method = requestContext.getMethod();
+        HttpMethod method = getRequestContext().getMethod();
         switch (method) {
         case GET:
             // if payload != null throw exception?
-            request = new GetRequest<T>(requestDispatcher, requestContext, uri, responseHandler, logger);
+            request = new GetRequest<>(prototype, uri);
             break;
         case POST:
-            request = new PostRequest<T>(requestDispatcher, requestContext, uri, payload, responseHandler, logger);
+            request = new PostRequest<>(prototype, uri);
 
             HttpEntity httpEntity = null;
             if (payload != null) {
                 httpEntity = new StringEntity(payload, ContentType.create(mimeType, characterEncoding));
             }
             if (payloads != null) {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                List<NameValuePair> params = new ArrayList<>();
                 for (Entry<String, Object> entry : payloads.entrySet()) {
                     entry.getValue();
                     String stringValue = StringUtils.defaultString(entry.getValue());
@@ -262,6 +274,8 @@ public class HttpRequestBuilder<T> {
         addAuthentication(request, uri);
 
         request.setCallback(callback);
+
+        request.setHttpClientBuilder(HTTP_CLIENT_BUILDER);
         return request;
     }
 
@@ -276,7 +290,7 @@ public class HttpRequestBuilder<T> {
                 BasicScheme authenticationScheme = new BasicScheme();
 
                 credentialsProvider = new BasicCredentialsProvider();
-                // Explicitly set the AuthScope to ANY_REAL in order to get
+                // Explicitly set the AuthScope to ANY_REALM in order to get
                 // 'preemptive authentication' to work
                 credentialsProvider.setCredentials(new AuthScope(uri.getHost(), uri.getPort(), AuthScope.ANY_REALM, authenticationScheme.getSchemeName()),
                         new UsernamePasswordCredentials(credentials.getUsername(), credentials.getPassword()));
@@ -294,20 +308,12 @@ public class HttpRequestBuilder<T> {
     }
 
     private URI getUri() throws ServerException {
-        return new UriBuilder().withBaseUrl(requestContext.getBaseUrl()).withPath(requestContext.getPath()).withPathVariables(pathVariables)
+        return new UriBuilder().withBaseUrl(getRequestContext().getBaseUrl()).withPath(getRequestContext().getPath()).withPathVariables(pathVariables)
                 .withQueryParameters(queryParameters).build();
     }
 
-    public boolean is(String system, String method) {
-        return requestContext.is(system, method);
-    }
-
-    public void setBaseUrl(String url) {
-        requestContext.setBaseUrl(url);
-    }
-
-    public RequestContext<T> getRequestContext() {
-        return requestContext;
+    public HttpRequestContext<T> getRequestContext() {
+        return (HttpRequestContext<T>) prototype.getContext();
     }
 
     @Override

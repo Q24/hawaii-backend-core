@@ -15,18 +15,22 @@
  */
 package io.kahu.hawaii.util.call;
 
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
 public interface AbortableRequest<T> extends Request<T> {
+    TimeOut getTimeOut();
+
     RequestContext<T> getContext();
+
+    void setQueueStatistic(QueueStatistic queueStatistic);
 
     RequestStatistic getStatistic();
 
     void setCallback(ResponseCallback<T> callback);
-
 
     Response<T> doExecute() throws Throwable;
 

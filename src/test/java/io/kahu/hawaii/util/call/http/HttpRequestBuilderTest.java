@@ -16,6 +16,7 @@
 package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.Request;
+import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.response.StringResponseHandler;
@@ -46,10 +47,12 @@ public class HttpRequestBuilderTest {
     public void setUp() throws ServerException {
         requestDispatcher = mock(RequestDispatcher.class);
         responseHandler = mock(StringResponseHandler.class);
-        requestContext = new HttpRequestContext<String>(HttpMethod.GET, "http://test.com", "/testUrl", "dynalean", "get_shop_locations", 1);
+        requestContext = new HttpRequestContext<>(HttpMethod.GET, "http://test.com", "/testUrl", "dynalean", "get_shop_locations", 1);
         logger = mock(CallLogger.class);
-        builderWithoutHeaderProvider = new HttpRequestBuilder<String>(requestDispatcher, requestContext, responseHandler, logger);
-        builderWithHeaderProvider = new HttpRequestBuilder<String>(requestDispatcher, requestContext, responseHandler, logger, new TestHttpHeaderProvider());
+
+        RequestPrototype<HttpResponse, String> prototype = new RequestPrototype<>(requestDispatcher, requestContext, responseHandler, logger);
+        builderWithoutHeaderProvider = new HttpRequestBuilder<>(prototype);
+        builderWithHeaderProvider = new HttpRequestBuilder<>(prototype, new TestHttpHeaderProvider());
     }
 
     @Test

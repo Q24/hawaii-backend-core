@@ -16,6 +16,7 @@
 package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.log.CallLogger;
@@ -32,4 +33,7 @@ public class GetRequest<T> extends AbortableHttpRequest<T> {
         super(requestDispatcher, context, responseHandler, new HttpGet(uri), logger);
     }
 
+    public GetRequest(RequestPrototype prototype, URI uri) {
+        super(prototype, new HttpGet(uri));
+    }
 }

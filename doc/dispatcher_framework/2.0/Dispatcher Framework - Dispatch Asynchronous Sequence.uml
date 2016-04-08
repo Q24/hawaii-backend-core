@@ -38,25 +38,29 @@ activate Request #ddd
 
     Request -> RequestDispatcher : executeAsync( this )
     activate RequestDispatcher #ddd
-        create AsyncFutureRequest
-        RequestDispatcher -> AsyncFutureRequest : <b>new( request, this )</b>
-        activate AsyncFutureRequest #ddd
-            create AsyncCallableRequest
-            AsyncFutureRequest -> AsyncCallableRequest : <b>new( request, dispatcher )</b>
-            AsyncFutureRequest -[#grey]-> RequestDispatcher : asyncTask
-        deactivate AsyncFutureRequest
-
         RequestDispatcher -> ExecutorServiceRepository : getServiceMonitor( request )
         activate ExecutorServiceRepository #ddd
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository
 
-        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( asyncTask )
+        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( request, dispatcher )
         activate HawaiiThreadPoolExecutor #ddd
-         create Thread_2
-         HawaiiThreadPoolExecutor -> Thread_2 : run( asyncTask )
-         activate Thread_2 #eee
-         HawaiiThreadPoolExecutor -> RequestDispatcher
+            HawaiiThreadPoolExecutor -> HawaiiThreadPoolExecutor : logScheduleTask( task, queueStatistics )
+            activate HawaiiThreadPoolExecutor #fc9
+            deactivate HawaiiThreadPoolExecutor
+
+            create AsyncFutureRequest
+            HawaiiThreadPoolExecutor -> AsyncFutureRequest : <b>new( request, this )</b>
+            activate AsyncFutureRequest #ddd
+                create AsyncCallableRequest
+                AsyncFutureRequest -> AsyncCallableRequest : <b>new( request, dispatcher )</b>
+                AsyncFutureRequest -[#grey]-> HawaiiThreadPoolExecutor : asyncTask
+            deactivate AsyncFutureRequest
+
+            create Thread_2
+            HawaiiThreadPoolExecutor -> Thread_2 : run( asyncTask )
+            activate Thread_2 #eee
+            HawaiiThreadPoolExecutor -> RequestDispatcher
         deactivate HawaiiThreadPoolExecutor
 
         RequestDispatcher -> Request : getResponse( )
@@ -82,60 +86,44 @@ deactivate AsyncFutureRequest
 activate AsyncCallableRequest #ddd
 AsyncCallableRequest -> RequestDispatcher : execute( request )
     activate RequestDispatcher #ddd
-        RequestDispatcher -> Request : getContext()
-        activate Request #fc9
-            Request -> RequestDispatcher : context
-        deactivate Request
-        |||
-
         RequestDispatcher -> Request : getResponse()
         activate Request #fc9
             Request -> RequestDispatcher : response
         deactivate Request
 
         |||
+        RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
+        activate RequestDispatcher #ffc
+        deactivate RequestDispatcher
 
         RequestDispatcher -> ExecutorServiceRepository : getService( request )
         activate ExecutorServiceRepository #ddd
-
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository
 
-        RequestDispatcher -> HawaiiThreadPoolExecutor : getQueueStatistics
+        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( request, response )
         activate HawaiiThreadPoolExecutor #ddd
-            HawaiiThreadPoolExecutor -> RequestDispatcher : queueStatistics
-        deactivate HawaiiThreadPoolExecutor
+            HawaiiThreadPoolExecutor -> Request : setQueueStatistics( queueStatistics )
+            activate Request #fc9
+                Request -> RequestStatistic : setQueueStatistics( queueStatistics )
+            deactivate Request
 
-        RequestDispatcher -> Request : getRequestStatistics
-        activate Request #fc9
-            Request -> RequestDispatcher : statistics
-        deactivate Request
-        RequestDispatcher -> RequestStatistic : setQueueStatistics( queueStatistics )
+            HawaiiThreadPoolExecutor -> HawaiiThreadPoolExecutor : logScheduleTask( request, queueStatistics )
+                activate HawaiiThreadPoolExecutor #fc9
+            deactivate HawaiiThreadPoolExecutor
 
-        |||
-        RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
-        activate RequestDispatcher #ffc
-        |||
-        deactivate RequestDispatcher
+            create FutureRequest
+            HawaiiThreadPoolExecutor -> FutureRequest : <b>new( request, response )</b>
+            activate FutureRequest #ddd
+                create CallableRequest
+                FutureRequest -> CallableRequest : <b>new( request, response )</b>
+                FutureRequest -[#grey]-> HawaiiThreadPoolExecutor : task
+            deactivate FutureRequest
 
-        |||
-
-        create FutureRequest
-        RequestDispatcher -> FutureRequest : <b>new( request, response )</b>
-        activate FutureRequest #ddd
-            create CallableRequest
-            FutureRequest -> CallableRequest : <b>new( request, response )</b>
-            FutureRequest -[#grey]-> RequestDispatcher : task
-        deactivate FutureRequest
-
-
-        RequestDispatcher -> HawaiiThreadPoolExecutor : execute( task )
-
-        activate HawaiiThreadPoolExecutor #ddd
             create Thread_1
             HawaiiThreadPoolExecutor -> Thread_1 : run( task )
             activate Thread_1 #eee
-            HawaiiThreadPoolExecutor -> RequestDispatcher
+            HawaiiThreadPoolExecutor -> RequestDispatcher : task
         deactivate HawaiiThreadPoolExecutor
 
         Thread_1 -> FutureRequest : run( )

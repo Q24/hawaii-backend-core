@@ -35,11 +35,17 @@ public class RequestContext<T> {
     private T rejected;
     private T aborted;
 
+    public RequestContext(String backendSystem, String methodName) {
+        this.backendSystem = backendSystem;
+        this.methodName = methodName;
+        configuration = new RequestConfiguration();
+    }
+
     public RequestContext(String backendSystem, String methodName, int timeOut) {
         this.backendSystem = backendSystem;
         this.methodName = methodName;
         configuration = new RequestConfiguration();
-        configuration.setTimeOut(timeOut);
+        configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
     }
 
     public String getBackendSystem() {
@@ -92,12 +98,8 @@ public class RequestContext<T> {
         }
     }
 
-    public int getTimeOut() {
+    public TimeOut getTimeOut() {
         return configuration.getTimeOutOrDefaultIfUnset();
-    }
-
-    public TimeUnit getTimeOutUnit() {
-        return configuration.getTimeOutUnit();
     }
 
     public String getQueue() {

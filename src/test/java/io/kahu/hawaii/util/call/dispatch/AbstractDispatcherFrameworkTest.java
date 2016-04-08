@@ -68,7 +68,7 @@ public class AbstractDispatcherFrameworkTest {
     }
 
     protected TestRequest exec(TestRequest request) {
-        getExecutor().execute(new FutureRequest(request, request.getResponse()));
+        getExecutor().execute(request, request.getResponse());
         return request;
     }
 
