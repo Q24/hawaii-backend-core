@@ -66,8 +66,6 @@
 [ ] Create HTTP Response to extend Response
 	! Different branch / pull request
 
-[ ] Create HTTP RequestContext to contain base url
-
 === New ===
 [ ] SQL
 [ ] Builders
