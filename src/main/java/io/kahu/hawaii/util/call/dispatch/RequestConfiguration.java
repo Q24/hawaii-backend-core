@@ -15,8 +15,11 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import org.apache.http.annotation.NotThreadSafe;
+
 import java.util.concurrent.TimeUnit;
 
+@NotThreadSafe
 public class RequestConfiguration {
     private String queue = ExecutorServiceRepository.DEFAULT_POOL_NAME;
     private final Integer defaultTimeOut = 10;

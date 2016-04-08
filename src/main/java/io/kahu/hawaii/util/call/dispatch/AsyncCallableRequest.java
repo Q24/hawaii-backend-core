@@ -18,9 +18,11 @@ package io.kahu.hawaii.util.call.dispatch;
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.logger.LoggingContext;
+import org.apache.http.annotation.NotThreadSafe;
 
 import java.util.concurrent.Callable;
 
+@NotThreadSafe
 public class AsyncCallableRequest<T> implements Callable<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
     private final RequestDispatcher requestDispatcher;

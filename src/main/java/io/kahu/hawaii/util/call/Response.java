@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.http.Header;
+import org.apache.http.annotation.NotThreadSafe;
 
+@NotThreadSafe
 public class Response<T> {
     private final Request<T> request;
     private final RequestStatistic statistic;

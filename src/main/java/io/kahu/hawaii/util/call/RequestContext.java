@@ -20,7 +20,9 @@ import io.kahu.hawaii.util.call.dispatch.RequestConfiguration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class RequestContext<T> {
     private final String backendSystem;
     private final String methodName;

@@ -17,7 +17,9 @@ package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
+import org.apache.http.annotation.NotThreadSafe;
 
+@NotThreadSafe
 public class TimingResponseHandler<F, T> implements ResponseHandler<F, T> {
     private final ResponseHandler<F, T> delegate;
     private final RequestStatistic statistic;

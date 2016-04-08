@@ -22,7 +22,7 @@ import org.jolokia.jmx.JsonMBean;
 
 @JsonMBean
 public class RequestConfigurations {
-    private final Map<String, RequestConfiguration> configurations = new HashMap<String, RequestConfiguration>();
+    private final Map<String, RequestConfiguration> configurations = new HashMap<>();
 
     public RequestConfiguration get(String key) {
         RequestConfiguration configuration = configurations.get(key);

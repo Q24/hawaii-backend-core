@@ -16,7 +16,9 @@
 package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.exception.ServerException;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class PassthroughResponseHandler<T> implements ResponseHandler<T, T>{
     @Override
     public void addToResponse(T payload, Response<T> response) throws ServerException {

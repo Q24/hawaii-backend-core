@@ -21,7 +21,9 @@ import io.kahu.hawaii.util.call.log.request.RequestLogger;
 import io.kahu.hawaii.util.call.log.response.ResponseLogger;
 import io.kahu.hawaii.util.logger.LogManager;
 import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class CallLoggerImpl<T> implements CallLogger<T> {
     protected LogManager logManager;
     protected RequestLogger requestLogger;

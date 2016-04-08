@@ -17,7 +17,9 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.logger.LoggingContext;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class LogCallIdListener implements RequestDispatchedListener {
 
     @Override

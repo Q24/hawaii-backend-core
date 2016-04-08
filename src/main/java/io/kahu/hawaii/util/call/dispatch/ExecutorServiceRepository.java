@@ -38,12 +38,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.annotation.ThreadSafe;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+@ThreadSafe
 public class ExecutorServiceRepository implements ApplicationListener<ContextRefreshedEvent> {
     private final RequestConfigurations requestConfigurations;
     private final Map<String, String> defaultExecutors = new HashMap<>();

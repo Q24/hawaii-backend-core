@@ -16,7 +16,9 @@
 package io.kahu.hawaii.util.call.statistics;
 
 import io.kahu.hawaii.util.call.ResponseStatus;
+import org.apache.http.annotation.NotThreadSafe;
 
+@NotThreadSafe
 public class RequestStatistic {
     private long startNano;
     private long startCallNano;

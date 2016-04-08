@@ -17,11 +17,13 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
+import org.apache.http.annotation.ThreadSafe;
 
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
+@ThreadSafe
 public class HawaiiRejectedExecutionHandler implements RejectedExecutionHandler {
     private final LogManager logManager;
     private final RejectedExecutionHandler delegate;

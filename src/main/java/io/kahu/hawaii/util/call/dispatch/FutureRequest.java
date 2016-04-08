@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
+import org.apache.http.annotation.NotThreadSafe;
 
 import java.util.concurrent.FutureTask;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.FutureTask;
  * It creates a {@link CallableRequest} that does the actual work.
  * @param <T>
  */
+@NotThreadSafe
 public class FutureRequest<T> extends FutureTask<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
 

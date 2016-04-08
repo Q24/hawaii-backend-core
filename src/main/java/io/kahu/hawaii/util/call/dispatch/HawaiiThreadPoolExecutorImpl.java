@@ -18,10 +18,12 @@ package io.kahu.hawaii.util.call.dispatch;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.QueueStatisticImpl;
 import io.kahu.hawaii.util.logger.LogManager;
+import org.apache.http.annotation.ThreadSafe;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+@ThreadSafe
 public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements HawaiiThreadPoolExecutor {
     private final AtomicLong rejected = new AtomicLong(0L);
     private final String name;
