@@ -48,12 +48,16 @@ public class AbstractDispatcherFrameworkTest {
         }
     }
 
-    protected HawaiiThreadPoolExecutor getExecutor() {
+    protected HawaiiThreadPoolExecutorImpl getExecutor() {
         return executor;
     }
 
     protected LogManager getLogManager() {
         return logManager;
+    }
+
+    protected CallLogger<String> getCallLogger() {
+        return callLogger;
     }
 
     protected TestRequest createRequest() {
@@ -63,7 +67,7 @@ public class AbstractDispatcherFrameworkTest {
     protected TestRequest createRequest(int timeOut) {
         RequestContext<String> context = new RequestContext<>("test", "method", timeOut);
 
-        TestRequest request = new TestRequest(null, context, new PassthroughResponseHandler<>(), callLogger);
+        TestRequest request = new TestRequest(null, context, new PassthroughResponseHandler<>(), getCallLogger());
         return request;
     }
 

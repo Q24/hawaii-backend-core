@@ -69,6 +69,6 @@
 === New ===
 [ ] SQL
 [ ] Builders
-    [X] Prototype in builders
-    [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
+    [ ] Prototype in builders
+    [ ] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
     [ ] Create SQL Builder

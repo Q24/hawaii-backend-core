@@ -15,14 +15,18 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
-import io.kahu.hawaii.util.call.Response;
+import io.kahu.hawaii.util.call.*;
+import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
+import org.apache.cxf.endpoint.Server;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.IllegalFormatException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -142,7 +146,112 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
         assertThat(request.isRejected(), is(true));
     }
 
-    private Response<String> dispatch(final RequestDispatcher dispatcher, final TestRequest request) {
+
+    @Test
+    public void testExceptionOnExecuteIsRethrownByGet() throws ServerException {
+        setUp(1);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        IllegalArgumentException illegalArgument = new IllegalArgumentException("Bla bla");
+        ServerException serverException = new ServerException(ServerError.BACKEND_CONNECTION_ERROR, "foo", illegalArgument);
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), serverException);
+
+        Response<String> response = dispatch(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("foo");
+        thrown.expectCause(is(illegalArgument));
+        response.get();
+    }
+
+    @Test
+    public void testRunTimeExceptionOnExecuteIsRethrownAsServerExceptionByGet() throws ServerException {
+        setUp(1);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        RuntimeException cause = new IllegalArgumentException("foo");
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), cause);
+
+        Response<String> response = dispatch(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("Execution exception");
+        thrown.expectCause(is(cause));
+        response.get();
+    }
+
+    @Test
+    public void testErrorOnExecuteIsRethrownAsServerExceptionByGet() throws ServerException {
+        setUp(1);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        Error error = new Error("foo");
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), error);
+
+        Response<String> response = dispatch(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("UNEXPECTED_EXCEPTION");
+        thrown.expectCause(is(error));
+        response.get();
+    }
+
+    @Test
+    public void testAsyncExceptionOnExecuteIsRethrownByGet() throws ServerException {
+        setUp(2);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        IllegalArgumentException cause = new IllegalArgumentException("foo");
+        ServerException serverException = new ServerException(ServerError.BACKEND_CONNECTION_ERROR, "foo", cause);
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), serverException);
+
+        Response<String> response = dispatchAsync(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("foo");
+        thrown.expectCause(is(cause));
+        response.get();
+    }
+
+    @Test
+    public void testasyncRunTimeExceptionOnExecuteIsRethrownAsServerExceptionByGet() throws ServerException {
+        setUp(2);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        RuntimeException cause = new IllegalArgumentException("foo");
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), cause);
+
+        Response<String> response = dispatchAsync(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("Execution exception");
+        thrown.expectCause(is(cause));
+        response.get();
+    }
+
+    @Test
+    public void testAsyncErrorOnExecuteIsRethrownAsServerExceptionByGet() throws ServerException {
+        setUp(2);
+
+        RequestContext<String> context = new RequestContext<>("test", "method", 1);
+
+        Error error = new Error("foo");
+        ExecptionInExecuteInternallyRequest request = new ExecptionInExecuteInternallyRequest(context, new PassthroughResponseHandler<>(), getCallLogger(), error);
+
+        Response<String> response = dispatchAsync(requestDispatcher, request);
+
+        thrown.expect(ServerException.class);
+        thrown.expectMessage("UNEXPECTED_EXCEPTION");
+        thrown.expectCause(is(error));
+        response.get();
+    }
+    
+    private Response<String> dispatch(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -160,7 +269,9 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
         return request.getResponse();
     }
 
-    private Response<String> dispatchAsync(final RequestDispatcher dispatcher, final TestRequest request) {
+    private Response<String> dispatchAsync(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
+        assert getExecutor().getMaximumPoolSize() > 1 : "For async calls pool size > 1 required!";
+
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -177,5 +288,6 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
 
         return request.getResponse();
     }
+
 
 }

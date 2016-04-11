@@ -17,6 +17,8 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.LoggingContext;
 
 import java.util.concurrent.Callable;
@@ -38,8 +40,10 @@ public class CallableRequest<T> implements Callable<Response<T>> {
             abortableRequest.doCallback();
 
             return response;
+        } catch (Exception e) {
+            throw e;
         } catch (Throwable t) {
-            throw new Exception(t);
+            throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, t);
         } finally {
             LoggingContext.remove();
         }

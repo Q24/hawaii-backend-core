@@ -130,7 +130,7 @@ public class RequestDispatcher {
         } catch (InterruptedException e) {
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
         } catch (ExecutionException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Execution exception", e);
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Execution exception", e.getCause());
         } catch (TimeoutException e) {
             request.abort();
         } finally {

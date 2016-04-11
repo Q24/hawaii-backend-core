@@ -86,3 +86,7 @@ is that we wrap the blocking queue given to the executor, for each task that is 
 queue is full, this forces the executor to start a new thread. If no new thread can be started the task is delegated
 to the rejection handler. Our implementation of the rejection handler is that it adds the task to the queue. If this add
 fails, the task is rejected. Otherwise one of the threads of the executor will pick it up and execute it.
+
+==
+Example
+
