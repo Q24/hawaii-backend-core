@@ -48,6 +48,13 @@ public class RequestContext<T> {
         configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
     }
 
+    public RequestContext(String backendSystem, String methodName, TimeOut timeOut) {
+        this.backendSystem = backendSystem;
+        this.methodName = methodName;
+        configuration = new RequestConfiguration();
+        configuration.setTimeOut(timeOut);
+    }
+
     public String getBackendSystem() {
         return backendSystem;
     }
