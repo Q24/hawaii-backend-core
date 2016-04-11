@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call.sql.response;
 
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 import org.apache.http.annotation.ThreadSafe;
 import org.springframework.jdbc.core.RowMapper;
@@ -49,8 +50,7 @@ public class SetResponseHandler<R extends ResultSet, T> implements ResponseHandl
             }
             response.set(set);
         } catch (SQLException e) {
-            // TODO
-            e.printStackTrace();
+            throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }
     }
 }

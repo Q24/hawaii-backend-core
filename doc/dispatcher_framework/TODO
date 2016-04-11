@@ -17,6 +17,8 @@
 
 [ ] ? Change configuration of requests (RequestConfiguration / Context / Constructor)
 
+
+
 === Bug ===
 
 === Todo ===
@@ -48,9 +50,13 @@
 [X] Move logging of schedule of request to ThreadPoolExecutor.
 [X] Introduce "TimeOut" with Unit and Size
 
+[ ] ! Make sure call returns an answer (i.e. response status is set)
+
 [ ] ! TEST
 
 [ ] Examples
+
+[ ] ? ResponseHandler .... it MUST set a response, or throw an exception.
 
 [ ] Document minimal configuration
     ! Pool names
@@ -67,8 +73,11 @@
 	! Different branch / pull request
 
 === New ===
-[ ] SQL
-[ ] Builders
-    [ ] Prototype in builders
-    [ ] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
-    [ ] Create SQL Builder
+[X] SQL
+    ! See ContactDbRepository#getContactById() for implementation
+
+[X] Builders
+    [X] Prototype in builders
+    [ ] Use real call as prototype
+    [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
+    [X] Create SQL Builder

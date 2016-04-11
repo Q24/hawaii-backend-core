@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 @NotThreadSafe
-public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> implements AbortableRequest<T> {
+public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> implements AbortableRequest<T>, DbCall {
 
     /*
      * Ensure that if the database returns a result set the timer is stopped.
@@ -133,4 +133,13 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
         return pscf.newPreparedStatementCreator(params);
     }
 
+    @Override
+    public String getSql() {
+        return sql;
+    }
+
+    @Override
+    public Map<String, ?> getParameters() {
+        return params;
+    }
 }
