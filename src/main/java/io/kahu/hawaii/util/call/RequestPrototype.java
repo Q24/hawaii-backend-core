@@ -20,14 +20,14 @@ import io.kahu.hawaii.util.call.log.CallLogger;
 
 public class RequestPrototype<F, T>  {
     private final RequestDispatcher requestDispatcher;
-    private ResponseHandler<F, T> responseHandler;
     private final RequestContext<T> context;
+    private ResponseHandler<F, T> responseHandler;
     private final CallLogger<T> logger;
 
     public RequestPrototype(RequestDispatcher requestDispatcher, RequestContext<T> context, ResponseHandler<F, T> responseHandler, CallLogger<T> logger) {
         this.requestDispatcher = requestDispatcher;
-        this.responseHandler = responseHandler;
         this.context = context;
+        this.responseHandler = responseHandler;
         this.logger = logger;
     }
 
