@@ -57,6 +57,7 @@
 [ ] Document minimal configuration
     ! Pool names
     ! ...
+    
 
 === Todo (incompatible with 1.0) ====
 [ ] executorServiceRepository should have an 'async pool'
