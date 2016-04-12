@@ -1,14 +1,10 @@
 == Call Dispatch Framework ==
 
 === Investigate ===
-[ ] ? Use "call prototype" in "call builders"
-[ ] ? Introduce "CallBuilder" interface
 [ ] ? Cleanup {tx, call} ids?
 [ ] ? Usage of Response.setMessage / getMessage
-[ ] ? What happens in case of exception in CallableRequest?
-    Is rethrown in ExecutionException, caught in RequestDispatcher
-[ ] ? Investigate timeout on "Response#get()". (Do not confuse this with releasing of resources by aborting a request, with (possibly) the same time out.)
-	? Why, what is the usage of this?
+[X] What happens in case of exception in CallableRequest?
+    - It is rethrown in ExecutionException, caught in RequestDispatcher
 [ ] Split Request into internal interface and external interface?
 [ ] ? Remove response from exec and execAsync?
     ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
@@ -52,9 +48,11 @@
 
 [ ] Examples
 
-[ ] Document minimal configuration
+[X] Document minimal configuration
     ! Pool names
     ! ...
+
+[X] Rename HawaiiThreadPoolExecutor into RequestExecutor. (Same for ..Impl.)
 
 === Todo (incompatible with 1.0) ====
 [ ] executorServiceRepository should have an 'async pool'
@@ -68,7 +66,7 @@
 
 === New ===
 [ ] SQL
-[ ] Builders
-    [ ] Prototype in builders
-    [ ] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
+[X] Builders
+    [X] Prototype in builders
+    [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
     [ ] Create SQL Builder

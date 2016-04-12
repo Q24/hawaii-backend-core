@@ -18,15 +18,12 @@ package io.kahu.hawaii.util.call.dispatch;
 import io.kahu.hawaii.util.call.*;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
-import org.apache.cxf.endpoint.Server;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.IllegalFormatException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -40,7 +37,7 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private ExecutorServiceRepository executorRepository;
+    private ExecutorRepository executorRepository;
 
     private RequestDispatcher requestDispatcher;
 
@@ -51,8 +48,8 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
 
     private void setUp(int maxSize) {
         createExecutor(1, maxSize, 1);
-        when(executorRepository.getService(anyObject())).thenReturn(getExecutor());
-        when(executorRepository.getServiceMonitor(anyObject())).thenReturn(getExecutor());
+        when(executorRepository.getExecutor(anyObject())).thenReturn(getExecutor());
+        when(executorRepository.getAsyncExecutor(anyObject())).thenReturn(getExecutor());
 
         requestDispatcher = new RequestDispatcher(executorRepository, getLogManager());
     }

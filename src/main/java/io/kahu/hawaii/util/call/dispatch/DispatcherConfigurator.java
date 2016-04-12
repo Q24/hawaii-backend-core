@@ -37,17 +37,17 @@ import java.util.concurrent.TimeUnit;
 
 public class DispatcherConfigurator implements ApplicationListener<ContextRefreshedEvent> {
     private final LogManager logManager;
-    private final ExecutorServiceRepository executorServiceRepository;
+    private final ExecutorRepository executorServiceRepository;
     private final RequestConfigurations requestConfigurations;
 
-    public DispatcherConfigurator(ExecutorServiceRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
+    public DispatcherConfigurator(ExecutorRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
         this.executorServiceRepository = executorServiceRepository;
         this.requestConfigurations = requestConfigurations;
 
         this.logManager = logManager;
     }
 
-    public DispatcherConfigurator(File configFile, ExecutorServiceRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
+    public DispatcherConfigurator(File configFile, ExecutorRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
         this(executorServiceRepository, requestConfigurations, logManager);
 
         configure(configFile);
@@ -70,7 +70,7 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
 
     private void parseConfig(JSONObject json) throws JSONException {
         Map<String, String> defaultExecutors = new HashMap<>();
-        Map<String, HawaiiThreadPoolExecutorImpl> executors = new HashMap<>();
+        Map<String, HawaiiExecutorImpl> executors = new HashMap<>();
 
         JSONArray queues = json.getJSONArray("queues");
         for (int i = 0; i < queues.length(); i++) {
@@ -82,7 +82,7 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
             int maxPendingRequests = queue.getInt("max_pending_requests");
 
             logManager.info(CoreLoggers.SERVER, "Creating queue '" + name + "' with '" + corePoolSize + "'/'" + maxPoolSize + "'/'" + maxPendingRequests + "'.");
-            HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(name, corePoolSize, maxPoolSize, maxPendingRequests, new TimeOut(keepAliveTime, TimeUnit.SECONDS), logManager);
+            HawaiiExecutorImpl executor = new HawaiiExecutorImpl(name, corePoolSize, maxPoolSize, maxPendingRequests, new TimeOut(keepAliveTime, TimeUnit.SECONDS), logManager);
 
             executors.put(name, executor);
         }
@@ -111,10 +111,10 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
                 String lookup = createLookup(systemName, method);
                 RequestConfiguration configuration = requestConfigurations.get(lookup);
                 if (StringUtils.isNotBlank(defaultQueue)) {
-                    configuration.setQueue(defaultQueue);
+                    configuration.setExecutorName(defaultQueue);
                 }
                 if (StringUtils.isNotBlank(queue)) {
-                    configuration.setQueue(queue);
+                    configuration.setExecutorName(queue);
                 }
 
                 if (timeOut > 0) {
@@ -123,7 +123,7 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
             }
         }
 
-        for (HawaiiThreadPoolExecutorImpl executor : executors.values()) {
+        for (HawaiiExecutorImpl executor : executors.values()) {
             executorServiceRepository.add(executor);
         }
         executorServiceRepository.setDefaultExecutors(defaultExecutors);
@@ -146,7 +146,7 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
             RequestConfiguration requestConfiguration = requestConfigurations.get(lookup);
             requestContext.setConfiguration(requestConfiguration);
             logManager.debug(CoreLoggers.SERVER,
-                    "Configuring call '" + lookup + "' to use '" + requestContext.getQueue() + "' with timeout '" + requestContext.getTimeOut() + "'.");
+                    "Configuring call '" + lookup + "' to use '" + requestContext.getExecutorName() + "' with timeout '" + requestContext.getTimeOut() + "'.");
         }
     }
 

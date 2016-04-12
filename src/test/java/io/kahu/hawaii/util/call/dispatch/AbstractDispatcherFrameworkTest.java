@@ -17,7 +17,6 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.PassthroughResponseHandler;
 import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.logger.DefaultLogManager;
@@ -36,7 +35,7 @@ import static org.junit.Assert.assertThat;
 public class AbstractDispatcherFrameworkTest {
     private LogManager logManager = new DefaultLogManager(new LogManagerConfiguration(new LoggingConfiguration()));
 
-    private HawaiiThreadPoolExecutorImpl executor;
+    private HawaiiExecutorImpl executor;
 
     @Mock
     private CallLogger<String> callLogger;
@@ -48,7 +47,7 @@ public class AbstractDispatcherFrameworkTest {
         }
     }
 
-    protected HawaiiThreadPoolExecutorImpl getExecutor() {
+    protected HawaiiExecutorImpl getExecutor() {
         return executor;
     }
 
@@ -90,7 +89,7 @@ public class AbstractDispatcherFrameworkTest {
     }
 
     protected void createExecutor(int coreSize, int maxSize, int queueSize) {
-        executor = new HawaiiThreadPoolExecutorImpl("name", coreSize, maxSize, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<>(queueSize), new HawaiiThreadFactory("test"), null, logManager);
+        executor = new HawaiiExecutorImpl("name", coreSize, maxSize, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<>(queueSize), new HawaiiThreadFactory("test"), null, logManager);
         executor.prestartAllCoreThreads();
     }
 

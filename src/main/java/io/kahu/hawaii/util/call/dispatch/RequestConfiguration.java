@@ -22,16 +22,16 @@ import java.util.concurrent.TimeUnit;
 
 @NotThreadSafe
 public class RequestConfiguration {
-    private String queue;
+    private String executorName;
     private TimeOut defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
     private TimeOut timeOut = null;
 
-    public String getQueue() {
-        return queue;
+    public String getExecutorName() {
+        return executorName;
     }
 
-    public void setQueue(String queue) {
-        this.queue = queue;
+    public void setExecutorName(String executorName) {
+        this.executorName = executorName;
     }
 
     public TimeOut getTimeOut() {

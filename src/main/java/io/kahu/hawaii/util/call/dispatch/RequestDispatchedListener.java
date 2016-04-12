@@ -22,5 +22,5 @@ import io.kahu.hawaii.util.call.AbortableRequest;
  * contain a very lightweight method.
  */
 public interface RequestDispatchedListener {
-    <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor);
+    <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiExecutor executor);
 }

@@ -28,27 +28,30 @@ import org.apache.http.annotation.ThreadSafe;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Implementation of an ThreadPoolExecutor that first adds new threads and then queues tasks.
+ */
 @ThreadSafe
-public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements HawaiiThreadPoolExecutor {
+public class HawaiiExecutorImpl extends ThreadPoolExecutor implements HawaiiExecutor {
     private final AtomicLong rejected = new AtomicLong(0L);
     private final String name;
     private final LogManager logManager;
 
     @Deprecated
-    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-            BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
+    public HawaiiExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
                 handler));
         this.name = name;
         this.logManager = logManager;
     }
 
-    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, int queueSize, TimeOut threadKeepAlive, LogManager logManager) {
+    public HawaiiExecutorImpl(String name, int corePoolSize, int maximumPoolSize, int queueSize, TimeOut threadKeepAlive, LogManager logManager) {
         this(name, corePoolSize, maximumPoolSize, threadKeepAlive, new ArrayBlockingQueue<>(queueSize), new HawaiiThreadFactory(name), null, logManager);
     }
 
-    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, TimeOut threadKeepAlive,
-                                        BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
+    public HawaiiExecutorImpl(String name, int corePoolSize, int maximumPoolSize, TimeOut threadKeepAlive,
+                              BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
         super(corePoolSize, maximumPoolSize, threadKeepAlive.getDuration(), threadKeepAlive.getUnit(), new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
                 handler));
         this.name = name;

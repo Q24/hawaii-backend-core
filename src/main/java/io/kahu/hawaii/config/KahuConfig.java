@@ -50,7 +50,7 @@ import io.kahu.hawaii.service.mail.HawaiiProperties;
 import io.kahu.hawaii.service.mail.MailConnection;
 import io.kahu.hawaii.service.mail.MailSender;
 import io.kahu.hawaii.service.mail.SMTPMailConnection;
-import io.kahu.hawaii.util.call.dispatch.ExecutorServiceRepository;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
 import io.kahu.hawaii.util.call.dispatch.LogCallIdListener;
 import io.kahu.hawaii.util.call.dispatch.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
@@ -285,10 +285,10 @@ public class KahuConfig {
     }
 
     @Bean(destroyMethod = "stop")
-    public ExecutorServiceRepository executorServiceRepository() throws IOException, JSONException {
+    public ExecutorRepository executorServiceRepository() throws IOException, JSONException {
         String config = env.getProperty("dispatcher.configuration.file");
         File configFile = new File(locationHelper().getHawaiiServerHome(), config);
-        return new ExecutorServiceRepository(configFile, logManager(), requestCongfigurations());
+        return new ExecutorRepository(configFile, logManager(), requestCongfigurations());
     }
 
     @Bean

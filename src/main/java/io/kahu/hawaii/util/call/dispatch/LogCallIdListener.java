@@ -23,7 +23,7 @@ import org.apache.http.annotation.ThreadSafe;
 public class LogCallIdListener implements RequestDispatchedListener {
 
     @Override
-    public <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor) {
+    public <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiExecutor executor) {
         LoggingContext loggingContext = LoggingContext.get();
         Object foo = loggingContext.getFromRootContext("call_ids");
         if (foo != null) {

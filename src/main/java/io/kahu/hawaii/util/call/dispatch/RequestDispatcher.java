@@ -16,10 +16,7 @@
 package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.*;
-import io.kahu.hawaii.util.call.http.HttpCall;
-import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
-import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
 
 import java.util.ArrayList;
@@ -28,14 +25,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
-import io.kahu.hawaii.util.logger.LoggingContext;
 import org.apache.http.annotation.ThreadSafe;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 @ThreadSafe
 public class RequestDispatcher {
     private final LogManager logManager;
-    private final ExecutorServiceRepository executorServiceRepository;
+    private final ExecutorRepository executorServiceRepository;
 
     private final List<RequestDispatchedListener> listeners = new ArrayList<>();
 
@@ -50,7 +45,7 @@ public class RequestDispatcher {
      * @param logManager
      * @param listeners
      */
-    public RequestDispatcher(ExecutorServiceRepository executorServiceRepository, LogManager logManager, RequestDispatchedListener... listeners) {
+    public RequestDispatcher(ExecutorRepository executorServiceRepository, LogManager logManager, RequestDispatchedListener... listeners) {
         this.executorServiceRepository = executorServiceRepository;
         this.logManager = logManager;
         if (listeners != null) {
@@ -92,7 +87,7 @@ public class RequestDispatcher {
      */
     public <T> Response<T> executeAsync(AbortableRequest<T> request) throws ServerException {
         try {
-            executorServiceRepository.getServiceMonitor(request).executeAsync(request, this);
+            executorServiceRepository.getAsyncExecutor(request).executeAsync(request, this);
         } catch (RejectedExecutionException e) {
             request.reject();
             request.finish();
@@ -112,7 +107,7 @@ public class RequestDispatcher {
         Response<T> response = request.getResponse();
 
         try {
-            HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
+            HawaiiExecutor executor = executorServiceRepository.getExecutor(request);
 
             notifyListeners(request, executor);
 
@@ -149,7 +144,7 @@ public class RequestDispatcher {
 
 
 
-    private <T> void notifyListeners(AbortableRequest<T> request, HawaiiThreadPoolExecutor executor) {
+    private <T> void notifyListeners(AbortableRequest<T> request, HawaiiExecutor executor) {
         for (RequestDispatchedListener listener : listeners) {
             listener.notifyBeforeDispatch(request, request.isAsync(), executor);
         }

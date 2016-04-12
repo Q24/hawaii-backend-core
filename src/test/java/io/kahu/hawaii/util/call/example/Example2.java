@@ -18,12 +18,12 @@ package io.kahu.hawaii.util.call.example;
 import io.kahu.hawaii.util.call.Request;
 import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.TimeOut;
-import io.kahu.hawaii.util.call.dispatch.ExecutorServiceRepository;
-import io.kahu.hawaii.util.call.dispatch.HawaiiThreadPoolExecutorImpl;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.example.domain.Person;
 import io.kahu.hawaii.util.call.example.service.ClientResource;
-import io.kahu.hawaii.util.call.example.handler.CrmGetClientByIdResponseHandler;
+import io.kahu.hawaii.util.call.example.handler.GetCustomerByIdResponseHandler;
 import io.kahu.hawaii.util.call.example.service.RestServer;
 import io.kahu.hawaii.util.call.http.HttpMethod;
 import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
@@ -52,7 +52,7 @@ public class Example2 {
         DOMConfigurator.configure(Example2.class.getResource("/log4j.xml").getFile());
 
         RestServer server = null;
-        ExecutorServiceRepository executorRepository = null;
+        ExecutorRepository executorRepository = null;
         try {
             /*
              * Create our rest server with a 'ClientResource'.
@@ -68,12 +68,12 @@ public class Example2 {
             LogManager logManager = new DefaultLogManager(new LogManagerConfiguration(new LoggingConfiguration()));
 
             // Create an executor, which holds a queue with core size 1, max size 2, a queue of size 2. Threads 'outside the core pool' that are still active after one minute will get cleaned up.
-            HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(ExecutorServiceRepository.DEFAULT_POOL_NAME, 1, 2, 2, new TimeOut(1, TimeUnit.MINUTES), logManager);
+            HawaiiExecutorImpl executor = new HawaiiExecutorImpl(ExecutorRepository.DEFAULT_EXECUTOR_NAME, 1, 2, 2, new TimeOut(1, TimeUnit.MINUTES), logManager);
             // Create an executor, which holds a queue with core size 1, max size 2, a queue of size 2. Threads 'outside the core pool' that are still active after one minute will get cleaned up.
-            HawaiiThreadPoolExecutorImpl executor2 = new HawaiiThreadPoolExecutorImpl("crm", 1, 2, 2, new TimeOut(1, TimeUnit.MINUTES), logManager);
+            HawaiiExecutorImpl executor2 = new HawaiiExecutorImpl("crm", 1, 2, 2, new TimeOut(1, TimeUnit.MINUTES), logManager);
 
             // Create the repository that holds all executors
-            executorRepository = new ExecutorServiceRepository(logManager);
+            executorRepository = new ExecutorRepository(logManager);
             executorRepository.add(executor);
             executorRepository.add(executor2);
 
@@ -93,7 +93,7 @@ public class Example2 {
              */
             HttpRequestContext<Person> context = new HttpRequestContext<>(HttpMethod.GET, "http://localhost:" + SERVER_PORT, "/client/{client-id}", "crm", "get_client_by_id", new TimeOut(10, TimeUnit.SECONDS));
             CallLogger callLogger = new CallLoggerImpl<>(logManager, new HttpRequestLogger(), new JsonPayloadResponseLogger<Person>());
-            RequestPrototype<HttpResponse, Person> prototype = new RequestPrototype(requestDispatcher, context, new CrmGetClientByIdResponseHandler(), callLogger);
+            RequestPrototype<HttpResponse, Person> prototype = new RequestPrototype(requestDispatcher, context, new GetCustomerByIdResponseHandler(), callLogger);
             HttpRequestBuilder<Person> getPersonByIdRequest = new HttpRequestBuilder<>(prototype);
 
             /*

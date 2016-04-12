@@ -43,7 +43,7 @@ public class HawaiiRejectedExecutionHandler implements RejectedExecutionHandler 
             executor.getQueue().add(task);
         } catch (IllegalStateException e) {
             try {
-                ((HawaiiThreadPoolExecutorImpl) executor).rejectTask();
+                ((HawaiiExecutorImpl) executor).rejectTask();
                 if (delegate != null) {
                     delegate.rejectedExecution(task, executor);
                 }

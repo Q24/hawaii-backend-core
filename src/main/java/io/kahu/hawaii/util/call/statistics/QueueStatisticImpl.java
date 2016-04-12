@@ -15,7 +15,7 @@
  */
 package io.kahu.hawaii.util.call.statistics;
 
-import io.kahu.hawaii.util.call.dispatch.HawaiiThreadPoolExecutorImpl;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
 import org.apache.http.annotation.ThreadSafe;
 
 @ThreadSafe
@@ -30,7 +30,7 @@ public class QueueStatisticImpl implements QueueStatistic {
     private final long completedTaskCount;
     private final long rejectedTaskCount;
 
-    public QueueStatisticImpl(HawaiiThreadPoolExecutorImpl executor) {
+    public QueueStatisticImpl(HawaiiExecutorImpl executor) {
         this.queueName = executor.getName();
 
         this.poolSize = executor.getPoolSize();

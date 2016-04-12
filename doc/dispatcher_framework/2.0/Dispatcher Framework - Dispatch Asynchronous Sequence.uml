@@ -38,7 +38,7 @@ activate Request #ddd
 
     Request -> RequestDispatcher : executeAsync( this )
     activate RequestDispatcher #ddd
-        RequestDispatcher -> ExecutorServiceRepository : getServiceMonitor( request )
+        RequestDispatcher -> ExecutorServiceRepository : getAsyncExecutor( request )
         activate ExecutorServiceRepository #ddd
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository
@@ -96,7 +96,7 @@ AsyncCallableRequest -> RequestDispatcher : execute( request )
         activate RequestDispatcher #ffc
         deactivate RequestDispatcher
 
-        RequestDispatcher -> ExecutorServiceRepository : getService( request )
+        RequestDispatcher -> ExecutorServiceRepository : getExecutor( request )
         activate ExecutorServiceRepository #ddd
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository

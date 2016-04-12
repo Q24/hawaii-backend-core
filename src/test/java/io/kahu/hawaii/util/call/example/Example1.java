@@ -18,12 +18,12 @@ package io.kahu.hawaii.util.call.example;
 import io.kahu.hawaii.util.call.Request;
 import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.TimeOut;
-import io.kahu.hawaii.util.call.dispatch.ExecutorServiceRepository;
-import io.kahu.hawaii.util.call.dispatch.HawaiiThreadPoolExecutorImpl;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.example.domain.Person;
 import io.kahu.hawaii.util.call.example.service.ClientResource;
-import io.kahu.hawaii.util.call.example.handler.CrmGetClientByIdResponseHandler;
+import io.kahu.hawaii.util.call.example.handler.GetCustomerByIdResponseHandler;
 import io.kahu.hawaii.util.call.example.service.RestServer;
 import io.kahu.hawaii.util.call.http.HttpMethod;
 import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
@@ -48,7 +48,7 @@ public class Example1 {
         DOMConfigurator.configure(Example1.class.getResource("/log4j.xml").getFile());
 
         RestServer server = null;
-        ExecutorServiceRepository executorRepository = null;
+        ExecutorRepository executorRepository = null;
         try {
             /*
              * Create our rest server with a 'ClientResource'.
@@ -58,40 +58,43 @@ public class Example1 {
             server.start();
 
             /*
-             * START of generic setup
+             * Dispatcher Framework setup
              */
             // Create a log manager (purpose and explanation out of scope for this example).
             LogManager logManager = new DefaultLogManager(new LogManagerConfiguration(new LoggingConfiguration()));
 
-            // Create an executor, which holds a queue with core size 1, max size 2, a queue of size 2. Threads 'outside the core pool' that are still active after one minute will get cleaned up.
-            HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(ExecutorServiceRepository.DEFAULT_POOL_NAME, 1, 2, 2, new TimeOut(1, TimeUnit.MINUTES), logManager);
+            // Create an executor, with a thread pool of core size 1 and max size 2 and with a queue of size 4.
+            // Threads 'outside the core pool' that are still active after one minute will get cleaned up.
+            HawaiiExecutorImpl executor = new HawaiiExecutorImpl(ExecutorRepository.DEFAULT_EXECUTOR_NAME,
+                    1, 2, 4,
+                    new TimeOut(1, TimeUnit.MINUTES),
+                    logManager);
 
             // Create the repository that holds all executors
-            executorRepository = new ExecutorServiceRepository(logManager);
+            executorRepository = new ExecutorRepository(logManager);
             executorRepository.add(executor);
 
             // Create a new request dispatcher.
             RequestDispatcher requestDispatcher = new RequestDispatcher(executorRepository, logManager);
 
             /*
-             * END of generic setup
-             */
-
-            /*
              * Setup the request (builder).
              */
-            HttpRequestContext<Person> context = new HttpRequestContext<>(HttpMethod.GET, "http://localhost:" + SERVER_PORT, "/client/{client-id}", "crm", "get_client_by_id", new TimeOut(10, TimeUnit.SECONDS));
+            HttpRequestContext<Person> context = new HttpRequestContext<>(HttpMethod.GET,
+                    "http://localhost:" + SERVER_PORT, "/customer/{customer-id}",
+                    "crm", "get_customer_by_id",
+                    new TimeOut(2, TimeUnit.SECONDS));
             CallLogger callLogger = new CallLoggerImpl<>(logManager, new HttpRequestLogger(), new JsonPayloadResponseLogger<Person>());
-            RequestPrototype<HttpResponse, Person> prototype = new RequestPrototype(requestDispatcher, context, new CrmGetClientByIdResponseHandler(), callLogger);
-            HttpRequestBuilder<Person> getPersonByIdRequest = new HttpRequestBuilder<>(prototype);
+            RequestPrototype<HttpResponse, Person> prototype = new RequestPrototype(requestDispatcher, context, new GetCustomerByIdResponseHandler(), callLogger);
+            HttpRequestBuilder<Person> getCustomerByIdRequest = new HttpRequestBuilder<>(prototype);
 
             /*
              * Use the request (builder).
              */
-            Request<Person> request = getPersonByIdRequest.newInstance().withPathVariables("10").build();
+            Request<Person> request = getCustomerByIdRequest.newInstance().withPathVariables("10").build();
             Person person = request.execute().get();
 
-            System.err.println("CLIENT - Got client '" + person.getName() + "' with id '" + person.getId() + "'.");
+            System.err.println("CLIENT - Got customer '" + person.getName() + "' with id '" + person.getId() + "'.");
 
         } finally {
             server.stop();

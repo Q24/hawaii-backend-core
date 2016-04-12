@@ -21,8 +21,8 @@ import io.kahu.hawaii.util.call.http.response.AbstractHttpResponseHandler;
 import org.apache.http.HttpResponse;
 import org.codehaus.jettison.json.JSONObject;
 
-public class CrmGetClientByIdResponseHandler extends AbstractHttpResponseHandler<Person> {
-    public CrmGetClientByIdResponseHandler() {
+public class GetCustomerByIdResponseHandler extends AbstractHttpResponseHandler<Person> {
+    public GetCustomerByIdResponseHandler() {
         super(true);
     }
 

@@ -50,7 +50,7 @@ public class Test {
         LogManager logManager = new DefaultLogManager(logManagerConfig);
 
         File configFile = new File("/home/tapir/vf/src/kahuna-backend/conf/dispatcher_config.json");
-        ExecutorServiceRepository executorServiceRepository = new ExecutorServiceRepository(configFile, logManager, new RequestConfigurations());
+        ExecutorRepository executorServiceRepository = new ExecutorRepository(configFile, logManager, new RequestConfigurations());
         RequestDispatcher dispatcher = new RequestDispatcher(executorServiceRepository, logManager);
 
         List<MyRequest> requests = new ArrayList<>();
@@ -81,7 +81,7 @@ public class Test {
         stopped.await();
         MyRequest request = new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, -1, new CountDownLatch(0));
         System.out.println("Done");
-        System.out.println(" *" + executorServiceRepository.getService(request).getQueueStatistic().toString());
+        System.out.println(" *" + executorServiceRepository.getExecutor(request).getQueueStatistic().toString());
         for (int i = 0; i < 70; i++) {
             new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, 120 + i, stopped).execute();
             Thread.sleep(980);
@@ -92,7 +92,7 @@ public class Test {
         // RequestContext<String>("test", "test", 100), null, callLogger, i,
         // stopped);
         //
-        System.out.println(" *" + executorServiceRepository.getService(request).getQueueStatistic().toString());
+        System.out.println(" *" + executorServiceRepository.getExecutor(request).getQueueStatistic().toString());
     }
 
     public class MyRequest extends AbstractAbortableRequest<String, String> {

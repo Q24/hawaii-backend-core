@@ -43,7 +43,7 @@ activate Request #ddd
         activate RequestDispatcher #ffc
         deactivate RequestDispatcher
 
-        RequestDispatcher -> ExecutorServiceRepository : getService( request )
+        RequestDispatcher -> ExecutorServiceRepository : getExecutor( request )
         activate ExecutorServiceRepository #ddd
             ExecutorServiceRepository -> RequestDispatcher : executor
         deactivate ExecutorServiceRepository

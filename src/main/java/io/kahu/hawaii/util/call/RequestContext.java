@@ -95,8 +95,8 @@ public class RequestContext<T> {
             if (configuration.getTimeOut() == null) {
                 configuration.setTimeOut(this.configuration.getTimeOut());
             }
-            if (configuration.getQueue() == null) {
-                configuration.setQueue(this.configuration.getQueue());
+            if (configuration.getExecutorName() == null) {
+                configuration.setExecutorName(this.configuration.getExecutorName());
             }
         }
 
@@ -107,7 +107,7 @@ public class RequestContext<T> {
         return configuration.getTimeOutOrDefaultIfUnset();
     }
 
-    public String getQueue() {
-        return configuration.getQueue();
+    public String getExecutorName() {
+        return configuration.getExecutorName();
     }
 }

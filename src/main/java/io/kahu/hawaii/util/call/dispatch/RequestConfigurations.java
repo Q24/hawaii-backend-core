@@ -39,7 +39,7 @@ public class RequestConfigurations {
         get(key).setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
     }
 
-    public void setQueue(String key, String queue) {
-        get(key).setQueue(queue);
+    public void setExecutorName(String key, String queue) {
+        get(key).setExecutorName(queue);
     }
 }
