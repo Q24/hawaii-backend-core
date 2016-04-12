@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p %X{logtype} %m%n" />
+		</layout>
+	</appender>
+	<logger name="hawaii.server" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="hawaii.server.exception" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="hawaii.server.cache" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="hawaii.server.calls" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="hawaii.client" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="hawaii.audit" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.springframework"
+			additivity="false">
+		<level value="OFF" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.apache.http" additivity="false">
+		<level value="OFF" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.apache.http.wire" additivity="false">
+		<level value="OFF" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="STDOUT" />
+	</root>
+</log4j:configuration>

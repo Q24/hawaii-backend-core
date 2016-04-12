@@ -256,6 +256,50 @@
       <artifactId>commons-beanutils</artifactId>
       <version>1.9.2</version>
     </dependency>
+    <!-- START For dispatcher sample code -->
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>2.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>2.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-jetty-http</artifactId>
+      <version>2.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-moxy</artifactId>
+      <version>2.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.eclipse.jetty.aggregate</groupId>
+      <artifactId>jetty-all</artifactId>
+      <version>9.3.0.M1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- For dispatcher sample code -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.21</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- END for dispatcher sample code -->
   </dependencies>
 
   <build>

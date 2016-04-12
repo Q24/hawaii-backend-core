@@ -42,10 +42,14 @@ public class RequestContext<T> {
     }
 
     public RequestContext(String backendSystem, String methodName, int timeOut) {
+        this(backendSystem, methodName, new TimeOut(timeOut, TimeUnit.SECONDS));
+    }
+
+    public RequestContext(String backendSystem, String methodName, TimeOut timeOut) {
         this.backendSystem = backendSystem;
         this.methodName = methodName;
         configuration = new RequestConfiguration();
-        configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
+        configuration.setTimeOut(timeOut);
     }
 
     public String getBackendSystem() {
@@ -86,16 +90,17 @@ public class RequestContext<T> {
     }
 
     public void setConfiguration(RequestConfiguration configuration) {
-        if (this.configuration == null) {
-            this.configuration = configuration;
-        } else {
-            if (StringUtils.isNotBlank(configuration.getQueue())) {
-                this.configuration.setQueue(configuration.getQueue());
+        if (this.configuration != null) {
+            // Copy existing configuration values over new values if they are null.
+            if (configuration.getTimeOut() == null) {
+                configuration.setTimeOut(this.configuration.getTimeOut());
             }
-            if (configuration.getTimeOut() != null) {
-                this.configuration.setTimeOut(configuration.getTimeOut());
+            if (configuration.getQueue() == null) {
+                configuration.setQueue(this.configuration.getQueue());
             }
         }
+
+        this.configuration = configuration;
     }
 
     public TimeOut getTimeOut() {

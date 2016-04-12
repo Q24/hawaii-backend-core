@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 @NotThreadSafe
 public class RequestConfiguration {
-    private String queue = ExecutorServiceRepository.DEFAULT_POOL_NAME;
+    private String queue;
     private TimeOut defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
     private TimeOut timeOut = null;
 

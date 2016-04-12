@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
+import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.QueueStatisticImpl;
 import io.kahu.hawaii.util.logger.CoreLoggers;
@@ -33,9 +34,22 @@ public class HawaiiThreadPoolExecutorImpl extends ThreadPoolExecutor implements 
     private final String name;
     private final LogManager logManager;
 
+    @Deprecated
     public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
             BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
+                handler));
+        this.name = name;
+        this.logManager = logManager;
+    }
+
+    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, int queueSize, TimeOut threadKeepAlive, LogManager logManager) {
+        this(name, corePoolSize, maximumPoolSize, threadKeepAlive, new ArrayBlockingQueue<>(queueSize), new HawaiiThreadFactory(name), null, logManager);
+    }
+
+    public HawaiiThreadPoolExecutorImpl(String name, int corePoolSize, int maximumPoolSize, TimeOut threadKeepAlive,
+                                        BlockingQueue<Runnable> workQueue, ThreadFactory factory, RejectedExecutionHandler handler, LogManager logManager) {
+        super(corePoolSize, maximumPoolSize, threadKeepAlive.getDuration(), threadKeepAlive.getUnit(), new HawaiiBlockingQueue<>(workQueue), factory, new HawaiiRejectedExecutionHandler(logManager,
                 handler));
         this.name = name;
         this.logManager = logManager;

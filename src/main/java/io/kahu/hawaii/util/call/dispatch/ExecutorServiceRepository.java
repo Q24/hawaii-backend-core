@@ -17,122 +17,80 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.TimeOut;
-import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
-import io.kahu.hawaii.util.call.statistics.QueueStatistic;
-import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
-import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
-import io.kahu.hawaii.util.spring.ApplicationContextProvider;
+import org.apache.http.annotation.ThreadSafe;
+import org.codehaus.jettison.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.annotation.ThreadSafe;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 @ThreadSafe
-public class ExecutorServiceRepository implements ApplicationListener<ContextRefreshedEvent> {
-    private final RequestConfigurations requestConfigurations;
+public class ExecutorServiceRepository {
     private final Map<String, String> defaultExecutors = new HashMap<>();
     private final Map<String, HawaiiThreadPoolExecutor> executors = new HashMap<>();
 
-    static final String DEFAULT_POOL_NAME = "default";
-    private static final String GUARD_POOL_NAME = "async_executor_guard";
+    public static final String DEFAULT_POOL_NAME = "default";
+    public static final String DEFAULT_ASYNC_POOL_NAME = "async_executor_guard";
 
     private final LogManager logManager;
 
+    public ExecutorServiceRepository(final LogManager logManager) {
+        this.logManager = logManager;
+    }
+
+    /**
+     * Deprecated, use dispatcher configurator.
+     *
+     * @param configFile
+     * @param logManager
+     * @param requestConfigurations
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Deprecated
     public ExecutorServiceRepository(File configFile, final LogManager logManager, RequestConfigurations requestConfigurations) throws IOException,
             JSONException {
         this.logManager = logManager;
-        this.requestConfigurations = requestConfigurations;
-
-        String configuration = FileUtils.readFileToString(configFile);
-        JSONObject json = new JSONObject(configuration);
-        parseConfig(json);
-
-        assert executors.containsKey(DEFAULT_POOL_NAME) : "The system queue with name '" + DEFAULT_POOL_NAME + "' is not defined.";
-        assert executors.containsKey(GUARD_POOL_NAME) : "The system queue with name '" + GUARD_POOL_NAME + "' is not defined.";
+        new DispatcherConfigurator(configFile, this, requestConfigurations, logManager);
     }
 
-    private void parseConfig(JSONObject json) throws JSONException {
-        JSONArray queues = json.getJSONArray("queues");
-        for (int i = 0; i < queues.length(); i++) {
-            JSONObject queue = queues.getJSONObject(i);
-            String name = queue.getString("name");
-            int corePoolSize = queue.getInt("core_pool_size");
-            int maxPoolSize = queue.getInt("max_pool_size");
-            int keepAliveTime = queue.getInt("keep_alive_time");
-            int maxPendingRequests = queue.getInt("max_pending_requests");
-
-            logManager
-                    .info(CoreLoggers.SERVER, "Creating queue '" + name + "' with '" + corePoolSize + "'/'" + maxPoolSize + "'/'" + maxPendingRequests + "'.");
-            HawaiiThreadPoolExecutorImpl executor = new HawaiiThreadPoolExecutorImpl(name, corePoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS,
-                    new ArrayBlockingQueue<>(maxPendingRequests), new HawaiiThreadFactory(name), null, logManager);
-
-            executors.put(name, executor);
-        }
-
-        JSONArray systems = json.getJSONArray("systems");
-        for (int i = 0; i < systems.length(); i++) {
-            JSONObject system = systems.getJSONObject(i);
-            String systemName = system.getString("name");
-
-            String defaultQueue = system.optString("default_queue");
-            if (StringUtils.isNotBlank(defaultQueue)) {
-                assert executors.containsKey(defaultQueue) : "The configured queue '" + defaultQueue + "' does not exist.";
-                defaultExecutors.put(systemName, defaultQueue);
-            }
-
-            JSONArray calls = system.getJSONArray("calls");
-            for (int j = 0; j < calls.length(); j++) {
-                JSONObject call = calls.getJSONObject(j);
-                String method = call.getString("method");
-                Integer timeOut = call.optInt("time_out", -1);
-                String queue = call.optString("queue");
-                if (StringUtils.isNotBlank(queue)) {
-                    assert executors.containsKey(queue) : "The configured queue '" + queue + "' does not exist.";
-                }
-
-                String lookup = createLookup(systemName, method);
-                RequestConfiguration configuration = requestConfigurations.get(lookup);
-                if (StringUtils.isNotBlank(defaultQueue)) {
-                    configuration.setQueue(defaultQueue);
-                }
-                if (StringUtils.isNotBlank(queue)) {
-                    configuration.setQueue(queue);
-                }
-
-                if (timeOut > 0) {
-                    configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
-                }
-            }
-        }
+    public void add(HawaiiThreadPoolExecutor executor) {
+        this.executors.put(executor.getName(), executor);
     }
+
+    public void setDefaultExecutors(Map<String, String> defaultExecutors) {
+        this.defaultExecutors.clear();
+        this.defaultExecutors.putAll(defaultExecutors);
+    }
+
+    public void configure() {
+        assert this.executors.containsKey(DEFAULT_POOL_NAME) : "The system queue with name '" + DEFAULT_POOL_NAME + "' is not defined.";
+        assert this.executors.containsKey(DEFAULT_ASYNC_POOL_NAME) : "The system queue with name '" + DEFAULT_ASYNC_POOL_NAME + "' is not defined.";
+    }
+
 
     private <T> HawaiiThreadPoolExecutor getQueue(AbortableRequest<T> request) {
+        HawaiiThreadPoolExecutor service = null;
+
         RequestContext<T> context = request.getContext();
 
-        String executorName = context.getQueue();
-        HawaiiThreadPoolExecutor service = executors.get(executorName);
+        service = executors.get(context.getQueue());
         if (service == null) {
-            service = executors.get(DEFAULT_POOL_NAME);
+            String executorName = defaultExecutors.get(context.getBackendSystem());
+            service = executors.get(executorName);
+
+            if (service == null) {
+                service = executors.get(DEFAULT_POOL_NAME);
+            }
+
+            if (context.getQueue() == null) {
+                context.getConfiguration().setQueue(service.getName());
+            }
         }
+
+
         return service;
     }
 
@@ -140,32 +98,13 @@ public class ExecutorServiceRepository implements ApplicationListener<ContextRef
         return getQueue(request);
     }
 
-    private String createLookup(String system, String method) {
-        return system + "." + method;
-    }
-
     public <T> HawaiiThreadPoolExecutor getServiceMonitor(AbortableRequest<T> request) {
-        return executors.get(GUARD_POOL_NAME);
+        return executors.get(DEFAULT_ASYNC_POOL_NAME);
     }
 
     public void stop() {
         for (HawaiiThreadPoolExecutor executor : executors.values()) {
             executor.shutdown();
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        Collection<HttpRequestBuilder> beans = ApplicationContextProvider.getBeans(HttpRequestBuilder.class);
-        for (HttpRequestBuilder builder : beans) {
-            RequestContext requestContext = builder.getRequestContext();
-            String lookup = createLookup(requestContext.getBackendSystem(), requestContext.getMethodName());
-
-            RequestConfiguration requestConfiguration = requestConfigurations.get(lookup);
-            requestContext.setConfiguration(requestConfiguration);
-            logManager.debug(CoreLoggers.SERVER,
-                    "Configuring call '" + lookup + "' to use '" + requestContext.getQueue() + "' with timeout '" + requestContext.getTimeOut() + "'.");
         }
     }
 }

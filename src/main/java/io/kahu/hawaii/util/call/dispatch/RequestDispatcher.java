@@ -126,13 +126,20 @@ public class RequestDispatcher {
             task.get(timeOut.getDuration(), timeOut.getUnit());
 
         } catch (RejectedExecutionException e) {
+            // Executor is too busy (no threads available nor is there a place in the queue).
             request.reject();
+        } catch (TimeoutException e) {
+            // The task.get( ... ) is timed out. The execution takes too long.
+            request.abort();
         } catch (InterruptedException e) {
+            // ..
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
         } catch (ExecutionException e) {
+            // Catches all exceptions from within the executor
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Execution exception", e.getCause());
-        } catch (TimeoutException e) {
-            request.abort();
+        } catch (Throwable t) {
+            // Catches all exceptions outside the executor
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Unexpected exception", t);
         } finally {
             request.finish();
         }

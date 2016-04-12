@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call;
+package io.kahu.hawaii.util.call.example.domain;
 
-import java.util.concurrent.TimeUnit;
+public class Person {
+    private String id;
+    private String name;
 
-public class TimeOut {
-    private final long duration;
-    private final TimeUnit unit;
-
-    public TimeOut(long duration, TimeUnit unit) {
-        this.duration = duration;
-        this.unit = unit;
+    public String getId() {
+        return id;
     }
 
-    public long getDuration() {
-        return duration;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public TimeUnit getUnit() {
-        return unit;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
