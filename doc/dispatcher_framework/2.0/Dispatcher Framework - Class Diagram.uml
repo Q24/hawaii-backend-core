@@ -133,9 +133,12 @@ class RequestDispatcher {
     + Response<T> execute(AbortableRequest<T> request)
     + Response<T> executeAsync(AbortableRequest<T> request)
 }
-RequestDispatcher ..> ExecutorServiceRepository : <b> getService(request) </b>
-RequestDispatcher ..> FutureRequest : <b> new (request, response) </b>
-RequestDispatcher ..> AsyncFutureRequest : <b>new (request, dispatcher)</b>
+RequestDispatcher ..> ExecutorRepository : <b> getExecutor(request) </b>
+
+RequestDispatcher *-[#grey]- HawaiiExecutor : <b> execute(request, response)</b>
+RequestDispatcher     *-[#grey]- HawaiiExecutor : <b> executeAsync(request, dispatcher)</b>
+HawaiiExecutor ..> FutureRequest : <b> new (request, response) </b>
+HawaiiExecutor ..> AsyncFutureRequest : <b>new (request, dispatcher)</b>
 AsyncFutureRequest *-[#grey]- RequestDispatcher : uses
 
 FutureRequest ..> CallableRequest : <b>new (request, response)</b>
@@ -145,17 +148,18 @@ CallableRequest .[#grey].> AbortableRequest : doCallback()
 class HttpRequestBuilder {
 }
 HttpRequestBuilder *-[#grey]- RequestDispatcher
-HttpRequestBuilder ..> GetRequest : <b> new</b>
-HttpRequestBuilder ..> PostRequest : <b> new</b>
+HttpRequestBuilder ..> GetRequest : <b> new </b>
+HttpRequestBuilder ..> PostRequest : <b> new </b>
 
-
-
-class HawaiiThreadPoolExecutor {
+class HawaiiExecutor {
     + String getName()
     + void rejectTask()
     + QueueStatistic getQueueStatistic()
+    + execute(request, response)
+    + executeAsync(request, dispatcher)
+
 }
-HawaiiThreadPoolExecutor *-[#grey]- QueueStatistic
+HawaiiExecutor *-[#grey]- QueueStatistic
 
 interface QueueStatistic {
     + String getQueueName()
@@ -192,34 +196,39 @@ class RequestStatistic {
 RequestStatistic *-[#grey]- QueueStatistic
 RequestStatistic *-[#grey]- ResponseStatus
 
-class ExecutorServiceRepository {
-    + HawaiiThreadPoolExecutor getQueue(AbortableRequest<T> request)
-    + HawaiiThreadPoolExecutor getService(AbortableRequest<T> request)
-    + ExecutorService getServiceMonitor(AbortableRequest<T> request)
+class ExecutorRepository {
+    + HawaiiExecutor getQueue(AbortableRequest<T> request)
+    + HawaiiExecutor getService(AbortableRequest<T> request)
+    + Executor getServiceMonitor(AbortableRequest<T> request)
 }
-ExecutorServiceRepository *.d. HawaiiThreadPoolExecutor
+ExecutorRepository *-[#grey]- HawaiiExecutor
 
 class RequestConfiguration {
-    + String getQueue()
-    + void setQueue(String queue)
-    + Integer getTimeOut()
-    + void setTimeOut(Integer timeOut)
-    + TimeUnit getTimeOutUnit()
-    + int getTimeOutOrDefaultIfUnset()
+    + String getExecutorName()
+    + void setExecutorName(String queue)
+    + TimeOut getTimeOut()
+    + void setTimeOut(TimeOut timeOut)
+    + TimeOut getTimeOutOrDefaultIfUnset()
+    + RequestContext<T> getContext()
+    + void getContext(RequestContext<T> context)
     ==
-    String defaultQueue = DEFAULT_POOL_NAME
-    Integer defaultTimeOut = 10
+    TimeOut defaultTimeOut = 10 seconds
 }
-RequestConfiguration *-[#grey]-> ExecutorServiceRepository : DEFAULT_POOL_NAME
+
+class RequestConfigurations {
+    + RequestConfiguration get(callName)
+}
+RequestConfigurations *-[#grey]- RequestConfiguration
+ExecutorRepository *-[#grey]- RequestConfigurations
+ExecutorRepository ..> RequestConfigurations : get( request.getName )
 
 class RequestContext<T> {
     + String getBackendSystem()
     + String getMethodName()
     + boolean is(String system, String method)
     .. delegates to config ..
-    + int getTimeOut()
-    + TimeUnit getTimeOutUnit()
-    + String getQueue()
+    + TimeOut getTimeOut()
+    + String getExecutorName()
     + void setConfiguration(RequestConfiguration configuration)
     ..<i> unused </i>..
     + T getRejectResponse()
@@ -228,7 +237,7 @@ class RequestContext<T> {
     + void setTimeOutResponse(T aborted)
     + T getTimeOutResponse()
 }
-RequestContext *-[#grey]- RequestConfiguration : uses
+RequestContext *-[#grey]-* RequestConfiguration : uses
 RequestContext <|-- HttpRequestContext
 
 class HttpRequestContext<T> {
