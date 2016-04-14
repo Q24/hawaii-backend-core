@@ -13,6 +13,8 @@
 
 [ ] ? Change configuration of requests (RequestConfiguration / Context / Constructor)
 
+
+
 === Bug ===
 
 === Todo ===
@@ -58,7 +60,8 @@
         [ ] Example1 - Simple configuration
         [ ] Example2 - Configuration of a specific executor
 
-
+[ ] ! Make sure call returns an answer (i.e. response status is set)
+    ResponseHandler .... it MUST set a response, or throw an exception.
 
 === Todo (incompatible with 1.0) ====
 [ ] executorRepository should have an 'async pool'
@@ -72,10 +75,10 @@
 
 === New ===
 [X] SQL
-    [X] On branch sql_call
+    ! See ContactDbRepository#getContactById() for implementation on kahuna-backend branch 'query_via_call_framework'
+
 [X] Builders
     [X] Prototype in builders
         [ ] Change prototype into AbstractAbortableRequest / the real deal?
     [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
-    [X] Create SQL Builder (on branch sql_call)
-[ ]
+    [X] Create SQL Builder
