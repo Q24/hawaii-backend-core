@@ -115,6 +115,9 @@ public class Response<T> {
         setMessage(message);
     }
 
+    public void setStatus(ResponseStatus status, Throwable t) {
+        setStatus(status, t.getMessage(), t);
+    }
 
     public void setStatus(ResponseStatus status, String message, Throwable throwable) {
         setStatus(status);

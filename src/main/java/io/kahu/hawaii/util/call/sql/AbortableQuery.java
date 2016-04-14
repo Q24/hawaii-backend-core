@@ -97,7 +97,7 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
                 //
             }
             if (!aborted) {
-                response.setStatus(ResponseStatus.BACKEND_FAILURE, e.getMessage(), e);
+                response.setStatus(ResponseStatus.BACKEND_FAILURE, e);
             }
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }

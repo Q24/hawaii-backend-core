@@ -79,7 +79,7 @@ public class AbortableHttpRequest<T> extends AbstractAbortableRequest<HttpRespon
             throw new ServerException(ServerError.IO, e);
         } catch (IOException e) {
             if (!aborted) {
-                response.setStatus(ResponseStatus.BACKEND_FAILURE, e.getMessage(), e);
+                response.setStatus(ResponseStatus.BACKEND_FAILURE, e);
             }
         } finally {
             httpRequest.releaseConnection();
