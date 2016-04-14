@@ -15,11 +15,10 @@
  */
 package io.kahu.hawaii.util.call;
 
-import io.kahu.hawaii.util.call.dispatch.RequestConfiguration;
+import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.annotation.ThreadSafe;
 
 @ThreadSafe

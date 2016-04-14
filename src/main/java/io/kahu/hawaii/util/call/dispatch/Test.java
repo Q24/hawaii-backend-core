@@ -19,6 +19,7 @@ import io.kahu.hawaii.util.call.AbstractAbortableRequest;
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.call.log.CallLoggerImpl;
 import io.kahu.hawaii.util.exception.ServerException;

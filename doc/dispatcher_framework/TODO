@@ -39,23 +39,29 @@
 [X] Remove HttpClientBuilder from request dispatcher.
 
 [ ] Make sure in error situations the response is logged.
-[ ] Log request & queue statistics of async requests
+[X] Log request & queue statistics of async requests
 
 [X] Move logging of schedule of request to ThreadPoolExecutor.
+
 [X] Introduce "TimeOut" with Unit and Size
-
-[ ] ! TEST
-
-[ ] Examples
-
-[X] Document minimal configuration
-    ! Pool names
-    ! ...
 
 [X] Rename HawaiiThreadPoolExecutor into RequestExecutor. (Same for ..Impl.)
 
+[ ] Tests
+
+
+[X] Documentation
+    [X] Configuration
+        [X] Queues / Executors
+        [X] Requests
+    [ ] Examples
+        [ ] Example1 - Simple configuration
+        [ ] Example2 - Configuration of a specific executor
+
+
+
 === Todo (incompatible with 1.0) ====
-[ ] executorServiceRepository should have an 'async pool'
+[ ] executorRepository should have an 'async pool'
 	! Different branch / pull request, config change needed!
 
 [ ] Remove LogManager from CallLogger
@@ -65,8 +71,11 @@
 	! Different branch / pull request
 
 === New ===
-[ ] SQL
+[X] SQL
+    [X] On branch sql_call
 [X] Builders
     [X] Prototype in builders
+        [ ] Change prototype into AbstractAbortableRequest / the real deal?
     [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
-    [ ] Create SQL Builder
+    [X] Create SQL Builder (on branch sql_call)
+[ ]

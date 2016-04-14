@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.configuration;
 
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.TimeOut;

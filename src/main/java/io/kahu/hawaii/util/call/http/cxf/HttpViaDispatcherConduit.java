@@ -15,8 +15,8 @@
  */
 package io.kahu.hawaii.util.call.http.cxf;
 
-import io.kahu.hawaii.util.call.dispatch.RequestConfiguration;
-import io.kahu.hawaii.util.call.dispatch.RequestConfigurations;
+import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
+import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.HttpMethod;
 import io.kahu.hawaii.util.call.http.HttpRequestContext;

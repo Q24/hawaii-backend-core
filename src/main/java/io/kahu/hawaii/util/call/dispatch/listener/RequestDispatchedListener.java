@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.dispatch.listener;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutor;
 
 /**
  * Listener invoked when a request is dispatched. This class should typically

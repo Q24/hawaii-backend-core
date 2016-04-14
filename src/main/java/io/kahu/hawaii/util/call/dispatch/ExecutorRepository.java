@@ -17,6 +17,9 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
+import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
+import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.logger.LogManager;
 import org.apache.http.annotation.ThreadSafe;
 import org.codehaus.jettison.json.JSONException;

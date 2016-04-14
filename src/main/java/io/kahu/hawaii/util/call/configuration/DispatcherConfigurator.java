@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.configuration;
 
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.TimeOut;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
 import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
