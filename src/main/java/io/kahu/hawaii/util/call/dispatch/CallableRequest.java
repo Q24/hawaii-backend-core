@@ -37,6 +37,7 @@ public class CallableRequest<T> implements Callable<Response<T>> {
         LoggingContext.remove();
         try {
             abortableRequest.doExecute();
+            assert abortableRequest.getResponse().getStatus() != null;
             abortableRequest.doCallback();
 
             return response;

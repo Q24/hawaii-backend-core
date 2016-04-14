@@ -15,12 +15,13 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.call.TimeOut;
+import io.kahu.hawaii.util.call.http.HttpRequestContext;
+import org.jolokia.jmx.JsonMBean;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import io.kahu.hawaii.util.call.TimeOut;
-import org.jolokia.jmx.JsonMBean;
 
 @JsonMBean
 public class RequestConfigurations {
@@ -41,5 +42,12 @@ public class RequestConfigurations {
 
     public void setExecutorName(String key, String queue) {
         get(key).setExecutorName(queue);
+    }
+
+    public void changeUrl(String system, String method, String url) {
+        String key = system + "." + method;
+        RequestConfiguration configuration = get(key);
+        HttpRequestContext context = (HttpRequestContext) configuration.getContext();
+        context.setBaseUrl(url);
     }
 }

@@ -15,6 +15,7 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.TimeOut;
 import org.apache.http.annotation.NotThreadSafe;
 
@@ -25,6 +26,7 @@ public class RequestConfiguration {
     private String executorName;
     private TimeOut defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
     private TimeOut timeOut = null;
+    private RequestContext<?> context;
 
     public String getExecutorName() {
         return executorName;
@@ -49,4 +51,11 @@ public class RequestConfiguration {
         return timeOut;
     }
 
+    public RequestContext<?> getContext() {
+        return context;
+    }
+
+    public void setContext(RequestContext<?> context) {
+        this.context = context;
+    }
 }

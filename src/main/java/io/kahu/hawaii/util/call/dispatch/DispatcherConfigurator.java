@@ -145,6 +145,7 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
 
             RequestConfiguration requestConfiguration = requestConfigurations.get(lookup);
             requestContext.setConfiguration(requestConfiguration);
+            requestConfiguration.setContext(requestContext);
             logManager.debug(CoreLoggers.SERVER,
                     "Configuring call '" + lookup + "' to use '" + requestContext.getExecutorName() + "' with timeout '" + requestContext.getTimeOut() + "'.");
         }
