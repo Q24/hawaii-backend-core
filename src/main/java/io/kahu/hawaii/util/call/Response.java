@@ -96,11 +96,16 @@ public class Response<T> {
         this.response = response;
     }
 
+    public void set(ResponseStatus status, T response, String message) {
+        setStatus(status, message);
+        this.response = response;
+    }
+
     public ResponseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ResponseStatus status) {
+    private void setStatus(ResponseStatus status) {
         statistic.setStatus(status);
         this.status = status;
     }
@@ -110,10 +115,6 @@ public class Response<T> {
         setMessage(message);
     }
 
-    public void setStatus(ResponseStatus status, T response) {
-        setStatus(status);
-        this.response = response;
-    }
 
     public void setStatus(ResponseStatus status, String message, Throwable throwable) {
         setStatus(status);

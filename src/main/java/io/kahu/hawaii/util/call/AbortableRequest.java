@@ -21,6 +21,10 @@ import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
+/**
+ * Internal interface, should never be used directly. Use Request. For implementations, create a subclass of AbstractAbortableRequest.
+ * @param <T>
+ */
 public interface AbortableRequest<T> extends Request<T> {
     TimeOut getTimeOut();
 

@@ -42,7 +42,6 @@ public class HawaiiJsonObjectResponseHandler extends AbstractHttpResponseHandler
         } else {
             JSONObject data = jsonResponse.getJSONArray(ResponseKeyConstants.DATA_KEY).getJSONObject(0);
             response.set(data);
-            response.setStatus(ResponseStatus.SUCCESS);
         }
     }
 }

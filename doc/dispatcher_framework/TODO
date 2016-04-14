@@ -1,19 +1,21 @@
 == Call Dispatch Framework ==
 
 === Investigate ===
-[ ] ? Cleanup {tx, call} ids?
+[ ] ? Cleanup {tx, call} ids? Make dispatcher framework clear the ID's. See logging refactoring.
+
 [ ] ? Usage of Response.setMessage / getMessage
+
 [X] What happens in case of exception in CallableRequest?
     - It is rethrown in ExecutionException, caught in RequestDispatcher
+
 [ ] Split Request into internal interface and external interface?
+
 [ ] ? Remove response from exec and execAsync?
     ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
 
 [ ] ? Register timeout count on queue?
 
 [ ] ? Change configuration of requests (RequestConfiguration / Context / Constructor)
-
-
 
 === Bug ===
 
@@ -60,8 +62,9 @@
         [ ] Example1 - Simple configuration
         [ ] Example2 - Configuration of a specific executor
 
-[ ] ! Make sure call returns an answer (i.e. response status is set)
-    ResponseHandler .... it MUST set a response, or throw an exception.
+[X] Ensure request always returns an answer (i.e. response status is set).
+
+[ ] AbstractHttpResponseHanlder - Create method to accept / reject a statusline (200 , 400 , ....)
 
 === Todo (incompatible with 1.0) ====
 [ ] executorRepository should have an 'async pool'

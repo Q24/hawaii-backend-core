@@ -37,7 +37,10 @@ public class CallableRequest<T> implements Callable<Response<T>> {
         LoggingContext.remove();
         try {
             abortableRequest.doExecute();
-            assert abortableRequest.getResponse().getStatus() != null;
+            if (abortableRequest.getResponse().getStatus() == null) {
+                throw new ServerException(ServerError.METHOD_ERROR, "Response handler did not set the response status.");
+            }
+
             abortableRequest.doCallback();
 
             return response;

@@ -65,8 +65,7 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     public void abort() {
         this.error = true;
         statistic.endBackendRequest();
-        response.setMessage("Request '" + getId() + "' timed out.");
-        response.setStatus(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse());
+        response.set(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse(), "Request '" + getId() + "' timed out.");
         abortInternally();
     }
 
@@ -173,8 +172,7 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     @Override
     public void reject() {
         this.error = true;
-        response.setMessage("Request '" + getId() + "' rejected, too busy.");
-        response.setStatus(ResponseStatus.TOO_BUSY, getContext().getRejectResponse());
+        response.set(ResponseStatus.TOO_BUSY, getContext().getRejectResponse(), "Request '" + getId() + "' rejected, too busy.");
         rejectInternally();
     }
 

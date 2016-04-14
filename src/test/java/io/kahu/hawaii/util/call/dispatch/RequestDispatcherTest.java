@@ -247,44 +247,5 @@ public class RequestDispatcherTest extends AbstractDispatcherFrameworkTest {
         thrown.expectCause(is(error));
         response.get();
     }
-    
-    private Response<String> dispatch(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    dispatcher.execute(request);
-                } catch (ServerException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        t.setDaemon(true);
-        t.start();
-
-        return request.getResponse();
-    }
-
-    private Response<String> dispatchAsync(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
-        assert getExecutor().getMaximumPoolSize() > 1 : "For async calls pool size > 1 required!";
-
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    dispatcher.executeAsync(request);
-                } catch (ServerException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        t.setDaemon(true);
-        t.start();
-
-        return request.getResponse();
-    }
-
 
 }

@@ -15,10 +15,10 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
-import io.kahu.hawaii.util.call.PassthroughResponseHandler;
-import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.*;
 import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.call.statistics.QueueStatistic;
+import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.DefaultLogManager;
 import io.kahu.hawaii.util.logger.LogManager;
 import io.kahu.hawaii.util.logger.LogManagerConfiguration;
@@ -64,9 +64,16 @@ public class AbstractDispatcherFrameworkTest {
     }
 
     protected TestRequest createRequest(int timeOut) {
+        return createRequest(timeOut, null);
+    }
+
+    protected TestRequest createRequest(int timeOut, ResponseHandler<String, String> responseHandler) {
         RequestContext<String> context = new RequestContext<>("test", "method", timeOut);
 
-        TestRequest request = new TestRequest(null, context, new PassthroughResponseHandler<>(), getCallLogger());
+        if (responseHandler == null) {
+            responseHandler = new PassthroughResponseHandler<>();
+        }
+        TestRequest request = new TestRequest(null, context, responseHandler, getCallLogger());
         return request;
     }
 
@@ -89,8 +96,46 @@ public class AbstractDispatcherFrameworkTest {
     }
 
     protected void createExecutor(int coreSize, int maxSize, int queueSize) {
-        executor = new HawaiiExecutorImpl("name", coreSize, maxSize, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<>(queueSize), new HawaiiThreadFactory("test"), null, logManager);
+        executor = new HawaiiExecutorImpl("name", coreSize, maxSize, queueSize, new TimeOut(1, TimeUnit.MINUTES), logManager);
         executor.prestartAllCoreThreads();
+    }
+
+    protected Response<String> dispatch(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    dispatcher.execute(request);
+                } catch (ServerException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        t.setDaemon(true);
+        t.start();
+
+        return request.getResponse();
+    }
+
+    protected Response<String> dispatchAsync(final RequestDispatcher dispatcher, final AbstractAbortableRequest request) {
+        assert getExecutor().getMaximumPoolSize() > 1 : "For async calls pool size > 1 required!";
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    dispatcher.executeAsync(request);
+                } catch (ServerException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        t.setDaemon(true);
+        t.start();
+
+        return request.getResponse();
     }
 
 }

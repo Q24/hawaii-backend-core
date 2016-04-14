@@ -37,7 +37,6 @@ public class GZipFileResponseHandler extends AbstractHttpResponseHandler<File> i
 
     @Override
     public void doAddToResponse(HttpResponse payload, Response<File> response) throws Exception {
-        response.setStatus(ResponseStatus.SUCCESS);
         HttpResponseToGZipConverter converter = new HttpResponseToGZipConverter();
         if (file == null) {
             throw new ServerException(ServerError.IO, "File not specified!");

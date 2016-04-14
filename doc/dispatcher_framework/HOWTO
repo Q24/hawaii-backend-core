@@ -284,3 +284,14 @@ since there is no configuration for this call, nor a default executor set for th
 Note, we can define a system without a default executor. So, if we'd left out the 'default_queue' then the call
 'get_customer_by_id' would be executed by the 'default' executor.
 
+==Threads==
+Note that having a large pool of threads readily available to execute tasks comes at a price. Each thread, even while
+doing nothing takes up memory. This depends on the specific JVM settings, but default is half a megabyte. So, having 500
+threads waiting takes up 250M.
+
+The thread pools will remove unused threads if they're inactive for the configured amount of time. However, core threads
+will not be cleared. A balance must be sought between the time a thread is kept alive and the memory usage.
+
+==Response Handlers==
+A response handlers' responsibility is to transform the outcome of the request into the callers domain. The response
+handler *must* always set the response's status.

@@ -21,7 +21,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.RejectedExecutionException;
 
-public class HawaiiThreadPoolExecutorImplTest extends AbstractDispatcherFrameworkTest {
+public class HawaiiExecutorImplTest extends AbstractDispatcherFrameworkTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
