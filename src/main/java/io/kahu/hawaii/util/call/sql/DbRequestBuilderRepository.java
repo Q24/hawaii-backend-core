@@ -165,13 +165,14 @@ public class DbRequestBuilderRepository {
             Stream<Path> walk = Files.walk(myPath, 1);
             walk.forEach((path) -> {
                 String name = path.getFileName().toString();
-
-                DbRequestPrototype p = createPrototype(directory, name);
-                if (p != null) {
-                    try {
-                        add(new DbRequestBuilder(p));
-                    } catch (ServerException e) {
-                        e.printStackTrace();
+                if (name.endsWith(".sql")) {
+                    DbRequestPrototype p = createPrototype(directory, name);
+                    if (p != null) {
+                        try {
+                            add(new DbRequestBuilder(p));
+                        } catch (ServerException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
