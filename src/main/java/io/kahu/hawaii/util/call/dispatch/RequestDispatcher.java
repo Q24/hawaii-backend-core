@@ -15,11 +15,8 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
-import io.kahu.hawaii.util.call.AbortableRequest;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.call.ResponseStatus;
-import io.kahu.hawaii.util.call.http.HttpCall;
+import io.kahu.hawaii.util.call.*;
+import io.kahu.hawaii.util.call.dispatch.listener.RequestDispatchedListener;
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.LogManager;
 
@@ -27,18 +24,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class RequestDispatcher {
-    private final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-
     private final LogManager logManager;
-    private final ExecutorServiceRepository executorServiceRepository;
+    private final ExecutorRepository executorServiceRepository;
 
     private final List<RequestDispatchedListener> listeners = new ArrayList<>();
 
@@ -47,13 +40,13 @@ public class RequestDispatcher {
      * <em>each</em> call. Each listener is invoked before the actual dispatch
      * and this is done <em<sequentially</em>.
      *
-     * So please be very carefull what listeners you register.
+     * So please be very careful what listeners you register.
      *
      * @param executorServiceRepository
      * @param logManager
      * @param listeners
      */
-    public RequestDispatcher(ExecutorServiceRepository executorServiceRepository, LogManager logManager, RequestDispatchedListener... listeners) {
+    public RequestDispatcher(ExecutorRepository executorServiceRepository, LogManager logManager, RequestDispatchedListener... listeners) {
         this.executorServiceRepository = executorServiceRepository;
         this.logManager = logManager;
         if (listeners != null) {
@@ -61,11 +54,10 @@ public class RequestDispatcher {
                 this.listeners.add(listener);
             }
         }
-        httpClientBuilder.disableContentCompression();
     }
 
     public <T> Set<Response<T>> execute(RequestFactory<T> requestFactory, boolean waitForAnswers) throws ServerException {
-        Set<Response<T>> responses = new HashSet<Response<T>>();
+        Set<Response<T>> responses = new HashSet<>();
         CountDownLatch latch = new CountDownLatch(requestFactory.getNumberOfRequests());
         AbortableRequest<T> request = requestFactory.getNextRequest();
         while (request != null) {
@@ -86,65 +78,76 @@ public class RequestDispatcher {
         return responses;
     }
 
-    public <T> Response<T> execute(AbortableRequest<T> request) throws ServerException {
-        Response<T> response = execute(request, true);
-        return response;
-    }
-
+    /**
+     * Non blocking (asynchronous) execute of the request.
+     *
+     * @param request
+     * @param <T>
+     * @return
+     * @throws ServerException
+     */
     public <T> Response<T> executeAsync(AbortableRequest<T> request) throws ServerException {
-        Response<T> response = execute(request, false);
-        return response;
+        try {
+            executorServiceRepository.getAsyncExecutor(request).executeAsync(request, this);
+        } catch (RejectedExecutionException e) {
+            request.reject();
+            request.finish();
+        }
+        return request.getResponse();
     }
 
-    private <T> Response<T> execute(AbortableRequest<T> request, boolean synchronous) throws ServerException {
-        if (request instanceof HttpCall) {
-            ((HttpCall) request).setHttpClientBuilder(httpClientBuilder);
-        }
-        RequestContext<T> requestContext = request.getContext();
+    /**
+     * Blocking (synchronous) execute of the request.
+     *
+     * @param request
+     * @param <T>
+     * @return
+     * @throws ServerException
+     */
+    public <T> Response<T> execute(AbortableRequest<T> request) throws ServerException {
         Response<T> response = request.getResponse();
 
-        FutureRequest<T> task = new FutureRequest<T>(request);
         try {
-            HawaiiThreadPoolExecutor executor = executorServiceRepository.getService(request);
-            notifyListeners(request, synchronous, executor);
-            executor.execute(task);
+            HawaiiExecutor executor = executorServiceRepository.getExecutor(request);
 
-            if (synchronous) {
-                /*
-                 * Block until data is retrieved, but with a time out.
-                 */
-                task.get(requestContext.getTimeOut(), requestContext.getTimeOutUnit());
-                request.logResponse();
-            } else {
-                /*
-                 * Schedule a new task to verify the
-                 */
-                AsyncRequestTimeoutFutureTask<T> guardTask = new AsyncRequestTimeoutFutureTask<T>(task, logManager);
-                request.setGuardTask(guardTask);
+            notifyListeners(request, executor);
 
-                executorServiceRepository.getServiceMonitor(request).execute(guardTask);
-            }
+
+            FutureTask<T> task = executor.execute(request, response);
+
+            /*
+             * Block until data is retrieved, but with a time out.
+             */
+            TimeOut timeOut = request.getTimeOut();
+            task.get(timeOut.getDuration(), timeOut.getUnit());
+
         } catch (RejectedExecutionException e) {
-            request.setTooBusy();
-            request.logResponse();
-        } catch (InterruptedException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
-            request.logResponse();
-        } catch (ExecutionException e) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
-            request.logResponse();
+            // Executor is too busy (no threads available nor is there a place in the queue).
+            request.reject();
         } catch (TimeoutException e) {
+            // The task.get( ... ) is timed out. The execution takes too long.
             request.abort();
-            request.logResponse();
+        } catch (InterruptedException e) {
+            // ..
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Interrupted", e);
+        } catch (ExecutionException e) {
+            // Catches all exceptions from within the executor
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Execution exception", e.getCause());
+        } catch (Throwable t) {
+            // Catches all exceptions outside the executor
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Unexpected exception", t);
+        } finally {
+            request.finish();
         }
 
-        request.finish();
         return response;
     }
 
-    private <T> void notifyListeners(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor) {
+
+
+    private <T> void notifyListeners(AbortableRequest<T> request, HawaiiExecutor executor) {
         for (RequestDispatchedListener listener : listeners) {
-            listener.notifyBeforeDispatch(request, synchronous, executor);
+            listener.notifyBeforeDispatch(request, request.isAsync(), executor);
         }
     }
 }

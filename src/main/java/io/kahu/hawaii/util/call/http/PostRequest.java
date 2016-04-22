@@ -16,6 +16,7 @@
 package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.log.CallLogger;
@@ -29,5 +30,9 @@ public class PostRequest<T> extends AbortableHttpRequest<T> {
     public PostRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, URI uri, String payload,
             ResponseHandler<HttpResponse, T> responseHandler, CallLogger<T> logger) {
         super(requestDispatcher, context, responseHandler, new HttpPost(uri), logger);
+    }
+
+    public PostRequest(RequestPrototype<HttpResponse, T> prototype, URI uri) {
+        super(prototype, new HttpPost(uri));
     }
 }

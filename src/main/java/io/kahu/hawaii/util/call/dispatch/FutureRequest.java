@@ -17,18 +17,27 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
+import org.apache.http.annotation.NotThreadSafe;
 
 import java.util.concurrent.FutureTask;
 
+/**
+ * This class wraps an {@link AbortableRequest} to use inside an executor service.
+ *
+ * It creates a {@link CallableRequest} that does the actual work.
+ * @param <T>
+ */
+@NotThreadSafe
 public class FutureRequest<T> extends FutureTask<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
 
-    public FutureRequest(AbortableRequest<T> abortableRequest) {
-        super(new CallableRequest<T>(abortableRequest));
+    public FutureRequest(AbortableRequest<T> abortableRequest, Response<T> response) {
+        super(new CallableRequest<>(abortableRequest, response));
         this.abortableRequest = abortableRequest;
     }
 
-    public AbortableRequest<T> getAbortableRequest() {
-        return abortableRequest;
+    @Override
+    public String toString() {
+        return abortableRequest.getCallName() + " @ " + abortableRequest.getId();
     }
 }

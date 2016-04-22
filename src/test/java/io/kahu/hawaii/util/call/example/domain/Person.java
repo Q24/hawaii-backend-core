@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.example.domain;
 
-import io.kahu.hawaii.util.call.AbortableRequest;
+public class Person {
+    private String id;
+    private String name;
 
-/**
- * Listener invoked when a request is dispatched. This class should typically
- * contain a very lightweight method.
- */
-public interface RequestDispatchedListener {
-    <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor);
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

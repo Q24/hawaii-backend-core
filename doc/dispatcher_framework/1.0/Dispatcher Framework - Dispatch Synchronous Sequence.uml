@@ -1,0 +1,193 @@
+@startuml
+
+participant SomeService
+participant RequestStatistic
+participant Response
+participant ResponseHandler
+participant Request
+participant RequestDispatcher
+participant ExecutorServiceRepository
+participant HawaiiThreadPoolExecutor
+
+control Thread_1
+participant FutureTask
+participant CallableRequest
+
+create HawaiiThreadPoolExecutor
+ExecutorServiceRepository -> HawaiiThreadPoolExecutor : <b>new</b>
+
+...
+SomeService -> Request : execute( )
+
+activate Request #ddd
+    Request --> Request : setup( )
+    activate Request #fc9
+        create RequestStatistic
+        Request -> RequestStatistic : <b>new</b>
+        Request -> RequestStatistic : start( )
+        |||
+        create Response
+        Request -> Response : <b>new</b>
+    deactivate Request
+
+    Request -> RequestDispatcher : execute( this )
+    activate RequestDispatcher #ddd
+        RequestDispatcher --> RequestDispatcher : execute( request, <b>true</b> )
+
+        activate RequestDispatcher #fc9
+            RequestDispatcher -> Request : getContext()
+            activate Request #fc9
+                Request -> RequestDispatcher : context
+            deactivate Request
+            |||
+
+            RequestDispatcher -> Request : getResponse()
+            activate Request #fc9
+                Request -> RequestDispatcher : response
+            deactivate Request
+
+            create FutureTask
+            RequestDispatcher -> FutureTask : new( request )
+            activate FutureTask #ddd
+                create CallableRequest
+                FutureTask -> CallableRequest : new
+                FutureTask -[#grey]-> RequestDispatcher : task
+            deactivate FutureTask
+
+            |||
+
+            RequestDispatcher -> ExecutorServiceRepository : getService( request )
+            activate ExecutorServiceRepository #ddd
+                ExecutorServiceRepository -> HawaiiThreadPoolExecutor : getQueueStatistics
+                activate HawaiiThreadPoolExecutor #ddd
+                    HawaiiThreadPoolExecutor -> ExecutorServiceRepository : queueStatistics
+                deactivate HawaiiThreadPoolExecutor
+
+                ExecutorServiceRepository -> Request : getRequestStatistics
+                activate Request #fc9
+                    Request -> ExecutorServiceRepository : statistics
+                deactivate Request
+                ExecutorServiceRepository -> RequestStatistic : setQueueStatistics( queueStatistics )
+
+                ExecutorServiceRepository -> RequestDispatcher : executor
+            deactivate ExecutorServiceRepository
+            |||
+            RequestDispatcher -> RequestDispatcher : notifyListeners( request, executor )
+            activate RequestDispatcher #ffc
+            |||
+            deactivate RequestDispatcher
+
+            RequestDispatcher -> HawaiiThreadPoolExecutor : execute( task )
+
+            activate HawaiiThreadPoolExecutor #ddd
+                create Thread_1
+                HawaiiThreadPoolExecutor -> Thread_1 : run( task )
+                activate Thread_1 #ddd
+                |||
+                HawaiiThreadPoolExecutor -> RequestDispatcher
+            deactivate HawaiiThreadPoolExecutor
+
+            Thread_1 -> FutureTask : run( )
+            activate FutureTask #ddd
+                FutureTask -> CallableRequest : call( )
+            deactivate FutureTask
+
+            activate CallableRequest #ddd
+
+            RequestDispatcher -> Request : getTimeOut()
+            activate Request #fc9
+                Request -> RequestDispatcher : timeOut
+            deactivate Request
+
+            RequestDispatcher -> FutureTask : get( timeOut )
+            activate FutureTask #fc9
+            FutureTask -> FutureTask : awaitDone()
+            activate FutureTask #ffc
+
+            CallableRequest -> Request : getResponse( )
+            activate Request #fc9
+                Request -> CallableRequest : response
+            deactivate Request
+
+            CallableRequest -> Request : doExecute()
+            activate Request #fc9
+                Request -> RequestStatistic : startBackendRequest( )
+
+                Request -> Request : executeInternally( responseHandler )
+
+                activate Request #ffc
+                    Request -[#blue]> SomeSystem : do_some_call( )
+
+                    |||
+                    ... some what later ...
+                    |||
+
+                    SomeSystem -[#blue]> Request : <F>
+
+                    Request -> ResponseHandler : addToResponse( <F>, response )
+                    activate ResponseHandler #ddd
+                        ResponseHandler -> ResponseHandler : transform( <F> )
+
+                        activate ResponseHandler #fc9
+                            ResponseHandler -> ResponseHandler : <T>
+                        deactivate ResponseHandler
+
+                        ResponseHandler -> Response : set( <T> )
+                        ResponseHandler --> Request
+                    deactivate ResponseHandler
+                deactivate Request
+
+
+                Request -> RequestStatistic : endBackendRequest( )
+
+                Request -> CallableRequest
+            deactivate Request
+
+
+            CallableRequest -> Request : doCallback()
+            activate Request #fc9
+                |||
+                Request -> CallableRequest
+            deactivate Request
+
+            CallableRequest -> FutureTask  : response
+            deactivate CallableRequest
+            destroy CallableRequest
+
+            activate FutureTask #ddd
+                FutureTask --> FutureTask : signalDone( )
+                FutureTask --> Thread_1
+                destroy Thread_1
+            deactivate FutureTask
+                |||
+            deactivate FutureTask
+
+            FutureTask -> RequestDispatcher : response
+            deactivate FutureTask
+
+
+            destroy FutureTask
+
+
+
+            RequestDispatcher -> Request : logResponse( )
+
+            RequestDispatcher -> Request : finish( )
+            activate Request #fc9
+                Request -> RequestStatistic : finish( )
+                Request --> RequestDispatcher
+            deactivate Request
+
+            RequestDispatcher --> RequestDispatcher : response
+
+        deactivate RequestDispatcher
+
+        RequestDispatcher -> Request : response
+
+
+    deactivate RequestDispatcher
+    Request -> SomeService : response
+deactivate Request
+
+
+@enduml

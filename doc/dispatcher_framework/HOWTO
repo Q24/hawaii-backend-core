@@ -1,0 +1,297 @@
+== What is the request dispatcher framework ==
+The request dispatcher framework is used to execute requests in a controlled manner. It allows the requests to be
+aborted and guards against executing too many requests.
+
+This leads to a better performance for both the backend and the frontend.
+
+The frontend has a guarantee that calls will return in a predefined time. This avoids "hanging" calls. This way the
+frontend can release resources (ports, HTTP clients, ...) earlier. This leads to better response times and allows more
+requests to be executed. (More throughput.)
+
+The frontend can limit the number of outstanding requests per backend call. This limits the number of resources devoted
+to potential heavy calls. Again this leads to better (overall) response times and more throughput. (There are less
+calls that can claim critical resources, so more of those resources can be used for "nicer" backend requests.)
+
+At the same time, this acts as a guard for the backend systems. We can limit the number of requests that can be executed
+simultaneously. This way the backend system can devote all it's resources to answering the (smaller) number of requests,
+leading to an improved overall performance. (Less heavy calls at the same time, leading to better resource utilization.)
+
+Next to this, the dispatcher framework allows parallel execution of requests. It is possible to execute a request
+asynchronously. This allows the caller to execute multiple requests in parallel. The caller may execute a request in a
+"fire and forget" fashion, or the caller may eventually block until the request is done. Either way, the frontend can
+continue on other tasks, while a backend system is busy executing the request.
+
+There is a possibility to register a "callback" to handle the response of a call. This allows the frontend to execute
+some logic after the response has been received. Even when the call is executed in a fire and forget fashion. (It is
+not forbidden to do a blocking synchronous call, with a callback... But please explain the reasons to me ... ;-) )
+
+So, we have:
+- resource protection
+- protection against misbehaving backend systems
+- parallel requests
+- callbacks
+
+Ok, that was the "why do we care" section.
+
+==How does it work?==
+Basically we have a thread pool. Into this pool, we feed tasks. A task will execute the request we're interested in. By
+using the Java's executor framework, we can timeout on the response of the tasks. The executor has a thread pool and a
+queue for executing the tasks. The executor framework allows waiting for a tasks' response for a certain duration. It
+will time-out when the response is not ready within that duration.
+
+Now, there can be several executors. Each configured differently, for different systems or call types. This allows for
+better resource management.
+
+Usually we're not interested in the raw response, we translate the response into something manageable (our own domain).
+After a response is received the response is offered to a response handler. The response handler transforms the (raw)
+response into the desired result. For instance from JSON into a domain object of the frontend.
+
+For a synchronous request we wrap the request with a task, lookup the the executor and dispatch the request. If
+the executor has threads to spare, it will use a spare thread to execute the task. Otherwise it will queue the task
+until a thread becomes available. The execution of the task consists of:
+- performing the call;
+- transforming the response; and
+- calling the callback.
+After these steps, the thread is returned to the pool and the caller is unblocked and can use the response.
+
+Parallel requests are dispatched a bit differently. However, the task wrapping the request is different. The caller
+is directly unblocked, however, the the caller will be blocked when it tries to access the response.The caller can
+perform other work in parallel, but it accessing the response will force the caller to wait until the response is
+processed.
+
+The fire and forget pattern uses an asynchronous request, optionally with a callback. The caller however must not try to
+use the response (otherwise it will block!).
+
+How can we have several requests in parallel _and_ still do something with the combined results? Each request returns a
+response. The response is blocked until the response is processed. So, we can execute several requests, transform the
+responses, perhaps do some callbacks to handle some of the responses and wait for the requests' answers.
+
+In other words, we can execute several requests in parallel, storing the responses (but not looking at them), perhaps do
+some more work and only look at the responses when we need to. At this moment the caller will (potentially) be blocked
+and will have to wait until the response is finished. If the responses are already finished the caller is ofcource not
+blocked.
+
+==How does this protect us against misbehaving backend systems?==
+So, we can release callers after a given time? What about the threads that are busy fulfilling the requests? Or other
+resources consumed by the requests? For instance, the socket opened to do a REST call.
+
+After the task is timed out, the request is asked to abort itself. For HTTP connections some libraries allow closing
+the call (or socket) even if the call is not finished. For SQL queries, the JDBC standard allows stopping the query.
+
+This releases the resources of the request and signals the request that "something has happened" (usually by some
+horrible error). The request can then perform the necessary cleanups and stop. This then frees up the thread.
+
+So, if the abort is behaving correctly, the systems resources are guarded and the internal thread pools are protected as well.
+
+==Queue behaviour==
+Normally for the executor framework the executor inserts the task in a queue, using the offer mechanism. When the queue
+is full, the framework will create new threads. If both the queue and the thread pool are full the task is rejected.
+
+From our perspective this is not desirable. We want the number of threads to increase first. When the thread pool is
+fully utilized we want the tasks to pole up, until the queue is full. Again, when both are full the task is rejected.
+The difference is that we first want new threads to be created.
+
+For this we have an Hawaii specific implementation of the Executor, Queue and RejectionHandler. Together the behaviour
+is that we wrap the blocking queue given to the executor, for each task that is scheduled the executor is told the
+queue is full, this forces the executor to start a new thread. If no new thread can be started the task is delegated
+to the rejection handler. Our implementation of the rejection handler is that it adds the task to the queue. If this add
+fails, the task is rejected. Otherwise one of the threads of the executor will pick it up and execute it.
+
+==Examples==
+See the package io.kahu.hawaii.util.call.example in the test sources.
+
+===Example 1.===
+Suppose we have a CRM system, that allows retrieving of customers. We want to retrieve a customer from this system, but
+be sure that the response is received within 2 seconds. Otherwise a time out will be generated. The presentation of this
+to the users of the system is out of scope for this example. Let's focus on dispatching the request.
+
+The resource URL is something like:
+    http://host:port/customer/{customer_id}
+
+The response is a JSON, in the form of:
+    {
+        "id": "1",
+        "name": "Some name"
+    }
+
+We will walk through the code of the example. First, here is the code:
+    /*
+     * Dispatcher Framework setup
+     */
+    // Create a log manager (purpose and explanation out of scope for this example).
+    LogManager logManager = new DefaultLogManager(new LogManagerConfiguration(new LoggingConfiguration()));
+
+    // Create an executor, with a thread pool of core size 1 and max size 2 and with a queue of size 4.
+    // Threads 'outside' the core pool that are still active after one minute will get cleaned up.
+    HawaiiExecutorImpl executor = new HawaiiExecutorImpl(ExecutorRepository.DEFAULT_POOL_NAME,
+            1, 2, 4,
+            new TimeOut(1, TimeUnit.MINUTES),
+            logManager);
+
+    // Create the repository that holds all executors
+    executorRepository = new ExecutorRepository(logManager);
+    executorRepository.add(executor);
+
+    // Create a new request dispatcher.
+    RequestDispatcher requestDispatcher = new RequestDispatcher(executorRepository, logManager);
+
+    /*
+     * Setup the request (builder).
+     */
+    HttpRequestContext<Person> context = new HttpRequestContext<>(HttpMethod.GET,
+            "http://localhost:" + SERVER_PORT, "/customer/{customer-id}",
+            "crm", "get_customer_by_id",
+            new TimeOut(2, TimeUnit.SECONDS));
+
+    CallLogger callLogger = new CallLoggerImpl<>(logManager, new HttpRequestLogger(), new JsonPayloadResponseLogger<Person>());
+    RequestPrototype<HttpResponse, Person> prototype = new RequestPrototype(requestDispatcher, context, new GetCustomerByIdResponseHandler(), callLogger);
+    HttpRequestBuilder<Person> getCustomerByIdRequest = new HttpRequestBuilder<>(prototype);
+
+    /*
+     * Use the request (builder).
+     */
+    Request<Person> request = getCustomerByIdRequest.newInstance().withPathVariables("10").build();
+    Response<Person> response = request.execute();
+    Person person = response.get();
+
+What happens here is that the request is build from a request builder. The HTTP request builder substitutes '10' for the
+path variable 'customer-id'. This path variable is set in the request context ("/customer/{customer-id}"). This context
+also defines the name of the call (crm.get_customer_by_id) and the time out of 2 seconds. The name of the call consists
+of the backend name 'crm' and the method name 'get_customer_by_id'.
+
+When the request.execute() is called, the request is passed to the request dispatcher. The dispatcher asks the executor
+repository which executor is configured for this request. Since there is no specific configuration the default executor
+is used.
+
+The dispatcher then passes the request to the executor, which then executes the request. During the execution the
+call logger is invoked to log the start and end of the request. This takes care of logging the input and output of the
+service called. After the response has been received, the GetCustomerByIdResponseHandler is invoked to transform the
+JSON response into a Person object.
+
+If the response is received and transformed within the time out of 2 seconds the request.execute() will return and the
+response.get() will return the person retrieved.
+
+If the response is NOT received within 2 seconds, the response.get() will throw a ServerException.
+
+=== Why is the name of the builder "getCustomerByIdRequest"? ===
+The reason is simple, we can chain the last few lines:
+    Person person = getCustomerByIdRequest.newInstance().withPathVariables("10").build().execute().get();
+
+=== How can we create an asynchronous request of this? ===
+Simple, instead of using 'execute()' we could use 'executeAsync()':
+    Response<Person> response = getCustomerByIdRequest.newInstance().withPathVariables("10").build().executeAsync();
+    // Do some stuff...
+    ...
+    // Now retrieve the person we've asked for.
+    Person person = response.get();
+
+
+==How to configure multiple executors==
+We can configure multiple executors. For instance all calls for a specific backend system go through one executor, this
+way we limit the number of concurrent requests to this system. Another use case is that there are some important
+requests, for which we want to guarantee a dedicated number of simultaneous requests.
+
+How does this work? When we ask the repository for and executor for a specific request, the request is asked which
+executor is configured for it. In case no executor is configured, the request configuration is retrieved and the
+executor for this configuration is used. In case there is no configuration, the default executor for the backend service
+is retrieved. If that too is not configured, the default executor is used. So:
+1. Look in the request itself;
+2. Look at the configuration for the request;
+3. Look at the default executor for the backend system;
+4. Look at the default executor.
+
+The found executor is then stored in the configuration and the request is updated with this configuration.
+
+So, how can we configure all this?
+1. We cannot set the configuration in the request itself (or, it's not intended to be set).
+2. We can retrieve the request configuration by calling 'requestConfigurations.get(callName)' and modify the executor.
+    The call name is of the form 'system.method', for instance 'crm.get_customer_by_id'.
+3. We can add a default executor by calling 'executorRepository.addDefaultRepository(system, executorName)'
+4. The default executor has to be present, and is called 'default'.
+
+There is another way to do this, with a configuration file. The DispatcherConfigurator can read a configuration file.
+The format is:
+
+    {
+        "queues": [
+            {
+                "core_pool_size": 1,
+                "keep_alive_time": 60,
+                "max_pending_requests": 60,
+                "max_pool_size": 60,
+                "name": "default"
+            },
+            {
+                "core_pool_size": 10,
+                "keep_alive_time": 60,
+                "max_pending_requests": 6000,
+                "max_pool_size": 60,
+                "name": "async_executor_guard"
+            },
+            {
+                "core_pool_size": 10,
+                "keep_alive_time": 60,
+                "max_pending_requests": 80,
+                "max_pool_size": 40,
+                "name": "crm"
+            },
+            {
+                "core_pool_size": 10,
+                "keep_alive_time": 60,
+                "max_pending_requests": 20,
+                "max_pool_size": 20,
+                "name": "crm_important"
+            }
+        ],
+        "systems": [
+                {
+                    "calls": [
+                        {
+                            "method": "update_customer",
+                            "queue": "crm_important",
+                            "time_out": 20
+                        },
+                        {
+                            "method": "get_customer_by_id",
+                            "time_out": 2
+                        }
+                    ],
+                    "default_queue": "crm",
+                    "name": "crm"
+                }
+        ]
+    }
+
+This configuration defines a number of executors (called queues here) and (optionally) a number of systems. The first
+two queues ('default' and 'async_executor_guard') must always be defined. The async executor guard is the executor that
+is used for dispatching asynchronous calls. At the moment, there is only one asynchronous executor for all requests.
+
+Note you can make the executors (pools + queues) as small as you like, however, make sure that the requests are not
+rejected sine the queue is full, nor that the requests timeout because there are too few threads available.
+
+Next to the two system executors the 'crm' and 'crm_important' executors are defined.
+
+In the systems section we define a system with the name 'crm'. The default executor (queue) is called 'crm' as well. We
+define two calls, 'update_customer' and 'get_customer_by_id'. The first is executed by the 'crm_important' executor.
+The latter does not have an explicit executor configured, so the default of 'crm' will be used.
+
+Now, suppose we have another call, 'crm.delete_customer', then this call without configuration will go to the 'crm'
+executor, since there is a match on the systems' name.
+
+If we have yet another call, say 'billing.get_bill_for_customer', then this call would go to the 'default' executor,
+since there is no configuration for this call, nor a default executor set for this system.
+
+Note, we can define a system without a default executor. So, if we'd left out the 'default_queue' then the call
+'get_customer_by_id' would be executed by the 'default' executor.
+
+==Threads==
+Note that having a large pool of threads readily available to execute tasks comes at a price. Each thread, even while
+doing nothing takes up memory. This depends on the specific JVM settings, but default is half a megabyte. So, having 500
+threads waiting takes up 250M.
+
+The thread pools will remove unused threads if they're inactive for the configured amount of time. However, core threads
+will not be cleared. A balance must be sought between the time a thread is kept alive and the memory usage.
+
+==Response Handlers==
+A response handlers' responsibility is to transform the outcome of the request into the callers domain. The response
+handler *must* always set the response's status.

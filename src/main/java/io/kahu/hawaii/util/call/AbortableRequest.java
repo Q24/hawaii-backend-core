@@ -15,33 +15,53 @@
  */
 package io.kahu.hawaii.util.call;
 
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
+/**
+ * Internal interface, should never be used directly. Use Request. For implementations, create a subclass of AbstractAbortableRequest.
+ * @param <T>
+ */
 public interface AbortableRequest<T> extends Request<T> {
+    TimeOut getTimeOut();
+
     RequestContext<T> getContext();
 
-    void logResponse();
+    void setQueueStatistic(QueueStatistic queueStatistic);
 
     RequestStatistic getStatistic();
 
-    Response<T> doExecute() throws Throwable;
-
-    void abort();
-
     void setCallback(ResponseCallback<T> callback);
+
+    Response<T> doExecute() throws Throwable;
 
     void doCallback();
 
+    /**
+     * In case the request takes too long, the request is aborted by invoking this method.
+     */
+    void abort();
+
+    /**
+     * Signal the end of the request, releasing the lock on the response. Clients using Response#get() will be signalled to conintue.
+     */
     void finish();
 
-    void setTooBusy();
+    /**
+     * In case the system is too busy, the request can be rejected.
+     */
+    void reject();
 
+    /**
+     * internal use only
+     * @return
+     */
     Response<T> getResponse();
 
-    void setGuardTask(FutureTask<Response<T>> task);
-
     void setLatch(CountDownLatch latch);
+
+    boolean isAsync();
 }

@@ -15,7 +15,7 @@
  */
 package io.kahu.hawaii.util.call.http.cxf;
 
-import io.kahu.hawaii.util.call.dispatch.RequestConfigurations;
+import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 
 import java.io.IOException;

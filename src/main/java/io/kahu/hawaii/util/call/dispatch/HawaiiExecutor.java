@@ -15,15 +15,23 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.logger.LogManager;
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
-public class AsyncRequestTimeoutFutureTask<T> extends FutureTask<Response<T>> {
+public interface HawaiiExecutor {
+    String getName();
 
-    public AsyncRequestTimeoutFutureTask(FutureRequest<T> asyncRequest, LogManager logManager) {
-        super(new AsyncRequestTimeoutCallable<T>(asyncRequest, logManager));
-    }
+    void rejectTask();
 
+    QueueStatistic getQueueStatistic();
+
+    <T> FutureTask<T> execute(AbortableRequest<T> request, Response<T> response);
+
+    <T> FutureTask<T> executeAsync(AbortableRequest<T> request, RequestDispatcher dispatcher);
+
+    void shutdown();
 }

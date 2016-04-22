@@ -15,11 +15,14 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import org.apache.http.annotation.ThreadSafe;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+@ThreadSafe
 public class HawaiiBlockingQueue<E> implements BlockingQueue<E> {
     private final BlockingQueue<E> delegate;
 

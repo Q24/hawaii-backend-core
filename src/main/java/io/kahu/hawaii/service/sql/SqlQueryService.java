@@ -19,6 +19,6 @@ import io.kahu.hawaii.util.exception.ServerException;
 
 public interface SqlQueryService {
 
-    public String getSqlQuery(String resourceName, String queryName) throws ServerException;
+    String getSqlQuery(String resourceName, String queryName) throws ServerException;
 
 }

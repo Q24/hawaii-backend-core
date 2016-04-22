@@ -47,12 +47,10 @@ public class SoapResponseHandler implements ResponseHandler<HttpResponse, String
 
         try {
             doAddToResponse(payload, response);
-        } catch (Exception exception) {
-            response.setStatus(ResponseStatus.BACKEND_FAILURE, exception.getMessage(), exception);
-        } catch (AssertionError error) {
-            response.setStatus(ResponseStatus.BACKEND_FAILURE, error.getMessage(), error);
+        } catch (Exception | AssertionError exception) {
+            response.setStatus(ResponseStatus.BACKEND_FAILURE, exception);
         } catch (Throwable t) {
-            response.setStatus(ResponseStatus.INTERNAL_FAILURE, t.getMessage(), t);
+            response.setStatus(ResponseStatus.INTERNAL_FAILURE, t);
         }
     }
 

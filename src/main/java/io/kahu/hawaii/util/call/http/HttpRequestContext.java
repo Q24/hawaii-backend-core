@@ -16,13 +16,20 @@
 package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.TimeOut;
+
+import java.util.concurrent.TimeUnit;
 
 public class HttpRequestContext<T> extends RequestContext<T> {
     private final HttpMethod method;
     private String baseUrl;
     private String path;
 
+    @Deprecated
     public HttpRequestContext(HttpMethod method, String baseUrl, String path, String backendSystem, String methodName, int timeOut) {
+        this(method, baseUrl, path, backendSystem, methodName, new TimeOut(timeOut, TimeUnit.SECONDS));
+    }
+    public HttpRequestContext(HttpMethod method, String baseUrl, String path, String backendSystem, String methodName, TimeOut timeOut) {
         super(backendSystem, methodName, timeOut);
         this.method = method;
         this.baseUrl = baseUrl;

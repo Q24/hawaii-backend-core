@@ -16,19 +16,25 @@
 package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
+import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.logger.LoggingContext;
+import org.apache.http.annotation.NotThreadSafe;
 
-public class LogCallIdListener implements RequestDispatchedListener {
+import java.util.concurrent.Callable;
+
+@NotThreadSafe
+public class AsyncCallableRequest<T> implements Callable<Response<T>> {
+    private final AbortableRequest<T> abortableRequest;
+    private final RequestDispatcher requestDispatcher;
+
+    public AsyncCallableRequest(AbortableRequest<T> abortableRequest, RequestDispatcher requestDispatcher) {
+        this.abortableRequest = abortableRequest;
+        this.requestDispatcher = requestDispatcher;
+    }
 
     @Override
-    public <T> void notifyBeforeDispatch(AbortableRequest<T> request, boolean synchronous, HawaiiThreadPoolExecutor executor) {
-        LoggingContext loggingContext = LoggingContext.get();
-        Object foo = loggingContext.getFromRootContext("call_ids");
-        if (foo != null) {
-            loggingContext.putAtRootContext("call_ids", foo + ", " + request.getId());
-        } else {
-            loggingContext.putAtRootContext("call_ids", request.getId());
-        }
+    public Response<T> call() throws Exception {
+        return requestDispatcher.execute(abortableRequest);
     }
 
 }

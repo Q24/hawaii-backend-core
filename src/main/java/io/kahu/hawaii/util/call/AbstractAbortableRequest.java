@@ -17,6 +17,7 @@ package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.log.CallLogger;
+import io.kahu.hawaii.util.call.statistics.QueueStatistic;
 import io.kahu.hawaii.util.call.statistics.RequestStatistic;
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
@@ -37,12 +38,27 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     private boolean isAsync = false;
     private boolean error = false;
-    private boolean afterCallback = false;
     private Response<T> response = null;
     private String id;
     private CountDownLatch latch;
 
-    private FutureTask<Response<T>> guardTask;
+    public AbstractAbortableRequest(RequestPrototype<F, T>  prototype) {
+        this.requestDispatcher = prototype.getRequestDispatcher();
+        this.context = prototype.getContext();
+        this.responseHandler = prototype.getResponseHandler();
+        this.logger = prototype.getLogger();
+    }
+
+    public AbstractAbortableRequest(RequestPrototype<F, T>  prototype, ResponseHandler<F, T> responseHandler) {
+        this.requestDispatcher = prototype.getRequestDispatcher();
+        this.context = prototype.getContext();
+        if (responseHandler == null) {
+            this.responseHandler = prototype.getResponseHandler();
+        } else {
+            this.responseHandler = responseHandler;
+        }
+        this.logger = prototype.getLogger();
+    }
 
     public AbstractAbortableRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, ResponseHandler<F, T> responseHandler, CallLogger<T> logger) {
         this.requestDispatcher = requestDispatcher;
@@ -58,15 +74,10 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     @Override
     public void abort() {
+        this.error = true;
         statistic.endBackendRequest();
-        statistic.endRequest();
-        setTimeOut();
+        response.set(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse(), "Request '" + getId() + "' timed out.");
         abortInternally();
-    }
-
-    @Override
-    public void setGuardTask(FutureTask<Response<T>> task) {
-        this.guardTask = task;
     }
 
     @Override
@@ -78,11 +89,11 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
-    public void executeAsync() throws ServerException {
+    public Response<T> executeAsync() throws ServerException {
         try (PopResource pop = logger.getLogManager().pushContext()) {
             setup();
             this.isAsync = true;
-            requestDispatcher.executeAsync(this);
+            return requestDispatcher.executeAsync(this);
         }
     }
 
@@ -97,34 +108,20 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         statistic.startRequest();
         logger.logRequest(this);
 
-        response = new Response<T>(this, statistic, logger.getLogManager().getContextSnapshot());
+        response = new Response<>(this, statistic, logger.getLogManager().getContextSnapshot());
         this.isAsync = false;
         this.error = false;
-        this.afterCallback = false;
     }
 
     @Override
     public Response<T> doExecute() throws Throwable {
-        boolean errorCaught = false;
         try {
             statistic.startBackendRequest();
-            executeInternally(new TimingResponseHandler<F, T>(responseHandler, statistic), response);
+            executeInternally(new TimingResponseHandler<>(responseHandler, statistic), response);
         } catch (Throwable t) {
-            errorCaught = true;
             response.setStatus(ResponseStatus.INTERNAL_FAILURE, "Error executing call.", t);
             throw t;
         } finally {
-            if (latch != null) {
-                latch.countDown();
-            }
-            if (isAsync && guardTask != null) {
-                if (errorCaught && guardTask == null) {
-                    // Ignored
-                } else {
-                    // remove guard task
-                    guardTask.cancel(false);
-                }
-            }
             statistic.endBackendRequest();
         }
         return response;
@@ -153,17 +150,22 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         if (callback != null && !error) {
             try {
                 statistic.startCallback();
-                callback.handle(response.get());
+                callback.handle(response.getResponsePayload());
             } catch (Exception e) {
                 logger.getLogManager().error(CoreLoggers.SERVER_CALLS, e);
             } finally {
                 statistic.endCallback();
             }
         }
-        afterCallback = true;
-        if (isAsync) {
-            finish();
+
+        if (latch != null) {
+            latch.countDown();
         }
+    }
+
+    @Override
+    public void setQueueStatistic(QueueStatistic queueStatistic) {
+        getStatistic().setQueueStatistic(queueStatistic);
     }
 
     @Override
@@ -173,24 +175,18 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
 
     @Override
     public void finish() {
-        if (afterCallback || error) {
-            statistic.endRequest();
-        }
+        statistic.endRequest();
+        response.signalDone();
+        logResponse();
     }
 
     @Override
-    public void setTooBusy() {
+    public void reject() {
         this.error = true;
-        response.setMessage("Request '" + getId() + "' rejected, too busy.");
-        response.setStatus(ResponseStatus.TOO_BUSY, getContext().getRejectResponse());
+        response.set(ResponseStatus.TOO_BUSY, getContext().getRejectResponse(), "Request '" + getId() + "' rejected, too busy.");
         rejectInternally();
     }
 
-    public void setTimeOut() {
-        this.error = true;
-        response.setMessage("Request '" + getId() + "' timed out.");
-        response.setStatus(ResponseStatus.TIME_OUT, getContext().getTimeOutResponse());
-    }
 
     @Override
     public Response<T> getResponse() {
@@ -213,7 +209,30 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
     }
 
     @Override
-    public void logResponse() {
+    public boolean isAsync() {
+        return isAsync;
+    }
+
+    @Override
+    public TimeOut getTimeOut() {
+        return getContext().getTimeOut();
+    }
+
+    private void logResponse() {
         logger.logResponse(response);
+    }
+
+    /*
+     * For test purposes
+     */
+    protected void setStatistic(RequestStatistic statistic) {
+        this.statistic = statistic;
+    }
+
+    /*
+     * For test purposes
+     */
+    protected void setResponse(Response<T> response) {
+        this.response = response;
     }
 }

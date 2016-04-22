@@ -13,40 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.configuration;
+
+import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.TimeOut;
+import org.apache.http.annotation.NotThreadSafe;
 
 import java.util.concurrent.TimeUnit;
 
+@NotThreadSafe
 public class RequestConfiguration {
-    private String queue = ExecutorServiceRepository.DEFAULT_POOL_NAME;
-    private final Integer defaultTimeOut = 10;
-    private Integer timeOut = null;
+    private String executorName;
+    private TimeOut defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
+    private TimeOut timeOut = null;
+    private RequestContext<?> context;
 
-    public String getQueue() {
-        return queue;
+    public String getExecutorName() {
+        return executorName;
     }
 
-    public void setQueue(String queue) {
-        this.queue = queue;
+    public void setExecutorName(String executorName) {
+        this.executorName = executorName;
     }
 
-    public Integer getTimeOut() {
+    public TimeOut getTimeOut() {
         return timeOut;
     }
 
-    public void setTimeOut(Integer timeOut) {
+    public void setTimeOut(TimeOut timeOut) {
         this.timeOut = timeOut;
     }
 
-    public TimeUnit getTimeOutUnit() {
-        return TimeUnit.SECONDS;
-    }
-
-    public int getTimeOutOrDefaultIfUnset() {
+    public TimeOut getTimeOutOrDefaultIfUnset() {
         if (timeOut == null) {
             return defaultTimeOut;
         }
         return timeOut;
     }
 
+    public RequestContext<?> getContext() {
+        return context;
+    }
+
+    public void setContext(RequestContext<?> context) {
+        this.context = context;
+    }
 }

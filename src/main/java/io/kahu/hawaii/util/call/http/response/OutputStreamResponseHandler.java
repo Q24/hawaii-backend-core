@@ -37,7 +37,6 @@ public class OutputStreamResponseHandler extends AbstractHttpResponseHandler<Out
 
     @Override
     protected void doAddToResponse(HttpResponse payload, Response<OutputStream> response) throws Exception {
-        response.setStatus(ResponseStatus.SUCCESS);
         HttpResponseToOutputStreamWriter writer = new HttpResponseToOutputStreamWriter();
         if (out == null) {
             throw new ServerException(ServerError.IO, "OutputStream not specified!");
@@ -45,6 +44,5 @@ public class OutputStreamResponseHandler extends AbstractHttpResponseHandler<Out
         writer.writeResponseToOutputStream(payload, out);
 
         response.set(out);
-
     }
 }

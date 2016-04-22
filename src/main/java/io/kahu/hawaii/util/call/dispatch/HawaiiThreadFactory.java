@@ -15,8 +15,11 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import org.apache.http.annotation.ThreadSafe;
+
 import java.util.concurrent.ThreadFactory;
 
+@ThreadSafe
 public class HawaiiThreadFactory implements ThreadFactory {
     private final String threadPrefix;
     private int nrThreads;

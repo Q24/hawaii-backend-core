@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.configuration;
+
+import io.kahu.hawaii.util.call.TimeOut;
+import io.kahu.hawaii.util.call.http.HttpRequestContext;
+import org.jolokia.jmx.JsonMBean;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jolokia.jmx.JsonMBean;
+import java.util.concurrent.TimeUnit;
 
 @JsonMBean
 public class RequestConfigurations {
-    private final Map<String, RequestConfiguration> configurations = new HashMap<String, RequestConfiguration>();
+    private final Map<String, RequestConfiguration> configurations = new HashMap<>();
 
     public RequestConfiguration get(String key) {
         RequestConfiguration configuration = configurations.get(key);
@@ -34,10 +37,17 @@ public class RequestConfigurations {
     }
 
     public void setTimeOut(String key, int timeOut) {
-        get(key).setTimeOut(timeOut);
+        get(key).setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
     }
 
-    public void setQueue(String key, String queue) {
-        get(key).setQueue(queue);
+    public void setExecutorName(String key, String queue) {
+        get(key).setExecutorName(queue);
+    }
+
+    public void changeUrl(String system, String method, String url) {
+        String key = system + "." + method;
+        RequestConfiguration configuration = get(key);
+        HttpRequestContext context = (HttpRequestContext) configuration.getContext();
+        context.setBaseUrl(url);
     }
 }

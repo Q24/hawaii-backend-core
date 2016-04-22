@@ -17,32 +17,38 @@ package io.kahu.hawaii.util.call.dispatch;
 
 import io.kahu.hawaii.util.call.AbortableRequest;
 import io.kahu.hawaii.util.call.Response;
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.LoggingContext;
 
 import java.util.concurrent.Callable;
 
 public class CallableRequest<T> implements Callable<Response<T>> {
     private final AbortableRequest<T> abortableRequest;
+    private final Response<T> response;
 
-    public CallableRequest(AbortableRequest<T> abortableRequest) {
+    public CallableRequest(AbortableRequest<T> abortableRequest, Response<T> response) {
         this.abortableRequest = abortableRequest;
+        this.response = response;
     }
 
     @Override
     public Response<T> call() throws Exception {
         LoggingContext.remove();
-        Response<T> response = abortableRequest.getResponse();
         try {
             abortableRequest.doExecute();
+            if (abortableRequest.getResponse().getStatus() == null) {
+                throw new ServerException(ServerError.METHOD_ERROR, "Response handler did not set the response status.");
+            }
+
             abortableRequest.doCallback();
+
             return response;
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         } catch (Throwable t) {
-            throw new Exception(t);
+            throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, t);
         } finally {
-            abortableRequest.logResponse();
             LoggingContext.remove();
         }
     }

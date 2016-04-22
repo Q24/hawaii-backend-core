@@ -17,10 +17,14 @@ package io.kahu.hawaii.util.call;
 
 import io.kahu.hawaii.util.exception.ServerException;
 
+/**
+ * External interface of AbortableRequest
+ * @param <T>
+ */
 public interface Request<T> {
     Response<T> execute() throws ServerException;
 
-    void executeAsync() throws ServerException;
+    Response<T> executeAsync() throws ServerException;
 
     String getId();
 

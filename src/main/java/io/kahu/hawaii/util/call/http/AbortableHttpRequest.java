@@ -15,11 +15,7 @@
  */
 package io.kahu.hawaii.util.call.http;
 
-import io.kahu.hawaii.util.call.AbstractAbortableRequest;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.Response;
-import io.kahu.hawaii.util.call.ResponseHandler;
-import io.kahu.hawaii.util.call.ResponseStatus;
+import io.kahu.hawaii.util.call.*;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.exception.ServerError;
@@ -52,6 +48,12 @@ public class AbortableHttpRequest<T> extends AbstractAbortableRequest<HttpRespon
         this.httpClientContext = HttpClientContext.create();
     }
 
+    public AbortableHttpRequest(RequestPrototype<HttpResponse, T> prototype, HttpRequestBase httpRequest) {
+        super(prototype);
+        this.httpRequest = httpRequest;
+        this.httpClientContext = HttpClientContext.create();
+    }
+
     @Override
     public void setHttpClientBuilder(HttpClientBuilder httpClientBuilder) {
         this.httpClientBuilder = httpClientBuilder;
@@ -77,7 +79,7 @@ public class AbortableHttpRequest<T> extends AbstractAbortableRequest<HttpRespon
             throw new ServerException(ServerError.IO, e);
         } catch (IOException e) {
             if (!aborted) {
-                response.setStatus(ResponseStatus.BACKEND_FAILURE, e.getMessage(), e);
+                response.setStatus(ResponseStatus.BACKEND_FAILURE, e);
             }
         } finally {
             httpRequest.releaseConnection();

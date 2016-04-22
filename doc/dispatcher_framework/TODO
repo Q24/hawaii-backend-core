@@ -1,0 +1,87 @@
+== Call Dispatch Framework ==
+
+=== Investigate ===
+[ ] ? Cleanup {tx, call} ids? Make dispatcher framework clear the ID's. See logging refactoring.
+
+[ ] ? Usage of Response.setMessage / getMessage
+
+[X] What happens in case of exception in CallableRequest?
+    - It is rethrown in ExecutionException, caught in RequestDispatcher
+
+[ ] Split Request into internal interface and external interface?
+
+[ ] ? Remove response from exec and execAsync?
+    ! Remove requestDispatcher's responses. Add "response" to interface, remove getResponse from Request.
+
+[ ] ? Register timeout count on queue?
+
+[ ] ? Change configuration of requests (RequestConfiguration / Context / Constructor)
+
+=== Bug ===
+
+=== Todo ===
+[X] Make a request executor, use request executor in dispatcher
+	- Changed request dispatcher to have one simple inner 'execute( request )' method.
+[X] Make an asyc wrapper around request executor
+	- Introduced AsyncFutureRequest, AsyncRequestCallable
+
+[X] Add 'isSynchronous' to Request
+
+[X] Make (a)sync call block on "Response#get()"
+
+[X] Remove getAbortableRequest from FutureRequest
+
+[X] Set queue statistics inside dispatcher (not in executor repository)
+
+[X] Move finish to end of request dispatcher, add logResult to request.finish()
+	- Finish does signalDone, logResponse
+
+[X] Remove finish() call in "AbstractAbortableRequest#doCallBack()"
+
+[X] Mark classes as @Threadsafe / @NotThreadSafe
+
+[X] Remove HttpClientBuilder from request dispatcher.
+
+[ ] Make sure in error situations the response is logged.
+[X] Log request & queue statistics of async requests
+
+[X] Move logging of schedule of request to ThreadPoolExecutor.
+
+[X] Introduce "TimeOut" with Unit and Size
+
+[X] Rename HawaiiThreadPoolExecutor into RequestExecutor. (Same for ..Impl.)
+
+[ ] Tests
+
+
+[X] Documentation
+    [X] Configuration
+        [X] Queues / Executors
+        [X] Requests
+    [ ] Examples
+        [ ] Example1 - Simple configuration
+        [ ] Example2 - Configuration of a specific executor
+
+[X] Ensure request always returns an answer (i.e. response status is set).
+
+[ ] AbstractHttpResponseHanlder - Create method to accept / reject a statusline (200 , 400 , ....)
+
+=== Todo (incompatible with 1.0) ====
+[ ] executorRepository should have an 'async pool'
+	! Different branch / pull request, config change needed!
+
+[ ] Remove LogManager from CallLogger
+[ ] Remove LoggingContextMap from Response
+
+[ ] Create HTTP Response to extend Response
+	! Different branch / pull request
+
+=== New ===
+[X] SQL
+    ! See ContactDbRepository#getContactById() for implementation on kahuna-backend branch 'query_via_call_framework'
+
+[X] Builders
+    [X] Prototype in builders
+        [ ] Change prototype into AbstractAbortableRequest / the real deal?
+    [X] Add prototype to AbstractAbortableRequest and HttpRequestBuilder
+    [X] Create SQL Builder

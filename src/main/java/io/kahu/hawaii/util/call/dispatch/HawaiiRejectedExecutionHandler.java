@@ -15,13 +15,21 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
+import io.kahu.hawaii.util.logger.CoreLoggers;
+import io.kahu.hawaii.util.logger.LogManager;
+import org.apache.http.annotation.ThreadSafe;
+
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
+@ThreadSafe
 public class HawaiiRejectedExecutionHandler implements RejectedExecutionHandler {
+    private final LogManager logManager;
     private final RejectedExecutionHandler delegate;
 
-    public HawaiiRejectedExecutionHandler(RejectedExecutionHandler delegate) {
+    public HawaiiRejectedExecutionHandler(LogManager logManager, RejectedExecutionHandler delegate) {
+        this.logManager = logManager;
         this.delegate = delegate;
     }
 
@@ -34,10 +42,17 @@ public class HawaiiRejectedExecutionHandler implements RejectedExecutionHandler 
         try {
             executor.getQueue().add(task);
         } catch (IllegalStateException e) {
-            if (executor instanceof HawaiiThreadPoolExecutorImpl) {
-                ((HawaiiThreadPoolExecutorImpl) executor).rejectTask();
+            try {
+                ((HawaiiExecutorImpl) executor).rejectTask();
+                if (delegate != null) {
+                    delegate.rejectedExecution(task, executor);
+                }
             }
-            delegate.rejectedExecution(task, executor);
+            finally {
+                logManager.info(CoreLoggers.SERVER, "Rejected '" + task + "' since the pool and queue size has been exceeded.");
+                throw new RejectedExecutionException();
+            }
+
         }
     }
 

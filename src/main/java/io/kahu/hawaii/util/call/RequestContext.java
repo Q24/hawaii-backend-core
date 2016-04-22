@@ -15,12 +15,13 @@
  */
 package io.kahu.hawaii.util.call;
 
-import io.kahu.hawaii.util.call.dispatch.RequestConfiguration;
+import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.http.annotation.ThreadSafe;
 
+@ThreadSafe
 public class RequestContext<T> {
     private final String backendSystem;
     private final String methodName;
@@ -33,7 +34,17 @@ public class RequestContext<T> {
     private T rejected;
     private T aborted;
 
+    public RequestContext(String backendSystem, String methodName) {
+        this.backendSystem = backendSystem;
+        this.methodName = methodName;
+        configuration = new RequestConfiguration();
+    }
+
     public RequestContext(String backendSystem, String methodName, int timeOut) {
+        this(backendSystem, methodName, new TimeOut(timeOut, TimeUnit.SECONDS));
+    }
+
+    public RequestContext(String backendSystem, String methodName, TimeOut timeOut) {
         this.backendSystem = backendSystem;
         this.methodName = methodName;
         configuration = new RequestConfiguration();
@@ -78,27 +89,24 @@ public class RequestContext<T> {
     }
 
     public void setConfiguration(RequestConfiguration configuration) {
-        if (this.configuration == null) {
-            this.configuration = configuration;
-        } else {
-            if (StringUtils.isNotBlank(configuration.getQueue())) {
-                this.configuration.setQueue(configuration.getQueue());
+        if (this.configuration != null) {
+            // Copy existing configuration values over new values if they are null.
+            if (configuration.getTimeOut() == null) {
+                configuration.setTimeOut(this.configuration.getTimeOut());
             }
-            if (configuration.getTimeOut() != null) {
-                this.configuration.setTimeOut(configuration.getTimeOut());
+            if (configuration.getExecutorName() == null) {
+                configuration.setExecutorName(this.configuration.getExecutorName());
             }
         }
+
+        this.configuration = configuration;
     }
 
-    public int getTimeOut() {
+    public TimeOut getTimeOut() {
         return configuration.getTimeOutOrDefaultIfUnset();
     }
 
-    public TimeUnit getTimeOutUnit() {
-        return configuration.getTimeOutUnit();
-    }
-
-    public String getQueue() {
-        return configuration.getQueue();
+    public String getExecutorName() {
+        return configuration.getExecutorName();
     }
 }

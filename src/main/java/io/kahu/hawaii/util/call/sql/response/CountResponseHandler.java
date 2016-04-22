@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.util.call.dispatch;
+package io.kahu.hawaii.util.call.sql.response;
 
-import io.kahu.hawaii.util.call.statistics.QueueStatistic;
+import io.kahu.hawaii.util.call.ResponseHandler;
 
-import java.util.concurrent.ExecutorService;
+import java.sql.ResultSet;
 
-public interface HawaiiThreadPoolExecutor extends ExecutorService {
-    String getName();
+public class CountResponseHandler extends ScalarResponseHandler<ResultSet, Long> implements ResponseHandler<ResultSet, Long> {
 
-    void rejectTask();
-
-    QueueStatistic getQueueStatistic();
+    public CountResponseHandler() {
+        super((rs, rowNum) -> rs.getLong(1));
+    }
 }

@@ -62,7 +62,10 @@ public class ResourceSqlQueryService implements SqlQueryService {
             }
             builder.append(path);
         }
-        builder.append("/").append(queryId).append(".sql");
+        builder.append("/").append(queryId);
+        if (!queryId.endsWith(".sql")) {
+            builder.append(".sql");
+        }
         return builder.toString();
     }
 
