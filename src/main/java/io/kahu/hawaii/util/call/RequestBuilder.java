@@ -22,4 +22,18 @@ public interface RequestBuilder<T> {
     RequestBuilder<T> newInstance() throws ServerException;
 
     Request<T> build() throws ServerException;
+
+    RequestContext<T> getRequestContext();
+
+    default Response<T> execute() throws ServerException {
+        return build().execute();
+    }
+
+    default Response<T> executeAsync() throws ServerException {
+        return build().executeAsync();
+    }
+
+    default T get() throws ServerException {
+        return execute().get();
+    }
 }

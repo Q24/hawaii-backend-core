@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.service.sql;
+package io.kahu.hawaii.util.call.sql.response;
 
-import io.kahu.hawaii.util.exception.ServerException;
+import io.kahu.hawaii.util.call.ResponseHandler;
 
-public interface SqlQueryService {
+import java.sql.ResultSet;
 
-    String getSqlQuery(String resourceName, String queryName) throws ServerException;
+public class CountResponseHandler extends ScalarResponseHandler<ResultSet, Long> implements ResponseHandler<ResultSet, Long> {
 
+    public CountResponseHandler() {
+        super((rs, rowNum) -> rs.getLong(1));
+    }
 }

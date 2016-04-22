@@ -15,15 +15,16 @@
  */
 package io.kahu.hawaii.util.call.sql;
 
-import io.kahu.hawaii.util.call.Request;
-import io.kahu.hawaii.util.call.RequestBuilder;
-import io.kahu.hawaii.util.call.ResponseCallback;
+import io.kahu.hawaii.util.call.*;
+import io.kahu.hawaii.util.call.http.HttpRequestContext;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.annotation.NotThreadSafe;
 
 import java.lang.reflect.Constructor;
+import java.sql.ResultSet;
+import java.util.List;
 import java.util.Map;
 
 @NotThreadSafe
@@ -36,6 +37,9 @@ public class DbRequestBuilder<T> implements RequestBuilder<T> {
     private ResponseCallback<T> callback;
     private Map<String, Object> params;
     private String sql;
+
+    private String idColumn;
+    private ResponseHandler<ResultSet, T> responseHandler;
 
     public DbRequestBuilder(DbRequestPrototype<T> prototype) throws ServerException {
         this.prototype = prototype;
@@ -76,25 +80,50 @@ public class DbRequestBuilder<T> implements RequestBuilder<T> {
         return this;
     }
 
-    public DbRequestBuilder withSql(String sql) {
+    public DbRequestBuilder<T> withSql(String sql) {
         assert active : "Not active";
         this.sql = sql;
         return this;
     }
 
+    public DbRequestBuilder<T> withId(String idColumn) {
+        this.idColumn = idColumn;
+        return this;
+    }
+
+    public DbRequestBuilder<T> withResponseHandler(ResponseHandler<ResultSet, T> responseHandler) {
+        this.responseHandler = responseHandler;
+        return this;
+    }
+    
     @Override
     public Request<T> build() throws ServerException {
         assert active : "Not active.";
 
         AbortableQuery<T> request = null;
         if (StringUtils.isNotBlank(sql)) {
-            request = new AbortableQuery<>(prototype, params);
+            request = new AbortableQuery<>(prototype, responseHandler, sql, params);
         } else {
-            request = new AbortableQuery<>(prototype, params);
+            request = new AbortableQuery<>(prototype, responseHandler, params);
         }
 
+        if (StringUtils.isNotBlank(idColumn)) {
+            request.setIdColumn(idColumn);
+        }
         request.setCallback(callback);
 
         return request;
+    }
+
+    @Override
+    public RequestContext<T> getRequestContext() {
+        return  prototype.getContext();
+    }
+
+    public String getSql() {
+        if (sql == null) {
+            return prototype.getSql();
+        }
+        return sql;
     }
 }

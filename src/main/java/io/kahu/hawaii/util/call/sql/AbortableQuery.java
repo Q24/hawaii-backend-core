@@ -16,8 +16,10 @@
 package io.kahu.hawaii.util.call.sql;
 
 import io.kahu.hawaii.util.call.*;
+import io.kahu.hawaii.util.call.sql.response.UpdateIdResponseHandler;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.annotation.NotThreadSafe;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
@@ -48,16 +50,17 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
     private final DbCallType callType ;
     private final String sql;
     private final Map<String, Object> params;
+    private String idColumn;
 
     private PreparedStatement preparedStatement;
 
 
-    public AbortableQuery(DbRequestPrototype<T> prototype, Map<String, Object> params) {
-        this(prototype, prototype.getSql(), params);
+    public AbortableQuery(DbRequestPrototype<T> prototype, ResponseHandler<ResultSet, T> responseHandler, Map<String, Object> params) {
+        this(prototype, responseHandler, prototype.getSql(), params);
     }
 
-    public AbortableQuery(DbRequestPrototype<T> prototype, String sql, Map<String, Object> params) {
-        super(prototype);
+    public AbortableQuery(DbRequestPrototype<T> prototype, ResponseHandler<ResultSet, T> responseHandler, String sql, Map<String, Object> params) {
+        super(prototype, responseHandler);
         this.dataSource = prototype.getDataSource();
         this.callType = prototype.getCallType();
         this.sql = sql;
@@ -75,7 +78,10 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
 
             switch (callType) {
                 case INSERT:
-                    // fall though
+                    preparedStatement.executeUpdate();
+                    new UpdateIdResponseHandler().addToResponse(preparedStatement, response);
+                    break;
+
                 case DELETE:
                     // fall though
                 case UPDATE:
@@ -130,6 +136,9 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
         Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
         List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
         PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
+
+        pscf.setGeneratedKeysColumnNames(idColumn);
+
         return pscf.newPreparedStatementCreator(params);
     }
 
@@ -141,5 +150,9 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
     @Override
     public Map<String, ?> getParameters() {
         return params;
+    }
+
+    public void setIdColumn(String idColumn) {
+        this.idColumn = idColumn;
     }
 }

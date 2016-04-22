@@ -15,6 +15,7 @@
  */
 package io.kahu.hawaii.util.call.configuration;
 
+import io.kahu.hawaii.util.call.RequestBuilder;
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
@@ -140,8 +141,8 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
     @SuppressWarnings("rawtypes")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        Collection<HttpRequestBuilder> beans = ApplicationContextProvider.getBeans(HttpRequestBuilder.class);
-        for (HttpRequestBuilder builder : beans) {
+        Collection<RequestBuilder> beans = ApplicationContextProvider.getBeans(RequestBuilder.class);
+        for (RequestBuilder builder : beans) {
             RequestContext requestContext = builder.getRequestContext();
             String lookup = createLookup(requestContext.getBackendSystem(), requestContext.getMethodName());
 

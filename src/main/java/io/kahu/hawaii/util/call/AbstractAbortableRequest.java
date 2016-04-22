@@ -49,6 +49,17 @@ public abstract class AbstractAbortableRequest<F, T> implements Request<T>, Abor
         this.logger = prototype.getLogger();
     }
 
+    public AbstractAbortableRequest(RequestPrototype<F, T>  prototype, ResponseHandler<F, T> responseHandler) {
+        this.requestDispatcher = prototype.getRequestDispatcher();
+        this.context = prototype.getContext();
+        if (responseHandler == null) {
+            this.responseHandler = prototype.getResponseHandler();
+        } else {
+            this.responseHandler = responseHandler;
+        }
+        this.logger = prototype.getLogger();
+    }
+
     public AbstractAbortableRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, ResponseHandler<F, T> responseHandler, CallLogger<T> logger) {
         this.requestDispatcher = requestDispatcher;
         this.context = context;

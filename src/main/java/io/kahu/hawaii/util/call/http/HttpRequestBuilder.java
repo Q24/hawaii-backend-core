@@ -312,6 +312,7 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
                 .withQueryParameters(queryParameters).build();
     }
 
+    @Override
     public HttpRequestContext<T> getRequestContext() {
         return (HttpRequestContext<T>) prototype.getContext();
     }
