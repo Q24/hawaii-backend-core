@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.18 25 April 2016, Paul Klos
+ * Allow changing queries without rebuilding and restarting
+
 ## 0.2.17 29 March 2016, Paul Klos
  * Limit no. of records to be retrieved in PaginationHelper
 
