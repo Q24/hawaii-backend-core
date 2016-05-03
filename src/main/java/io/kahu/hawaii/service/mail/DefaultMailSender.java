@@ -15,9 +15,6 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -28,6 +25,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
 
 public class DefaultMailSender implements MailSender {
     private static final String MAIL_MIME_TYPE = "text/plain; charset=utf-8";
@@ -49,14 +49,9 @@ public class DefaultMailSender implements MailSender {
     public void sendMail(String to, String subject, String text) throws ServerException {
         sendMail(to, subject, text, properties.getProperty("mail.from"));
     }
-
+    
     @Override
-    public void sendMail(String to, String subject, String text, String from) throws ServerException {
-        sendMail(to, subject, text, from, "");
-    }
-
-    @Override
-    public void sendMail(String to, String subject, String text, String from, String attachment) throws ServerException {
+    public void sendMail(String to, String subject, String text, String from, String... attachments) throws ServerException {
         try {
             mailConnection.connectToMailServer();
             MimeMessage message = mailConnection.createMessage();
@@ -79,14 +74,18 @@ public class DefaultMailSender implements MailSender {
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(bodyPart);
 
-            if (!attachment.isEmpty()) {
-                // Attachment
-                bodyPart = new MimeBodyPart();
-                DataSource source = new FileDataSource(attachment);
-                bodyPart.setDataHandler(new DataHandler(source));
-                bodyPart.setFileName(getAttachmentFileName(attachment));
-                multipart.addBodyPart(bodyPart);
-            }
+            if (attachments != null){
+                for (String attachment: attachments){
+                    if (!attachment.isEmpty()) {
+                        // Attachment
+                        bodyPart = new MimeBodyPart();
+                        DataSource source = new FileDataSource(attachment);
+                        bodyPart.setDataHandler(new DataHandler(source));
+                        bodyPart.setFileName(getAttachmentFileName(attachment));
+                        multipart.addBodyPart(bodyPart);
+                    }
+                }                
+            }     
 
             message.setContent(multipart);
             mailConnection.sendMail(message);
@@ -99,4 +98,5 @@ public class DefaultMailSender implements MailSender {
             }
         }
     }
+    
 }
