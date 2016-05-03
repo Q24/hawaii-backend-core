@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.2.19 3 Mei 2016, Jonathan Brouwers
+ * Allow sending mails with multiple attachments
+
 ## 0.2.18 25 April 2016, Paul Klos
  * Allow changing queries without rebuilding and restarting
 
