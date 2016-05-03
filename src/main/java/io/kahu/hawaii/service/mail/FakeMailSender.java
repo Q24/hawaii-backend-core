@@ -37,12 +37,7 @@ public class FakeMailSender implements MailSender {
     public void sendMail(String to, String subject, String text) throws ServerException {
         sendMail(to, subject, text, "");
     }
-
-    @Override
-    public void sendMail(String to, String subject, String text, String from) throws ServerException {
-        sendMail(to, subject, text, from, "");
-    }
-
+    
     @Override
     public void sendMail(String to, String subject, String text, String from, String... attachments) throws ServerException {
         logInfo("---------------------------------------");

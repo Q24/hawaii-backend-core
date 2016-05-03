@@ -25,8 +25,6 @@ public interface MailSender {
 
     void sendMail(String to, String subject, String text) throws ServerException;
 
-    void sendMail(String to, String subject, String text, String from) throws ServerException;
-
     void sendMail(String to, String subject, String text, String from, String... attachments) throws ServerException;
 
     default String getAttachmentFileName(String attachment) {
