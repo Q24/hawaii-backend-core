@@ -18,6 +18,8 @@ package io.kahu.hawaii.service.mail;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 
+import java.util.List;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -87,6 +89,55 @@ public class DefaultMailSender implements MailSender {
                 bodyPart.setFileName(getAttachmentFileName(attachment));
                 multipart.addBodyPart(bodyPart);
             }
+
+            message.setContent(multipart);
+            mailConnection.sendMail(message);
+
+        } catch (Exception e) {
+            throw new ServerException(ServerError.MAIL_ERROR, e);
+        } finally {
+            if (mailConnection != null) {
+                mailConnection.disconnectFromMailServer();
+            }
+        }
+    }
+    
+    @Override
+    public void sendMail(String to, String subject, String text, String from, List<String> attachments) throws ServerException {
+        try {
+            mailConnection.connectToMailServer();
+            MimeMessage message = mailConnection.createMessage();
+            message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            InternetAddress sender = new InternetAddress(from);
+            InternetAddress[] senders = { sender };
+            message.setFrom(sender);
+            message.setReplyTo(senders);
+            message.setSubject(subject);
+
+            BodyPart bodyPart = new MimeBodyPart();
+
+            /**
+             * IMPORTANT NOTE: we don't set the mime type to text/html due to
+             * possible javascript injection attacks as we don't have proper
+             * server side validations yet !!!
+             */
+            bodyPart.setContent(text, MAIL_MIME_TYPE);
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(bodyPart);
+
+            if (!attachments.isEmpty()){
+                for (String attachment: attachments){
+                    if (!attachment.isEmpty()) {
+                        // Attachment
+                        bodyPart = new MimeBodyPart();
+                        DataSource source = new FileDataSource(attachment);
+                        bodyPart.setDataHandler(new DataHandler(source));
+                        bodyPart.setFileName(getAttachmentFileName(attachment));
+                        multipart.addBodyPart(bodyPart);
+                    }
+                }                
+            }            
 
             message.setContent(multipart);
             mailConnection.sendMail(message);
