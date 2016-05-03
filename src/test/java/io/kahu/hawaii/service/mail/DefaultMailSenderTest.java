@@ -17,6 +17,7 @@ package io.kahu.hawaii.service.mail;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -31,11 +32,14 @@ import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 public class DefaultMailSenderTest {
     private MailConnection mockedMailConnection;
@@ -70,6 +74,27 @@ public class DefaultMailSenderTest {
         verify(mockedMailConnection).connectToMailServer();
         verify(mockedMailConnection).disconnectFromMailServer();
     }
+    
+    @Test
+    public void assureThatMailWithAttachmentIsSent() throws Exception {
+        String to = "hello@test.com";
+        String mailFrom = "jopie@test.nl";
+        String subject = "unit test for mail sending";
+        String content = "mail body";
+        String attachment1 = File.separator + "tmp" + File.separator + "001" + File.separator + "demo.txt";
+        String attachment2 = File.separator + "tmp" + File.separator + "002" + File.separator + "demo1.txt";
+        
+        mailProperties.put("mail.from", mailFrom);
+        when(mockedMailConnection.createMessage()).thenReturn(mockedMimeMessage);
+        mailSender.sendMail(to, subject, content, mailFrom, attachment1, attachment2);
+        
+        ArgumentCaptor<Multipart> arg = ArgumentCaptor.forClass(Multipart.class);
+        verify(mockedMimeMessage).setContent(arg.capture());
+        Multipart mp = arg.getValue();
+        
+        assertThat("Wrong number of body parts", mp.getCount(), is(equalTo(3)));        
+    }
+
 
     @Test
     public void assureThatServerExceptionWithMailErrorIsSent() throws Exception {

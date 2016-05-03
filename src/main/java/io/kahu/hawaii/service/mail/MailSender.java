@@ -16,7 +16,6 @@
 package io.kahu.hawaii.service.mail;
 
 import java.io.File;
-import java.util.List;
 
 import io.kahu.hawaii.util.exception.ServerException;
 
@@ -28,10 +27,8 @@ public interface MailSender {
 
     void sendMail(String to, String subject, String text, String from) throws ServerException;
 
-    void sendMail(String to, String subject, String text, String from, String attachment) throws ServerException;
+    void sendMail(String to, String subject, String text, String from, String... attachments) throws ServerException;
 
-    void sendMail(String to, String subject, String text, String from, List<String> attachments) throws ServerException;
-    
     default String getAttachmentFileName(String attachment) {
         return attachment.substring(attachment.lastIndexOf(File.separator) + 1);
     }

@@ -15,8 +15,6 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import java.util.List;
-
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
@@ -46,31 +44,18 @@ public class FakeMailSender implements MailSender {
     }
 
     @Override
-    public void sendMail(String to, String subject, String text, String from, String attachment) throws ServerException {
+    public void sendMail(String to, String subject, String text, String from, String... attachments) throws ServerException {
         logInfo("---------------------------------------");
         logInfo("To:         " + to);
         logInfo("From:       " + from);
         logInfo("Subject:    " + subject);
         logInfo("Message:    ");
         logInfo(text);
-        logInfo("Attachment: " + attachment);
+        for (String attachment : attachments){            
+            logInfo("Attachment: " + attachment);
+        } 
         logInfo("---------------------------------------");
-    }
-    
-    @Override
-    public void sendMail(String to, String subject, String text, String from, List<String> attachments) throws ServerException {
-        logInfo("---------------------------------------");
-        logInfo("To:         " + to);
-        logInfo("From:       " + from);
-        logInfo("Subject:    " + subject);
-        logInfo("Message:    ");
-        logInfo(text);
-        for (int i =0; i< attachments.size(); i++){
-            String attachment = attachments.get(i);
-            logInfo("Attachment " + i + ": " + attachment);
-        }        
-        logInfo("---------------------------------------");
-    }
+    }    
 
     private void logInfo(String message) {
         logManager.info(CoreLoggers.FAKE_EMAIL, message);
