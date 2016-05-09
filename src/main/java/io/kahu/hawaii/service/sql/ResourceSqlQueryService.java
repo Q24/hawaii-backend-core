@@ -19,24 +19,28 @@ import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ResourceSqlQueryService implements SqlQueryService {
 
-    private final Map<String, String> cachedQueries = new HashMap<String, String>();
-
+    private final  Map<String, String> cachedQueries = new ConcurrentHashMap<>();
+    private final String overridePath;
     private final LogManager logManager;
 
     public ResourceSqlQueryService(LogManager logManager) {
+        this(logManager, null);
+    }
+
+    public ResourceSqlQueryService(LogManager logManager, final String overridePath) {
         this.logManager = logManager;
+        this.overridePath = overridePath;
     }
 
     @Override
@@ -49,6 +53,11 @@ public class ResourceSqlQueryService implements SqlQueryService {
             logManager.debug(CoreLoggers.SERVER, "Getting SQL query defined in '" + resourcePath + "' from the cache.");
         }
         return cachedQueries.get(resourcePath);
+    }
+
+    @Override
+    public void clearCache() {
+        cachedQueries.clear();
     }
 
     private String buildResourcePath(String path, String queryId) {
@@ -70,9 +79,38 @@ public class ResourceSqlQueryService implements SqlQueryService {
     }
 
     private String loadSqlQuery(String resourcePath) throws ServerException {
-        List<String> lines = readQuery(resourcePath);
+        List<String> lines = readQueryFromOverride(resourcePath);
+        if (lines == null) {
+            lines = readQuery(resourcePath);
+        }
         String query = makeQuery(lines);
         return query;
+    }
+
+    private List<String> readQueryFromOverride(String resourcePath) {
+        if (overridePath == null) {
+            return null;
+        }
+        List<String> result = null;
+        BufferedReader reader = null;
+        try {
+            File query = Paths.get(overridePath, resourcePath).toFile();
+            if (query.exists()) {
+                reader = new BufferedReader(new FileReader(query));
+                result = IOUtils.readLines(reader);
+            }
+        } catch (IOException e) {
+            logManager.error(CoreLoggers.SERVER, e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    logManager.error(CoreLoggers.SERVER, e);
+                }
+            }
+        }
+        return result;
     }
 
     private List<String> readQuery(String resourcePath) throws ServerException {

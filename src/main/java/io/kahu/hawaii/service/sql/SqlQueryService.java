@@ -21,4 +21,7 @@ public interface SqlQueryService {
 
     String getSqlQuery(String resourceName, String queryName) throws ServerException;
 
+    default void clearCache() {
+        // no action
+    }
 }
