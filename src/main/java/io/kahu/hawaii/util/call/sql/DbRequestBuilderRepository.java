@@ -157,7 +157,15 @@ public class DbRequestBuilderRepository {
             URI uri = this.getClass().getResource(directory).toURI();
             Path myPath;
             if (uri.getScheme().equals("jar")) {
-                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                FileSystem fileSystem = null;
+                try {
+                    fileSystem = FileSystems.getFileSystem(uri);
+                } catch (Exception e) {
+                    // ignore
+                }
+                if (fileSystem == null) {
+                    fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                }
                 myPath = fileSystem.getPath(directory);
             } else {
                 myPath = Paths.get(uri);
