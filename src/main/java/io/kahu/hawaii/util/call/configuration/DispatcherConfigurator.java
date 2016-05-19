@@ -45,6 +45,8 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
 
     public DispatcherConfigurator(ExecutorRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
         this.executorServiceRepository = executorServiceRepository;
+        executorServiceRepository.setRequestConfigurations(requestConfigurations);
+
         this.requestConfigurations = requestConfigurations;
 
         this.logManager = logManager;
@@ -101,27 +103,29 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
                 defaultExecutors.put(systemName, defaultQueue);
             }
 
-            JSONArray calls = system.getJSONArray("calls");
-            for (int j = 0; j < calls.length(); j++) {
-                JSONObject call = calls.getJSONObject(j);
-                String method = call.getString("method");
-                Integer timeOut = call.optInt("time_out", -1);
-                String queue = call.optString("queue");
-                if (StringUtils.isNotBlank(queue)) {
-                    assert executors.containsKey(queue) : "The configured queue '" + queue + "' does not exist.";
-                }
+            JSONArray calls = system.optJSONArray("calls");
+            if (calls != null) {
+                for (int j = 0; j < calls.length(); j++) {
+                    JSONObject call = calls.getJSONObject(j);
+                    String method = call.getString("method");
+                    Integer timeOut = call.optInt("time_out", -1);
+                    String queue = call.optString("queue");
+                    if (StringUtils.isNotBlank(queue)) {
+                        assert executors.containsKey(queue) : "The configured queue '" + queue + "' does not exist.";
+                    }
 
-                String lookup = createLookup(systemName, method);
-                RequestConfiguration configuration = requestConfigurations.get(lookup);
-                if (StringUtils.isNotBlank(defaultQueue)) {
-                    configuration.setExecutorName(defaultQueue);
-                }
-                if (StringUtils.isNotBlank(queue)) {
-                    configuration.setExecutorName(queue);
-                }
+                    String lookup = createLookup(systemName, method);
+                    RequestConfiguration configuration = requestConfigurations.get(lookup);
+                    if (StringUtils.isNotBlank(defaultQueue)) {
+                        configuration.setExecutorName(defaultQueue);
+                    }
+                    if (StringUtils.isNotBlank(queue)) {
+                        configuration.setExecutorName(queue);
+                    }
 
-                if (timeOut > 0) {
-                    configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
+                    if (timeOut > 0) {
+                        configuration.setTimeOut(new TimeOut(timeOut, TimeUnit.SECONDS));
+                    }
                 }
             }
         }
