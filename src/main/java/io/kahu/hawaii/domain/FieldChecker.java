@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class FieldChecker {
     public boolean checkAllFieldsAreBlank(Object bean) throws ServerException {

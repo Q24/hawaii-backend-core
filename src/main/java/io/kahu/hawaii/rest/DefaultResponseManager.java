@@ -15,20 +15,12 @@
  */
 package io.kahu.hawaii.rest;
 
-import io.kahu.hawaii.rest.JSONSerializable;
-import io.kahu.hawaii.util.exception.AuthorisationException;
-import io.kahu.hawaii.util.exception.HawaiiException;
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-import io.kahu.hawaii.util.exception.ValidationException;
+import io.kahu.hawaii.util.exception.*;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
 import io.kahu.hawaii.util.logger.LoggingContext;
-
-import java.util.List;
-
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -36,6 +28,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public class DefaultResponseManager implements ResponseManager {
 

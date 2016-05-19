@@ -15,10 +15,11 @@
  */
 package io.kahu.hawaii.domain;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 
 public class EnumProperty extends AbstractDomainProperty {
     private static final long serialVersionUID = 1L;

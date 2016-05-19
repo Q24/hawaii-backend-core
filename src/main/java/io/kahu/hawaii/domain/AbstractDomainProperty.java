@@ -19,7 +19,7 @@ import io.kahu.hawaii.domain.validation.DomainPropertyEqualsChecker;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * AbstractDomainProperty is a "wrapper" around string values. The original

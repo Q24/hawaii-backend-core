@@ -15,7 +15,7 @@
  */
 package io.kahu.hawaii.util.exception;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class ItemValidation {
     private String key;
