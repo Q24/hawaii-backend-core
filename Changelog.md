@@ -1,6 +1,9 @@
 # Hawaii Backend Core Changelog
 
-## 0.2.19 3 Mei 2016, Jonathan Brouwers
+## 0.3.0 19 May 2016, Rutger Lubbers
+ * Refactoring of async call framework (including database async calls)
+
+## 0.2.19 3 May 2016, Jonathan Brouwers
  * Allow sending mails with multiple attachments
 
 ## 0.2.18 25 April 2016, Paul Klos
