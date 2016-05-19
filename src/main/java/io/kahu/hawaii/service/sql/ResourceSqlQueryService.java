@@ -20,7 +20,7 @@ import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.CoreLoggers;
 import io.kahu.hawaii.util.logger.LogManager;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.file.Paths;

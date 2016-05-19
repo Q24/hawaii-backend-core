@@ -21,7 +21,7 @@ import io.kahu.hawaii.util.exception.ServerException;
 
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;

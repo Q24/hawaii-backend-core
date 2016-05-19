@@ -13,15 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kahu.hawaii.domain;
+package io.kahu.hawaii.sso.util;
 
-public interface DomainProperty extends ValueHolder {
-    /**
-     * Return the parsed value from this domain property. The parsing should be
-     * done forgiving, in a lenient manner. If the value cannot be parsed the
-     * parsed value should be null.
-     *
-     * @return String
-     */
-    String getParsedValue();
+import com.nimbusds.jose.jwk.JWKSet;
+
+import java.text.ParseException;
+
+public class SimpleJsonWebKeySetRepository implements JsonWebKeySetRepository {
+    private JWKSet jsonWebKeySet;
+
+    public SimpleJsonWebKeySetRepository(String jwks) throws ParseException {
+        this.jsonWebKeySet = JWKSet.parse(jwks);
+    }
+
+    public SimpleJsonWebKeySetRepository(JWKSet jwkSet) {
+        this.jsonWebKeySet = jwkSet;
+    }
+
+    @Override
+    public JWKSet get(String iss, String kid) {
+        return jsonWebKeySet;
+    }
 }

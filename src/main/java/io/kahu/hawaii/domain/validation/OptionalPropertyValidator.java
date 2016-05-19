@@ -21,7 +21,7 @@ import io.kahu.hawaii.domain.ValueHolder;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class OptionalPropertyValidator implements ConstraintValidator<Optional, ValueHolder> {
 
