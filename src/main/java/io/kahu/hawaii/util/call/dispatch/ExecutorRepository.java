@@ -62,6 +62,10 @@ public class ExecutorRepository {
         new DispatcherConfigurator(configFile, this, requestConfigurations, logManager);
     }
 
+    public void setRequestConfigurations(RequestConfigurations requestConfigurations) {
+        this.requestConfigurations = requestConfigurations;
+    }
+
     public void add(HawaiiExecutor executor) {
         this.executors.put(executor.getName(), executor);
     }
