@@ -23,6 +23,8 @@ import com.nimbusds.jwt.SignedJWT;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JwtTokenDecoder implements TokenDecoder, InitializingBean {
@@ -56,7 +58,13 @@ public class JwtTokenDecoder implements TokenDecoder, InitializingBean {
             SignedJWT jwt = SignedJWT.parse(tokenValue);
 
             if (jwt.verify(verifier)) {
-                return jwt.getJWTClaimsSet().getClaims();
+                Map<String, Object> claims = new HashMap<>(jwt.getJWTClaimsSet().getClaims());
+                Object exp = claims.get("exp");
+                if (exp instanceof Date) {
+                    Long l = ((Date) exp).getTime();
+                    claims.put("exp", l);
+                }
+                return claims;
             }
         } catch (Exception e) {
             e.printStackTrace();
