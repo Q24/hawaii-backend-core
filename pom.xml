@@ -92,11 +92,7 @@
       <artifactId>commons-codec</artifactId>
       <version>1.7</version>
     </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
-    </dependency>
+
     <dependency>
     <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -249,6 +245,12 @@
           <artifactId>jaxb-impl</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- SSO -->
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>4.3</version>
     </dependency>
     <!-- Apache Commons BeanUtils is used for checking bean properties -->
     <dependency>
