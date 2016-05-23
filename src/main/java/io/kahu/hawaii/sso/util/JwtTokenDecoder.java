@@ -21,13 +21,12 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
 import org.codehaus.jettison.json.JSONObject;
-import org.springframework.beans.factory.InitializingBean;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JwtTokenDecoder implements TokenDecoder, InitializingBean {
+public class JwtTokenDecoder implements TokenDecoder {
 
     private JsonWebKeySetRepository jsonWebKeySetRepository;
 
@@ -77,9 +76,5 @@ public class JwtTokenDecoder implements TokenDecoder, InitializingBean {
         return JKSVerifierFactory.get(jwk);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-    }
 
 }
