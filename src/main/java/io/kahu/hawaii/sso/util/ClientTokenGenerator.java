@@ -43,7 +43,7 @@ public class ClientTokenGenerator {
         JsonWebKeySetRepository jsonWebKeySetRepository = new SimpleJsonWebKeySetRepository(jwk);
         JwtTokenGenerator generator = new JwtTokenGenerator(jsonWebKeySetRepository);
 
-        JWT token = generator.generate("auto-login-web-app", "user", "my_key_id");
+        JWT token = generator.generate("auto-login-web-app", "user@example.com", "my_key_id");
 
         System.err.println(token.serialize());
 
