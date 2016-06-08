@@ -41,4 +41,9 @@ public class FakeCacheService implements CacheService {
     public void delete(String key) throws CacheServiceException {
         // do nothing
     }
+
+    @Override
+    public void flush() throws CacheServiceException {
+        // do nothing
+    }
 }

@@ -101,4 +101,9 @@ public class ConcurrentMapCacheService implements CacheService {
         }
     }
 
+    @Override
+    public void flush() throws CacheServiceException {
+        this.store.clear();
+        this.expirations.clear();
+    }
 }

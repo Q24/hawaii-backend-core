@@ -83,4 +83,9 @@ public class MemcachedCacheService implements CacheService {
             logManager.debug(CoreLoggers.CACHE, "cache.delete( '" + key + "' ) took '" + (end - start) / 1E6 + "' msec.");
         }
     }
+
+    @Override
+    public void flush() throws CacheServiceException {
+        this.memcachedClient.flush();
+    }
 }

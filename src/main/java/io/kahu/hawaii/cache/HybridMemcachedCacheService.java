@@ -185,6 +185,12 @@ public class HybridMemcachedCacheService implements CacheService {
         }
     }
 
+    @Override
+    public void flush() throws CacheServiceException {
+        this.backingCache.clear();
+        this.memcachedClient.flush();
+    }
+
     private String getVersionKey(String key) {
         return key + VERSION_SUFFIX;
     }

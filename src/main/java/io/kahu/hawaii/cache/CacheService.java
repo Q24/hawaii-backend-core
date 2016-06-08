@@ -77,4 +77,12 @@ public interface CacheService {
      *             in case of any error
      */
     public void delete(String key) throws CacheServiceException;
+
+    /**
+     * Flushes the cache (removing all items).
+     *
+     * @throws CacheServiceException
+     *             in case of any error
+     */
+    public void flush() throws CacheServiceException;
 }
