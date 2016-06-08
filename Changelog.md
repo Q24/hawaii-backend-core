@@ -1,5 +1,9 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.1 8 Juni 2016, Ronald Verheul, Marcel Overdijk
+ * Sitemap generator can now ignore pages based on list of regexp's.
+ * Added flush method to cache service.
+
 ## 0.3.0 19 May 2016, Rutger Lubbers
  * Refactoring of async call framework (including database async calls)
 
