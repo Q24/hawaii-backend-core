@@ -70,7 +70,7 @@ public class SiteMapGenerator {
             	fileName = fileName.replace('\\', '/');
             	
             	// if the file is part of the skip list, don't add it
-            	if (sitemapSkipPages != null && sitemapSkipPages.contains(fileName)) continue;
+            	if (skipFilename(fileName)) continue;
 
                 Element url = doc.createElement("url");
                 rootElement.appendChild(url);
@@ -131,5 +131,14 @@ public class SiteMapGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    private boolean skipFilename(String fileName) {
+        if (sitemapSkipPages != null) {
+            for (String skipPage: sitemapSkipPages) {
+                if (fileName.matches(skipPage)) return true;
+            }
+        }
+        return false;
     }
 }
