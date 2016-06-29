@@ -27,9 +27,9 @@ public class Log4jConfigListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        String config = System.getenv("log4j.configuration");
+        String config = System.getProperty("log4j.configuration");
         if (StringUtils.isBlank(config)) {
-            config = System.getProperty("log4j.configuration");
+            config = System.getenv("log4j.configuration");
         }
         if (StringUtils.isNotEmpty(config)) {
             String overrideConfig = StringUtils.replace(config, ".xml", ".local.xml");
