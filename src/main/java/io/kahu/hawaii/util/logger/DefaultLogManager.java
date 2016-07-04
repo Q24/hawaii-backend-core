@@ -63,7 +63,7 @@ public class DefaultLogManager implements LogManager {
     private final LogManagerConfiguration config;
 
     public DefaultLogManager(final LogManagerConfiguration config) {
-        this.loggers = new HashMap<String, Logger>();
+        this.loggers = new HashMap<>();
         this.config = config;
     }
 
@@ -714,35 +714,35 @@ public class DefaultLogManager implements LogManager {
     }
 
     private void addRequestStatisticsToLoggingContext(final Response<?> response) {
-        RequestStatistic reqeustStatistic = response.getStatistic();
+        RequestStatistic requestStatistic = response.getStatistic();
         double d;
 
-        d = reqeustStatistic.getTotalDuration();
+        d = requestStatistic.getTotalDuration();
         if (d != 0) {
             putContext("call.duration", d);
         }
 
-        d = reqeustStatistic.getCallbackDuration();
+        d = requestStatistic.getCallbackDuration();
         if (d != 0) {
             putContext("call.duration.callback", d);
         }
 
-        d = reqeustStatistic.getCallTime();
+        d = requestStatistic.getCallTime();
         if (d != 0) {
             putContext("call.duration.backend", d);
         }
 
-        d = reqeustStatistic.getConversionDuration();
+        d = requestStatistic.getConversionDuration();
         if (d != 0) {
             putContext("call.duration.conversion", d);
         }
 
-        d = reqeustStatistic.getQueueTime();
+        d = requestStatistic.getQueueTime();
         if (d != 0) {
             putContext("call.duration.queue", d);
         }
 
-        QueueStatistic queueStatistic = reqeustStatistic.getQueueStatistic();
+        QueueStatistic queueStatistic = requestStatistic.getQueueStatistic();
         if (queueStatistic != null) {
             putContext("queue.name", queueStatistic.getQueueName());
 
