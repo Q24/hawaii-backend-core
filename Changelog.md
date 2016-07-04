@@ -1,5 +1,9 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.3 4 July 2016, Paul Klos
+ * Fixed issue where queue statistics were not logged
+ * Fixed type in DefaultLogManager
+
 ## 0.3.2 4 July 2016
  * Fixed issue with ScalarResponseHandler in case query returned no rows
 
