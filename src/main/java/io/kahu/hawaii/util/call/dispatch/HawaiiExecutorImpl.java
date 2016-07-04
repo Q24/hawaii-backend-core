@@ -82,7 +82,10 @@ public class HawaiiExecutorImpl extends ThreadPoolExecutor implements HawaiiExec
     }
 
     public <T> FutureTask<T> execute(AbortableRequest<T> request, Response<T> response) {
-        logScheduleStart(request, getQueueStatistic());
+        QueueStatistic queueStatistics = getQueueStatistic();
+        request.setQueueStatistic(queueStatistics);
+
+        logScheduleStart(request, queueStatistics);
 
         return doExecute(new FutureRequest(request, response));
     }
