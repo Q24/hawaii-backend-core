@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.2 4 July 2016
+ * Fixed issue with ScalarResponseHandler in case query returned no rows
+
 ## 0.3.1 8 Juni 2016, Ronald Verheul, Marcel Overdijk
  * Sitemap generator can now ignore pages based on list of regexp's.
  * Added flush method to cache service.

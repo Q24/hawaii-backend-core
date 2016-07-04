@@ -35,13 +35,16 @@ public class ScalarResponseHandler<R extends ResultSet, T> implements ResponseHa
     @Override
     public void addToResponse(ResultSet resultSet, Response<T> response) throws ServerException {
         try {
-            if (!resultSet.isAfterLast()) {
-                resultSet.next();
-            }
             if (resultSet.isBeforeFirst()) {
                 // Cry bloody murder!
             }
-            response.set(rowMapper.mapRow(resultSet, 0));
+            // get first row (if any)
+            boolean hasResult = resultSet.next();
+            if (hasResult) {
+                response.set(rowMapper.mapRow(resultSet, 0));
+            } else {
+                response.set(null);
+            }
         } catch (SQLException e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }
