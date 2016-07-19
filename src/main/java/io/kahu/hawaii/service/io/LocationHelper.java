@@ -49,4 +49,17 @@ public class LocationHelper {
         }
         return hawaiiDocumentationDocRoot;
     }
+
+    private String hawaiiCsvHome = null;
+
+    public String getHawaiiCsvHome() {
+        if (hawaiiCsvHome == null) {
+            hawaiiCsvHome = System.getenv("HAWAII_CSV_HOME");
+        }
+        return hawaiiCsvHome;
+    }
+
+    public void setHawaiiCsvHome(String hawaiiCsvHome) {
+        this.hawaiiCsvHome = hawaiiCsvHome;
+    }
 }

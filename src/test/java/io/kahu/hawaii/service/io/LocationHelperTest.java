@@ -43,4 +43,14 @@ public class LocationHelperTest {
         String hawaiiDocumenationDocHome = helper.getHawaiiDocumentationDocRoot();
         assertThat("environment variable HAWAII_DOCUMENTATION_DOCROOT", hawaiiDocumenationDocHome, is(notNullValue()));
     }
+
+    @Test
+    public void assureThatHawaiiCsvHomeIsRetrievedOk() {
+        LocationHelper helper = new LocationHelper();
+        assertThat("environment variable HAWAII_CSV_HOME", helper.getHawaiiCsvHome(), is(System.getenv("HAWAII_CSV_HOME")));
+        
+        String otherValue = "/a/test/value";
+        helper.setHawaiiCsvHome(otherValue);
+        assertThat("environment variable get be set", helper.getHawaiiCsvHome(), is(otherValue));
+    }
 }
