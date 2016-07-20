@@ -54,12 +54,16 @@ public class LocationHelper {
 
     public String getHawaiiCsvHome() {
         if (hawaiiCsvHome == null) {
-            hawaiiCsvHome = System.getenv("HAWAII_CSV_HOME");
+            //use server-home as a default:
+            setHawaiiCsvHome(getHawaiiServerHome());
         }
         return hawaiiCsvHome;
     }
 
     public void setHawaiiCsvHome(String hawaiiCsvHome) {
-        this.hawaiiCsvHome = hawaiiCsvHome;
+        if(!hawaiiCsvHome.endsWith(File.separator)){
+            hawaiiCsvHome += File.separator;
+        }
+        this.hawaiiCsvHome = hawaiiCsvHome;        
     }
 }

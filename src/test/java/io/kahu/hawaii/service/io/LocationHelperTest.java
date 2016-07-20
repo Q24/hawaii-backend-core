@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import io.kahu.hawaii.service.io.LocationHelper;
+import java.io.File;
 
 import org.junit.Test;
 public class LocationHelperTest {
@@ -47,10 +48,14 @@ public class LocationHelperTest {
     @Test
     public void assureThatHawaiiCsvHomeIsRetrievedOk() {
         LocationHelper helper = new LocationHelper();
-        assertThat("environment variable HAWAII_CSV_HOME", helper.getHawaiiCsvHome(), is(System.getenv("HAWAII_CSV_HOME")));
+        String expected = System.getenv("HAWAII_SERVER_HOME");
+        if (!expected.endsWith(File.separator)) {
+            expected += File.separator;
+        }
+        assertThat("environment variable HAWAII_CSV_HOME", helper.getHawaiiCsvHome(), is(expected));
         
         String otherValue = "/a/test/value";
         helper.setHawaiiCsvHome(otherValue);
-        assertThat("environment variable get be set", helper.getHawaiiCsvHome(), is(otherValue));
+        assertThat("environment variable get be set", helper.getHawaiiCsvHome(), is(otherValue + File.separator));
     }
 }
