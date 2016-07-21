@@ -111,7 +111,6 @@ public class DbRequestBuilderRepository {
         return ((DbRequestBuilder<T>) get(name)).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
     }
     
-    @SuppressWarnings("rawtypes")
     public <T> DbRequestBuilder<T> get(String name, ResultSetExtractor<T> resultSetExtractor, QueryEnhancer queryEnhancer) throws ServerException {
         return queryEnhancer.enhance(get(name), null).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
     }

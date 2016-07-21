@@ -25,6 +25,13 @@ import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 
+/**
+ * 
+ * @author Jonathan.Brouwers
+ *
+ *         This is a {@link ResponseHandler} that allows you to use a
+ *         {@link ResultSetExtractor} on the full {@link ResultSet}
+ */
 public class ResultSetResponseHandler<T> implements ResponseHandler<ResultSet, T> {
     private ResultSetExtractor<T> resultSetExtractor;
 
@@ -35,9 +42,8 @@ public class ResultSetResponseHandler<T> implements ResponseHandler<ResultSet, T
     @Override
     public void addToResponse(ResultSet resultSet, Response<T> response) throws ServerException {
         try {
-            if (resultSet.isBeforeFirst()) {
-                // Cry bloody murder!
-            }
+            assert (!resultSet.isBeforeFirst());
+
             response.set(resultSetExtractor.extractData(resultSet));
         } catch (SQLException e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
