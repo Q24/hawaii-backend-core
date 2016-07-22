@@ -15,35 +15,35 @@
  */
 package io.kahu.hawaii.util.call.sql.response;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
-import org.apache.http.annotation.ThreadSafe;
-import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+/**
+ * This is a {@link ResponseHandler} that allows you to use a
+ * {@link ResultSetExtractor} on the full {@link ResultSet}
+ * 
+ * @author Jonathan.Brouwers
+ */
+public class ResultSetResponseHandler<T> implements ResponseHandler<ResultSet, T> {
+    private ResultSetExtractor<T> resultSetExtractor;
 
-@ThreadSafe
-public class ScalarResponseHandler<R extends ResultSet, T> implements ResponseHandler<ResultSet, T> {
-    private RowMapper<T> rowMapper;
-
-    public ScalarResponseHandler(RowMapper<T> rowMapper) {
-        this.rowMapper = rowMapper;
+    public ResultSetResponseHandler(ResultSetExtractor<T> resultSetExtractor) {
+        this.resultSetExtractor = resultSetExtractor;
     }
+
     @Override
     public void addToResponse(ResultSet resultSet, Response<T> response) throws ServerException {
         try {
             assert (resultSet.isBeforeFirst());
-            
-            // get first row (if any)
-            boolean hasResult = resultSet.next();
-            if (hasResult) {
-                response.set(rowMapper.mapRow(resultSet, 0));
-            } else {
-                response.set(null);
-            }
+
+            response.set(resultSetExtractor.extractData(resultSet));
         } catch (SQLException e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }

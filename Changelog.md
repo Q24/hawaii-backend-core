@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.4 21 July 2016, Jonathan Brouwers
+ * Added RespnseHandler with ResultSetExtractor
+
 ## 0.3.3 4 July 2016, Paul Klos
  * Fixed issue where queue statistics were not logged
  * Fixed type in DefaultLogManager
