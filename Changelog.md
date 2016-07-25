@@ -1,5 +1,10 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.5 21 July 2016, Paul Klos, Ronald Verheul
+ * Add possibility to override Hawaii server home to maintain
+   BPT, CSV and catalogue-related files externally
+ * Remove assertions from ResultSetResponseHandlers
+
 ## 0.3.4 21 July 2016, Jonathan Brouwers
  * Added RespnseHandler with ResultSetExtractor
 
