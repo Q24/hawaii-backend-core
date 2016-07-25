@@ -15,6 +15,8 @@
  */
 package io.kahu.hawaii.service.io;
 
+import org.springframework.util.Assert;
+
 import java.io.File;
 
 public class LocationHelper {
@@ -61,9 +63,10 @@ public class LocationHelper {
     }
 
     public void setHawaiiCsvHome(String hawaiiCsvHome) {
-        if(!hawaiiCsvHome.endsWith(File.separator)){
+        Assert.hasLength(hawaiiCsvHome);
+        if(!hawaiiCsvHome.endsWith(File.separator)) {
             hawaiiCsvHome += File.separator;
         }
-        this.hawaiiCsvHome = hawaiiCsvHome;        
+        this.hawaiiCsvHome = hawaiiCsvHome;
     }
 }

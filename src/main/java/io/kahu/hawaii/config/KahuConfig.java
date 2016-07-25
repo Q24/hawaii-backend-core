@@ -337,7 +337,4 @@ public class KahuConfig {
         return new CallLoggerImpl<>(logManager(), new HttpRequestLogger(), new FileDownloadResponseLogger());
     }
 
-    public void setEnv(Environment env) {
-        this.env = env;
-    }
 }
