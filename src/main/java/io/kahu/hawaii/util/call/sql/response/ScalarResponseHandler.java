@@ -35,8 +35,6 @@ public class ScalarResponseHandler<R extends ResultSet, T> implements ResponseHa
     @Override
     public void addToResponse(ResultSet resultSet, Response<T> response) throws ServerException {
         try {
-            assert (resultSet.isBeforeFirst());
-            
             // get first row (if any)
             boolean hasResult = resultSet.next();
             if (hasResult) {

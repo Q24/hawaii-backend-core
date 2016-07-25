@@ -37,8 +37,6 @@ public class ListResponseHandler<R extends ResultSet, T> implements ResponseHand
     @Override
     public void addToResponse(ResultSet resultSet, Response<List<T>> response) throws ServerException {
         try {
-            assert (resultSet.isBeforeFirst());
-            
             int i = 0;
             List<T> list = new ArrayList<>();
             while (resultSet.next()) {

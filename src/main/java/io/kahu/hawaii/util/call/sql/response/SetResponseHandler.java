@@ -39,8 +39,6 @@ public class SetResponseHandler<R extends ResultSet, T> implements ResponseHandl
     @Override
     public void addToResponse(ResultSet resultSet, Response<Set<T>> response) throws ServerException {
         try {
-            assert (resultSet.isBeforeFirst());
-            
             int i = 0;
             Set<T> set = new HashSet<>();
             while (resultSet.next()) {
