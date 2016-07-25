@@ -1,6 +1,9 @@
 # Hawaii Backend Core Changelog
 
-## 0.3.5 21 July 2016, Paul Klos, Ronald Verheul
+## 0.3.6 25 July 2016, Jonathan Brouwers
+ * Make QueryEnhancer part of DbRequestBuilder
+
+## 0.3.5 25 July 2016, Paul Klos, Ronald Verheul
  * Add possibility to override Hawaii server home to maintain
    BPT, CSV and catalogue-related files externally
  * Remove assertions from ResultSetResponseHandlers
