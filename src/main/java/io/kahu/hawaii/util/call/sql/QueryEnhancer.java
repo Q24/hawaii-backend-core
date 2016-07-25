@@ -21,9 +21,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Map;
 
 public interface QueryEnhancer {
-    default <T> DbRequestBuilder<T> enhance(DbRequestBuilder<T> original, Pageable pageable) {
-       return original.withSql(enhance(original.getSql(), pageable));
-    }
 
     String enhance(String original, Pageable pageable);
 
