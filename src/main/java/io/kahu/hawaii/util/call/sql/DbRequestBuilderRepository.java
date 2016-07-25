@@ -36,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.util.Assert;
 
 import java.net.URI;
 import java.nio.file.*;
@@ -111,10 +112,6 @@ public class DbRequestBuilderRepository {
         return ((DbRequestBuilder<T>) get(name)).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
     }
     
-    public <T> DbRequestBuilder<T> get(String name, ResultSetExtractor<T> resultSetExtractor, QueryEnhancer queryEnhancer) throws ServerException {
-        return queryEnhancer.enhance(get(name), null).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
-    }
-
     public <T> DbRequestBuilder<List<T>> getList(String name, RowMapper<T> rowMapper) throws ServerException {
         return ((DbRequestBuilder<List<T>>) get(name)).withResponseHandler(new ListResponseHandler<>(rowMapper));
     }
@@ -136,8 +133,10 @@ public class DbRequestBuilderRepository {
     }
 
     public <T> Page<T> getPage(String count, String fetch, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer, Long maxRows) throws ServerException {
+        Assert.notNull(pageable);
+        
         // retrieve query...
-        Long rowCount = queryEnhancer.enhance(getCount(count), pageable).withParams(params).get();
+        Long rowCount = getCount(count).withParams(params).withQueryEnhancer(queryEnhancer).withPageable(pageable).get();
         if (maxRows != null && (rowCount > maxRows)) {
             // Threshold defined and total number of records is higher
             return new PageImpl<>(new ArrayList<>(), new PageRequest(0, 1), rowCount);
@@ -145,7 +144,7 @@ public class DbRequestBuilderRepository {
 
         queryEnhancer.addPaging(params, pageable);
 
-        final List<T> pageItems = queryEnhancer.enhance(getList(fetch, rowMapper), pageable).withParams(params).get();
+        final List<T> pageItems = getList(fetch, rowMapper).withParams(params).withQueryEnhancer(queryEnhancer).withPageable(pageable).get();
 
         // return the page
         return new PageImpl<>(pageItems, pageable, rowCount);

@@ -15,17 +15,21 @@
  */
 package io.kahu.hawaii.util.call.sql;
 
-import io.kahu.hawaii.util.call.*;
-import io.kahu.hawaii.util.call.http.HttpRequestContext;
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.annotation.NotThreadSafe;
-
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
-import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.annotation.NotThreadSafe;
+import org.springframework.data.domain.Pageable;
+
+import io.kahu.hawaii.util.call.Request;
+import io.kahu.hawaii.util.call.RequestBuilder;
+import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.ResponseCallback;
+import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
 
 @NotThreadSafe
 public class DbRequestBuilder<T> implements RequestBuilder<T> {
@@ -37,6 +41,8 @@ public class DbRequestBuilder<T> implements RequestBuilder<T> {
     private ResponseCallback<T> callback;
     private Map<String, Object> params;
     private String sql;
+    private QueryEnhancer queryEnhancer;
+    private Pageable pageable;
 
     private String idColumn;
     private ResponseHandler<ResultSet, T> responseHandler;
@@ -96,10 +102,25 @@ public class DbRequestBuilder<T> implements RequestBuilder<T> {
         return this;
     }
     
+    public DbRequestBuilder<T> withQueryEnhancer(QueryEnhancer queryEnhancer) {
+        this.queryEnhancer = queryEnhancer;
+        return this;
+    }
+    
+    public DbRequestBuilder<T> withPageable(Pageable pageable) {
+        this.pageable = pageable;
+        return this;
+    }
+    
     @Override
     public Request<T> build() throws ServerException {
         assert active : "Not active.";
-
+    
+        if (queryEnhancer != null) {
+            //Enhance the query. 
+            //if pageable is null, the queryEnhancer should be able to handle that.
+            withSql(queryEnhancer.enhance(getSql(), pageable));
+        }
         AbortableQuery<T> request = null;
         if (StringUtils.isNotBlank(sql)) {
             request = new AbortableQuery<>(prototype, responseHandler, sql, params);
