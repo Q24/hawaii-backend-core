@@ -176,7 +176,12 @@ public class KahuConfig {
 
     @Bean
     public LocationHelper locationHelper() {
-        return new LocationHelper();
+        LocationHelper locationHelper = new LocationHelper();
+        String csvHome = env.getProperty("locationhelper.csvhome.directory");
+        if (csvHome != null && ! csvHome.isEmpty()) {
+            locationHelper.setHawaiiCsvHome(csvHome);
+        }
+        return locationHelper;
     }
 
     // *************************************************************************
@@ -330,5 +335,9 @@ public class KahuConfig {
     @Bean
     public CallLoggerImpl<FileDownload> fileDownloadCallLogger() {
         return new CallLoggerImpl<>(logManager(), new HttpRequestLogger(), new FileDownloadResponseLogger());
+    }
+
+    public void setEnv(Environment env) {
+        this.env = env;
     }
 }
