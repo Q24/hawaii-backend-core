@@ -23,6 +23,7 @@ import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.sql.response.CountResponseHandler;
 import io.kahu.hawaii.util.call.sql.response.ListResponseHandler;
 import io.kahu.hawaii.util.call.sql.response.ResultSetResponseHandler;
+import io.kahu.hawaii.util.call.sql.response.RowCallbackResponseHandler;
 import io.kahu.hawaii.util.call.sql.response.ScalarResponseHandler;
 import io.kahu.hawaii.util.call.sql.response.SetResponseHandler;
 import io.kahu.hawaii.util.exception.ServerError;
@@ -35,6 +36,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 
@@ -110,6 +112,10 @@ public class DbRequestBuilderRepository {
     
     public <T> DbRequestBuilder<T> get(String name, ResultSetExtractor<T> resultSetExtractor) throws ServerException {
         return ((DbRequestBuilder<T>) get(name)).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
+    }
+    
+    public DbRequestBuilder<Void> get(String name, RowCallbackHandler rowCallbackHandler) throws ServerException {
+        return ((DbRequestBuilder<Void>) get(name)).withResponseHandler(new RowCallbackResponseHandler(rowCallbackHandler));
     }
     
     public <T> DbRequestBuilder<List<T>> getList(String name, RowMapper<T> rowMapper) throws ServerException {

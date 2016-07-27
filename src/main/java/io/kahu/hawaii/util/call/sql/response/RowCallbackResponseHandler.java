@@ -17,34 +17,28 @@ package io.kahu.hawaii.util.call.sql.response;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.http.annotation.ThreadSafe;
-import org.springframework.jdbc.core.RowMapper;
 
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseHandler;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
 
-@ThreadSafe
-public class SetResponseHandler<R extends ResultSet, T> implements ResponseHandler<ResultSet, Set<T>> {
-    private RowMapper<T> rowMapper;
+import org.springframework.jdbc.core.RowCallbackHandler;
 
-    public SetResponseHandler(RowMapper<T> rowMapper) {
-        this.rowMapper = rowMapper;
+public class RowCallbackResponseHandler implements ResponseHandler<ResultSet, Void> {
+    private RowCallbackHandler rowCallbackHandler;
+
+    public RowCallbackResponseHandler(RowCallbackHandler rowCallbackHandler) {
+        this.rowCallbackHandler = rowCallbackHandler;
     }
+
     @Override
-    public void addToResponse(ResultSet resultSet, Response<Set<T>> response) throws ServerException {
+    public void addToResponse(ResultSet payload, Response<Void> response) throws ServerException {
         try {
-            int i = 0;
-            Set<T> set = new HashSet<>();
-            while (resultSet.next()) {
-                set.add(rowMapper.mapRow(resultSet, i));
-                i++;
+            while (payload.next()) {
+                rowCallbackHandler.processRow(payload);
             }
-            response.set(set);
+            response.set(null);
         } catch (SQLException e) {
             throw new ServerException(ServerError.UNEXPECTED_EXCEPTION, e);
         }
