@@ -85,7 +85,7 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
                 case DELETE:
                     // fall though
                 case UPDATE:
-                    preparedStatement.executeUpdate();
+                    response.set(preparedStatement.executeUpdate());
                     break;
 
                 case SELECT:
