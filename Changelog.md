@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.8 27 July 2016, Jonathan Brouwers
+ * Added functionality for Update/Delete/Insert in query framework
+
 ## 0.3.7 27 July 2016, Jonathan Brouwers
  * Added new ResponseHandler and new DbRequestBuilderRepository method using it.
 
