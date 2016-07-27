@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.7 27 July 2016, Jonathan Brouwers
+ * Added new ResponseHandler and new DbRequestBuilderRepository method using it.
+
 ## 0.3.6 25 July 2016, Jonathan Brouwers
  * Make QueryEnhancer part of DbRequestBuilder
 
