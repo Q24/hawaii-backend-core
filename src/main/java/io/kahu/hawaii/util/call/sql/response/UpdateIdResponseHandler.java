@@ -32,6 +32,7 @@ public class UpdateIdResponseHandler implements ResponseHandler<PreparedStatemen
             ResultSet keys  = payload.getGeneratedKeys();
             if (keys != null) {
                 try {
+                    keys.next();
                     String keyValue = keys.getString(1);
                     response.set(keyValue);
                 }

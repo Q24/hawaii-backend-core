@@ -155,8 +155,12 @@ public class DbRequestBuilderRepository {
         // return the page
         return new PageImpl<>(pageItems, pageable, rowCount);
     }
+    
+    public DbRequestBuilder<Integer> updateOrDelete(String name) throws ServerException {
+        return ((DbRequestBuilder<Integer>) get(name));
+    }
 
-    public void load(final String resourcePath) {
+    private void load(final String resourcePath) {
         String directory = resourcePath;
         if (!StringUtils.startsWith(directory, "/")) {
             directory = "/" + directory;
@@ -211,7 +215,7 @@ public class DbRequestBuilderRepository {
             String system = directory.substring("/sql/".length());
             system = system.replaceAll("/","");
             RequestContext context = new RequestContext(system, n);
-            return new DbRequestPrototype(prototype.getRequestDispatcher(), context, null, prototype.getLogger(), prototype.getDataSource(), getCallType(name), sql);
+            return new DbRequestPrototype(prototype.getRequestDispatcher(), context, null, prototype.getLogger(), prototype.getDataSource(), getCallType(sql), sql);
         } catch (ServerException e) {
             e.printStackTrace();
         }
@@ -219,8 +223,17 @@ public class DbRequestBuilderRepository {
         return null;
     }
 
-    private DbCallType getCallType(String name) {
-        return DbCallType.SELECT;
+    private DbCallType getCallType(String sql) {
+        String command = sql.toUpperCase();
+        if (command.contains("UPDATE")) {
+            return DbCallType.UPDATE;
+        } else if (command.contains("DELETE")) {
+            return DbCallType.DELETE;
+        } else if (command.contains("INSERT")) {
+            return DbCallType.INSERT;
+        } else {
+            return DbCallType.SELECT;
+        }
     }
     /*
      *
