@@ -46,9 +46,4 @@ public interface ValidatableDomainObject<T extends DomainObject> extends Validat
      */
     boolean isValid();
 
-    /**
-     * Check whether {@link #validate()} has been called.
-     */
-    boolean hasBeenValidated();
-
 }

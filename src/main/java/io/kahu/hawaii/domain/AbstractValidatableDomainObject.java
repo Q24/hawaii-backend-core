@@ -90,15 +90,6 @@ public class AbstractValidatableDomainObject implements Serializable, DomainObje
     }
 
     /**
-     * Returns whether this object has been validated by {@link #validate()}.
-     */
-    @Override
-    @Deprecated
-    public boolean hasBeenValidated() {
-        return true;
-    }
-
-    /**
      * Calls the javax validation framework (jsr-303) to validate this object.
      * The results are stored via {@link #setViolations(Set)}. Before validating
      * this class the method {@link #isValid()} will return an error.
