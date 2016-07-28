@@ -19,6 +19,7 @@ import io.kahu.hawaii.util.call.AbstractAbortableRequest;
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.Response;
 import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
 import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.call.log.CallLoggerImpl;
@@ -51,7 +52,8 @@ public class Test {
         LogManager logManager = new DefaultLogManager(logManagerConfig);
 
         File configFile = new File("/home/tapir/vf/src/kahuna-backend/conf/dispatcher_config.json");
-        ExecutorRepository executorServiceRepository = new ExecutorRepository(configFile, logManager, new RequestConfigurations());
+        ExecutorRepository executorServiceRepository = new ExecutorRepository(logManager);
+        new DispatcherConfigurator(configFile, executorServiceRepository, new RequestConfigurations(), logManager);
         RequestDispatcher dispatcher = new RequestDispatcher(executorServiceRepository, logManager);
 
         List<MyRequest> requests = new ArrayList<>();

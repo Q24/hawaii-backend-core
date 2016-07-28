@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import javax.management.MBeanServer;
 
+import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -278,7 +279,7 @@ public class KahuConfig {
     }
 
     public Map<String, Object> getMBeans() throws ServerException {
-        Map<String, Object> beans = new HashMap<String, Object>();
+        Map<String, Object> beans = new HashMap<>();
         beans.put("Hawaii:name=HawaiiMailProperties", hawaiiMailProperties());
         beans.put("Hawaii:name=RequestConfigurations", requestCongfigurations());
         return beans;
@@ -293,7 +294,9 @@ public class KahuConfig {
     public ExecutorRepository executorServiceRepository() throws IOException, JSONException {
         String config = env.getProperty("dispatcher.configuration.file");
         File configFile = new File(locationHelper().getHawaiiServerHome(), config);
-        return new ExecutorRepository(configFile, logManager(), requestCongfigurations());
+        final ExecutorRepository executorRepository = new ExecutorRepository(logManager());
+        new DispatcherConfigurator(configFile, executorRepository, requestCongfigurations(), logManager());
+        return executorRepository;
     }
 
     @Bean

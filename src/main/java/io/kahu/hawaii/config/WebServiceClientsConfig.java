@@ -37,17 +37,6 @@ public class WebServiceClientsConfig {
         return BusFactory.getDefaultBus();
     }
 
-    // @Bean
-    // public BusWiringBeanFactoryPostProcessor
-    // busWiringBeanFactoryPostProcessor() {
-    // return new BusWiringBeanFactoryPostProcessor();
-    // }
-    //
-    // @Bean
-    // public BusExtensionPostProcessor busExtensionPostProcessor() {
-    // return new BusExtensionPostProcessor();
-    // }
-
     @Bean
     public DispatcherTransportFactory dispatcherTransportFactor() throws IOException, JSONException {
         return new DispatcherTransportFactory(kahuConfig.requestCongfigurations(), kahuConfig.requestDispatcher(), cxf(), kahuConfig.logManager());

@@ -15,15 +15,12 @@
  */
 package io.kahu.hawaii.util.call.configuration;
 
-import io.kahu.hawaii.util.call.RequestBuilder;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.TimeOut;
-import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
-import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
-import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
-import io.kahu.hawaii.util.logger.CoreLoggers;
-import io.kahu.hawaii.util.logger.LogManager;
-import io.kahu.hawaii.util.spring.ApplicationContextProvider;
+import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -32,11 +29,14 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import io.kahu.hawaii.util.call.RequestBuilder;
+import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.TimeOut;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
+import io.kahu.hawaii.util.call.dispatch.HawaiiExecutorImpl;
+import io.kahu.hawaii.util.logger.CoreLoggers;
+import io.kahu.hawaii.util.logger.LogManager;
+import io.kahu.hawaii.util.spring.ApplicationContextProvider;
 
 public class DispatcherConfigurator implements ApplicationListener<ContextRefreshedEvent> {
     private final LogManager logManager;
@@ -130,9 +130,8 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
             }
         }
 
-        for (HawaiiExecutorImpl executor : executors.values()) {
-            executorServiceRepository.add(executor);
-        }
+        executors.values().forEach(executorServiceRepository::add);
+
         executorServiceRepository.setDefaultExecutors(defaultExecutors);
 
         executorServiceRepository.configure();

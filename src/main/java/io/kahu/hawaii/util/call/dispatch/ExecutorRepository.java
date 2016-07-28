@@ -15,20 +15,17 @@
  */
 package io.kahu.hawaii.util.call.dispatch;
 
-import io.kahu.hawaii.util.call.AbortableRequest;
-import io.kahu.hawaii.util.call.RequestContext;
-import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
-import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
-import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
-import io.kahu.hawaii.util.logger.LogManager;
-import org.apache.http.annotation.ThreadSafe;
-import org.codehaus.jettison.json.JSONException;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.http.annotation.ThreadSafe;
+
+import io.kahu.hawaii.util.call.AbortableRequest;
+import io.kahu.hawaii.util.call.RequestContext;
+import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
+import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
+import io.kahu.hawaii.util.logger.LogManager;
 
 @ThreadSafe
 public class ExecutorRepository {
@@ -43,23 +40,6 @@ public class ExecutorRepository {
 
     public ExecutorRepository(final LogManager logManager) {
         this.logManager = logManager;
-    }
-
-    /**
-     * Deprecated, use dispatcher configurator.
-     *
-     * @param configFile
-     * @param logManager
-     * @param requestConfigurations
-     * @throws IOException
-     * @throws JSONException
-     */
-    @Deprecated
-    public ExecutorRepository(File configFile, final LogManager logManager, RequestConfigurations requestConfigurations) throws IOException,
-            JSONException {
-        this.logManager = logManager;
-        this.requestConfigurations = requestConfigurations;
-        new DispatcherConfigurator(configFile, this, requestConfigurations, logManager);
     }
 
     public void setRequestConfigurations(RequestConfigurations requestConfigurations) {
