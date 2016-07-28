@@ -16,7 +16,7 @@
 package io.kahu.hawaii.cache;
 
 import io.kahu.hawaii.util.logger.LogManager;
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.spy.memcached.CASResponse;
 import net.spy.memcached.CASValue;
 import net.spy.memcached.MemcachedClient;

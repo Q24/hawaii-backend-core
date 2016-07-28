@@ -16,7 +16,7 @@
 package io.kahu.hawaii.util.logger;
 
 import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class LoggingContextTest {
-    public LoggingContext ctx2 = null;
+    private LoggingContext ctx2 = null;
 
     @Before
     public void setUp() {
@@ -39,7 +39,7 @@ public class LoggingContextTest {
         LoggingContext.remove();
     }
 
-    public void setContext2(LoggingContext ctx) {
+    private void setContext2(LoggingContext ctx) {
         ctx2 = ctx;
     }
 
@@ -49,13 +49,10 @@ public class LoggingContextTest {
         ctx1.put("foo", "bar");
         ctx2 = null;
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                LoggingContext ctx = LoggingContext.get();
-                ctx.put("fred", "derf");
-                setContext2(ctx);
-            }
+        Thread t = new Thread(() -> {
+            LoggingContext ctx = LoggingContext.get();
+            ctx.put("fred", "derf");
+            setContext2(ctx);
         });
         t.start();
         t.join();
