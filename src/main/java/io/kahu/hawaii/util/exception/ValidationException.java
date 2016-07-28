@@ -24,6 +24,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 public class ValidationException extends HawaiiException implements ExceptionKeyConstants {
 
@@ -51,13 +52,13 @@ public class ValidationException extends HawaiiException implements ExceptionKey
 
     public ValidationException(HawaiiRequestValidationError error, String message) {
         super(message);
-        assert (error != null);
+        Assert.notNull(error);
         addRequestValidationError(error);
     }
 
     public ValidationException(ItemValidation error) {
         super();
-        assert (error != null);
+        Assert.notNull(error);
         addItemValidation(error);
     }
 
@@ -78,10 +79,10 @@ public class ValidationException extends HawaiiException implements ExceptionKey
     }
 
     public void addRequestValidationError(HawaiiRequestValidationError error) {
-        assert (error != null);
+        Assert.notNull(error);
 
         if (requestValidationErrors == null) {
-            requestValidationErrors = new ArrayList<HawaiiRequestValidationError>();
+            requestValidationErrors = new ArrayList<>();
         }
         requestValidationErrors.add(error);
     }
@@ -93,17 +94,17 @@ public class ValidationException extends HawaiiException implements ExceptionKey
     }
 
     public void addItemValidation(ItemValidation error) {
-        assert (error != null);
+        Assert.notNull(error);
         if (itemValidations == null) {
-            itemValidations = new ArrayList<ItemValidation>();
+            itemValidations = new ArrayList<>();
         }
         itemValidations.add(error);
     }
 
     public void addItemValidations(List<ItemValidation> errors) {
-        assert (errors != null);
+        Assert.notNull(errors);
         if (itemValidations == null) {
-            itemValidations = new ArrayList<ItemValidation>();
+            itemValidations = new ArrayList<>();
         }
         itemValidations.addAll(errors);
     }

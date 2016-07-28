@@ -15,16 +15,6 @@
  */
 package io.kahu.hawaii.rest;
 
-import io.kahu.hawaii.rest.JSONSerializable;
-import io.kahu.hawaii.util.exception.AuthorisationException;
-import io.kahu.hawaii.util.exception.HawaiiException;
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-import io.kahu.hawaii.util.exception.ValidationException;
-import io.kahu.hawaii.util.logger.CoreLoggers;
-import io.kahu.hawaii.util.logger.LogManager;
-import io.kahu.hawaii.util.logger.LoggingContext;
-
 import java.util.List;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -36,6 +26,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
+
+import io.kahu.hawaii.util.exception.*;
+import io.kahu.hawaii.util.logger.CoreLoggers;
+import io.kahu.hawaii.util.logger.LogManager;
+import io.kahu.hawaii.util.logger.LoggingContext;
 
 public class DefaultResponseManager implements ResponseManager {
 
@@ -48,7 +44,7 @@ public class DefaultResponseManager implements ResponseManager {
     private final boolean hawaiiTxIdHeaderEnabled;
 
     public DefaultResponseManager(LogManager logManager, String loggingContextTxId) {
-        assert (logManager != null);
+        Assert.notNull(logManager);
         this.logManager = logManager;
         this.loggingContentTxId = loggingContextTxId;
         this.hawaiiTxIdHeaderEnabled = StringUtils.isNotBlank(loggingContextTxId);
@@ -115,8 +111,8 @@ public class DefaultResponseManager implements ResponseManager {
 
     @Override
     public ResponseEntity<String> toResponse(JSONObject... jsonObjects) throws ServerException {
-        assert (jsonObjects != null);
-        assert jsonObjects.length > 0;
+        Assert.notNull(jsonObjects);
+        Assert.isTrue(jsonObjects.length > 0);
 
         JSONArray data = new JSONArray();
 
@@ -130,14 +126,14 @@ public class DefaultResponseManager implements ResponseManager {
 
     @Override
     public ResponseEntity<String> toResponse(JSONArray jsonObjects) throws ServerException {
-        assert (jsonObjects != null);
+        Assert.notNull(jsonObjects);
         return myToResponse(jsonObjects);
     }
 
     @Override
     public ResponseEntity<String> toResponse(JSONSerializable... objects) throws ServerException {
-        assert (objects != null);
-        assert objects.length > 0;
+        Assert.notNull(objects);
+        Assert.isTrue(objects.length > 0);
 
         JSONArray data = new JSONArray();
         for (JSONSerializable object : objects) {
@@ -154,7 +150,7 @@ public class DefaultResponseManager implements ResponseManager {
 
     @Override
     public ResponseEntity<String> toResponse(List<JSONSerializable> objects) throws ServerException {
-        assert (objects != null);
+        Assert.notNull(objects);
         JSONArray data = new JSONArray();
         for (JSONSerializable object : objects) {
             data.put(object.toJson());
@@ -178,7 +174,7 @@ public class DefaultResponseManager implements ResponseManager {
     private ResponseEntity<String> myToResponse(JSONObject response) {
         HttpHeaders headers = new HttpHeaders();
         // explicitly set the application/json content type
-        headers.setContentType(MediaType.APPLICATION_JSON); 
+        headers.setContentType(MediaType.APPLICATION_JSON);
         if (hawaiiTxIdHeaderEnabled) {
             // note the X-Hawaii-Tx-Id header can be disabled by setting
             // logging.context.txid=

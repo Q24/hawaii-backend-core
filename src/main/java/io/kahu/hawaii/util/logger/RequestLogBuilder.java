@@ -24,6 +24,7 @@ import org.apache.http.message.BasicHeader;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -31,26 +32,26 @@ import org.springframework.util.MultiValueMap;
  * A builder that collects the information required to log a request (incoming
  * or outgoing).
  * </p>
- * 
+ *
  * <p>
  * In the constructor, it starts by setting a type. This is a string that
  * identifies what kind of transaction this is. For example,
  * "my.account.getAuthenticatedUser", "sms.sendTextMessage" or
  * "backend.activateSim".
  * </p>
- * 
+ *
  * <p>
  * Builder methods then gather the rest of the information: a body (as a
  * String), headers (a list of Strings), and parameters (a JSONObject). The
  * parameters can come from any source, including path parameters, query string
  * parameters and form parameters.
  * </p>
- * 
+ *
  * <p>
  * When done, logIncoming() or logOutgoing() will log the request. logIncoming()
  * will only log type, body and params.
  * </p>
- * 
+ *
  * @author ErnstJan.Plugge
  */
 public class RequestLogBuilder {
@@ -74,7 +75,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder paramNull(String name) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, JSONObject.EXPLICIT_NULL);
         } catch (JSONException cant_happen) {
@@ -84,7 +85,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, boolean value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -94,7 +95,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, int value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -104,7 +105,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, long value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -114,7 +115,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, double value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -124,7 +125,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, String value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -132,9 +133,9 @@ public class RequestLogBuilder {
         }
         return this;
     }
-    
+
     public RequestLogBuilder param(String name, String[] values) {
-        assert name != null;
+        Assert.hasLength(name);
         if (values.length > 0) {
             try {
                 this.params.put(name, new JSONArray(Arrays.asList(values)));
@@ -146,7 +147,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, JSONObject value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -156,7 +157,7 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder param(String name, JSONArray value) {
-        assert name != null;
+        Assert.hasLength(name);
         try {
             this.params.put(name, value);
         } catch (JSONException cant_happen) {
@@ -166,13 +167,13 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder excludeParam(String name) {
-        assert name != null;
+        Assert.hasLength(name);
         this.params.remove(name);
         return this;
     }
 
     public RequestLogBuilder formParams(MultiValueMap<String, String> map) {
-        assert map != null;
+        Assert.notNull(map);
         try {
             for (String name : map.keySet()) {
                 List<String> values = map.get(name);
@@ -187,25 +188,25 @@ public class RequestLogBuilder {
     }
 
     public RequestLogBuilder header(Header header) {
-        assert header != null;
+        Assert.notNull(header);
         headers.add(header);
         return this;
     }
 
     public RequestLogBuilder header(String name, String value) {
-        assert name != null;
-        assert value != null;
+        Assert.hasLength(name);
+        Assert.hasLength(value);
         return header(new BasicHeader(name, value));
     }
 
     public RequestLogBuilder headers(List<Header> headers) {
-        assert headers != null;
+        Assert.notNull(headers);
         this.headers.addAll(headers);
         return this;
     }
 
     public RequestLogBuilder headers(Header[] headers) {
-        assert headers != null;
+        Assert.notNull(headers);
         for (Header header : headers) {
             this.headers.add(header);
         }

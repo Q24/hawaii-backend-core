@@ -15,6 +15,7 @@
  */
 package io.kahu.hawaii.domain;
 
+import org.springframework.util.Assert;
 
 public class StringProperty extends AbstractDomainProperty {
     private static final long serialVersionUID = 1L;
@@ -38,10 +39,10 @@ public class StringProperty extends AbstractDomainProperty {
         }
         if (maxLength != null) {
             this.maxLength = maxLength.intValue();
-            assert maxLength > 0;
+            Assert.isTrue(maxLength > 0);
         }
         if (minLength != null && maxLength != null) {
-            assert minLength <= maxLength;
+            Assert.isTrue(minLength <= maxLength);
         }
     }
 

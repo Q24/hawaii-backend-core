@@ -22,6 +22,7 @@ import io.kahu.hawaii.util.call.log.response.ResponseLogger;
 import io.kahu.hawaii.util.logger.LogManager;
 import io.kahu.hawaii.util.logger.LoggingContext.PopResource;
 import org.apache.http.annotation.ThreadSafe;
+import org.springframework.util.Assert;
 
 @ThreadSafe
 public class CallLoggerImpl<T> implements CallLogger<T> {
@@ -30,7 +31,7 @@ public class CallLoggerImpl<T> implements CallLogger<T> {
     protected ResponseLogger<T> responseLogger;
 
     public CallLoggerImpl(LogManager logManager, RequestLogger requestLogger, ResponseLogger<T> responseLogger) {
-        assert logManager != null;
+        Assert.notNull(logManager);
         this.logManager = logManager;
         this.requestLogger = requestLogger;
         this.responseLogger = responseLogger;

@@ -32,31 +32,32 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
 public class AbstractController {
-    
+
     protected final LogManager logManager;
     private final String logTypePrefix;
 
     protected AbstractController(LogManager logManager, String logTypePrefix) {
-        assert logManager != null;
+        Assert.notNull(logManager);
         this.logManager = logManager;
         this.logTypePrefix = logTypePrefix;
     }
 
     protected void validate(Validatable validatable) throws ValidationException {
-        List<ItemValidation> item_validations = new ArrayList<ItemValidation>();
-        List<HawaiiRequestValidationError> request_validations = new ArrayList<HawaiiRequestValidationError>();
+        List<ItemValidation> itemValidations = new ArrayList<>();
+        List<HawaiiRequestValidationError> requestValidations = new ArrayList<>();
 
-        validatable.validate(request_validations, item_validations);
+        validatable.validate(requestValidations, itemValidations);
 
-        if (item_validations.size() > 0 || request_validations.size() > 0) {
+        if (itemValidations.size() > 0 || requestValidations.size() > 0) {
             ValidationException exception = new ValidationException();
-            exception.setItemValidations(item_validations);
-            exception.setRequestValidationErrors(request_validations);
+            exception.setItemValidations(itemValidations);
+            exception.setRequestValidationErrors(requestValidations);
             throw exception;
         }
     }
@@ -70,15 +71,15 @@ public class AbstractController {
     }
 
     protected RequestLogBuilder requestLog() {
-        
+
         String method = new Throwable().getStackTrace()[1].getMethodName();
         String type = logTypePrefix + "." + method;
         RequestLogBuilder builder = new RequestLogBuilder(logManager, type);
-        
+
         try {
             ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = sra.getRequest();
-            
+
             // path variables
             Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
             if (pathVariables != null) {
@@ -86,7 +87,7 @@ public class AbstractController {
                     builder.param(entry.getKey(), entry.getValue());
                 }
             }
-            
+
             // request parameters
             Enumeration<?> requestParameters = request.getParameterNames();
             while (requestParameters.hasMoreElements()) {
@@ -94,7 +95,7 @@ public class AbstractController {
                 String[] values = request.getParameterValues(key);
                 builder.param(key, values);
             }
-            
+
         } catch (Throwable t) {
             logManager.warn(CoreLoggers.SERVER, "Unable to log request", t);
             // ignore

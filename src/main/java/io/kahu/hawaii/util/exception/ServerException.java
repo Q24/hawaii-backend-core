@@ -20,6 +20,7 @@ import io.kahu.hawaii.util.logger.CoreLoggers;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 public class ServerException extends HawaiiException {
 
@@ -32,7 +33,7 @@ public class ServerException extends HawaiiException {
          * first call in this constructor
          */
         super((error != null ? error.toString() : "") + (message != null ? " - " + message : ""), throwable);
-        assert (error != null);
+        Assert.notNull(error);
         this.error = error;
     }
 

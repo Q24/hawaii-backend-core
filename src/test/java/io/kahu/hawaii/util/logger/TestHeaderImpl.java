@@ -17,18 +17,19 @@ package io.kahu.hawaii.util.logger;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.springframework.util.Assert;
 
 /**
  * A derived Header implementation that implements equals(). This allows two
  * lists of Headers to be compared for equality using .equals().
- * 
+ *
  * @author ErnstJan.Plugge
  */
 public class TestHeaderImpl extends BasicHeader {
     public TestHeaderImpl(String name, String value) {
         super(name, value);
-        assert name != null;
-        assert value != null;
+        Assert.hasLength(name);
+        Assert.hasLength(value);
     }
 
     @Override

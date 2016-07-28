@@ -15,14 +15,15 @@
  */
 package io.kahu.hawaii.util.exception;
 
-import org.apache.commons.lang.StringUtils;
+import org.springframework.util.Assert;
 
 public class ItemValidation {
     private String key;
     private HawaiiItemValidationError error;
 
     public ItemValidation(String key, HawaiiItemValidationError error) {
-        assert (!StringUtils.isBlank(key) && error != null);
+        Assert.hasLength(key);
+        Assert.notNull(error);
         this.key = key;
         this.error = error;
     }

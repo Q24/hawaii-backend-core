@@ -26,10 +26,11 @@ import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.util.Assert;
 
 public class FieldChecker {
     public boolean checkAllFieldsAreBlank(Object bean) throws ServerException {
-        assert bean != null;
+        Assert.notNull(bean);
         return checkAllFieldsAreBlank(bean, getFieldNames(bean));
     }
 
@@ -44,7 +45,7 @@ public class FieldChecker {
     }
 
     public boolean checkAllFieldsAreBlank(Object bean, String... fieldNames) throws ServerException {
-        assert bean != null;
+        Assert.notNull(bean);
         boolean allBlank = true;
         for (String fieldName : fieldNames) {
             try {

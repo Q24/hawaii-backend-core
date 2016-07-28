@@ -17,17 +17,19 @@ package io.kahu.hawaii.service.sms;
 
 import io.kahu.hawaii.util.exception.ServerException;
 import io.kahu.hawaii.util.logger.LogManager;
+import org.springframework.util.Assert;
 
 public class FakeSmsSender implements SMSSender {
 
     private LogManager logManager;
 
     public FakeSmsSender(LogManager logManager) {
+        Assert.notNull(logManager);
         this.logManager = logManager;
-        
+
         logManager.audit("Using FakeSmsSender");
     }
-    
+
     @Override
     public void sendSms(Sms sms) throws ServerException {
         logManager.audit("Sending (fake) SMS: " + sms);
