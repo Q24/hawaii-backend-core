@@ -31,7 +31,7 @@ public class HawaiiExceptionTest implements ExceptionKeyConstants {
             ServerError error = null;
             new ServerException(error);
             Assert.fail();
-        } catch (AssertionError e) {
+        } catch (IllegalArgumentException e) {
             // correct
         }
     }
@@ -92,13 +92,13 @@ public class HawaiiExceptionTest implements ExceptionKeyConstants {
 
         try {
             e.addItemValidation(null);
-        } catch (AssertionError exception) {
+        } catch (IllegalArgumentException exception) {
             // expected
         }
 
         try {
             e.addRequestValidationError(null);
-        } catch (AssertionError exception) {
+        } catch (IllegalArgumentException exception) {
             // expected
         }
     }

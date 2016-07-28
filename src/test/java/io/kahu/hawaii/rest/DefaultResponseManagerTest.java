@@ -73,7 +73,7 @@ public class DefaultResponseManagerTest implements ExceptionKeyConstants {
         responseManager.toResponse(object);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = IllegalArgumentException.class)
     public void assureThatToResponseWithNullValueForListFails() throws Exception {
         List<JSONSerializable> objects = null;
         responseManager.toResponse(objects);
@@ -160,7 +160,7 @@ public class DefaultResponseManagerTest implements ExceptionKeyConstants {
         assertThat(content.getJSONObject(0).getString("firstname"), is(equalTo("piet")));
         assertThat(content.getJSONObject(1).getString("firstname"), is(equalTo("jan")));
     }
-    
+
     private class ObjectExample implements JSONSerializable {
 
         private final String firstname;
@@ -183,7 +183,7 @@ public class DefaultResponseManagerTest implements ExceptionKeyConstants {
             }
         }
     }
-    
+
     @Test
     public void testHeadersDoesNotContainXHawaiiTxIdWhenDisabled() throws ServerException {
         responseManager = new DefaultResponseManager(logManager, null); // 2nd argument null to disable X-Hawaii-Tx-Id
@@ -191,7 +191,7 @@ public class DefaultResponseManagerTest implements ExceptionKeyConstants {
         HttpHeaders headers = response.getHeaders();
         assertThat(headers, not(hasKey(DefaultResponseManager.X_HAWAII_TRANSACTION_ID_HEADER)));
     }
-    
+
     @Test
     public void testHeadersContainsXHawaiiTxIdWhenEnabledAndTxIdInLoggingContent() throws ServerException {
         responseManager = new DefaultResponseManager(logManager, "tx.id"); // 2nd argument null to enable X-Hawaii-Tx-Id
@@ -201,7 +201,7 @@ public class DefaultResponseManagerTest implements ExceptionKeyConstants {
         assertThat(headers, hasKey(DefaultResponseManager.X_HAWAII_TRANSACTION_ID_HEADER));
         assertThat(headers.getFirst(DefaultResponseManager.X_HAWAII_TRANSACTION_ID_HEADER).toString(), is("12345"));
     }
-    
+
     @Test
     public void testHeadersDoesNotContainXHawaiiTxIdWhenEnabledButTxIdNotInLoggingContent() throws ServerException {
         responseManager = new DefaultResponseManager(logManager, "tx.id"); // 2nd argument null to enable X-Hawaii-Tx-Id
