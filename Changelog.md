@@ -1,5 +1,15 @@
 # Hawaii Backend Core Changelog
 
+## 0.3.9 28 July 2016, Paul Klos
+ * Remove deprecated contructor on HttpRequestBuilder
+ * Remove deprecated contructor on HawaiiExecutorImpl
+ * Remove deprecated method ValidatableDomainObject.hasBeenValidated
+ * Replace assertions on public method arguments
+ * Replace deprecated jUnit Assert import
+ * Explicitly call configure on DispatcherConfigurator
+ * Remove deprecated constructor from ExecutorRepository
+ * Remove deprecated RuntimeFeatures
+
 ## 0.3.8 27 July 2016, Jonathan Brouwers
  * Added functionality for Update/Delete/Insert in query framework
 
