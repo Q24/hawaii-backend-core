@@ -87,13 +87,6 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
 
     @Deprecated
     public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
-            CallLogger<T> logger, HttpHeaderProvider httpHeaderProvider, HttpRequestCredentials credentials) throws ServerException {
-        this(requestDispatcher, requestContext, responseHandler, logger, httpHeaderProvider);
-        this.credentials = credentials;
-    }
-
-    @Deprecated
-    public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
             CallLogger<T> logger, HttpHeaderProvider httpHeaderProvider) throws ServerException {
         this(requestDispatcher, requestContext, responseHandler, logger);
         this.httpHeaderProvider = httpHeaderProvider;
