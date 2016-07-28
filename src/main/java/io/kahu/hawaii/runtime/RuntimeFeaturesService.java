@@ -21,12 +21,6 @@ import io.kahu.hawaii.util.exception.ServerException;
 
 public interface RuntimeFeaturesService {
 
-    @Deprecated
-    RuntimeFeatures getRuntimeFeatures() throws ServerException;
-
-    @Deprecated
-    void updateRuntimeFeatures(RuntimeFeatures runtimeFeatures) throws ServerException;
-
     RuntimeFeature getRuntimeFeature(String name) throws ServerException, FeatureNotFoundException;
 
     List<RuntimeFeature> getRuntimeFeatureList() throws ServerException;
