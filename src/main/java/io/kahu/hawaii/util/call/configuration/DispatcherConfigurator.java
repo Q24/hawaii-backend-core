@@ -52,12 +52,6 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
         this.logManager = logManager;
     }
 
-    public DispatcherConfigurator(File configFile, ExecutorRepository executorServiceRepository, RequestConfigurations requestConfigurations, LogManager logManager) {
-        this(executorServiceRepository, requestConfigurations, logManager);
-
-        configure(configFile);
-    }
-
     public void configure(File configFile) {
         try {
             String configuration = FileUtils.readFileToString(configFile);

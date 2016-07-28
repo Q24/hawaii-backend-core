@@ -292,10 +292,11 @@ public class KahuConfig {
 
     @Bean(destroyMethod = "stop")
     public ExecutorRepository executorServiceRepository() throws IOException, JSONException {
+        final ExecutorRepository executorRepository = new ExecutorRepository(logManager());
+        DispatcherConfigurator dispatcherConfigurator = new DispatcherConfigurator(executorRepository, requestCongfigurations(), logManager());
         String config = env.getProperty("dispatcher.configuration.file");
         File configFile = new File(locationHelper().getHawaiiServerHome(), config);
-        final ExecutorRepository executorRepository = new ExecutorRepository(logManager());
-        new DispatcherConfigurator(configFile, executorRepository, requestCongfigurations(), logManager());
+        dispatcherConfigurator.configure(configFile);
         return executorRepository;
     }
 

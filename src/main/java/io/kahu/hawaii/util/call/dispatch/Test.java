@@ -51,29 +51,24 @@ public class Test {
         LogManagerConfiguration logManagerConfig = new LogManagerConfiguration(config);
         LogManager logManager = new DefaultLogManager(logManagerConfig);
 
-        File configFile = new File("/home/tapir/vf/src/kahuna-backend/conf/dispatcher_config.json");
         ExecutorRepository executorServiceRepository = new ExecutorRepository(logManager);
-        new DispatcherConfigurator(configFile, executorServiceRepository, new RequestConfigurations(), logManager);
-        RequestDispatcher dispatcher = new RequestDispatcher(executorServiceRepository, logManager);
+        DispatcherConfigurator dispatcherConfigurator = new DispatcherConfigurator(executorServiceRepository, new RequestConfigurations(), logManager);
+        File configFile = new File("/home/tapir/vf/src/kahuna-backend/conf/dispatcher_config.json");
+        dispatcherConfigurator.configure(configFile);
 
-        List<MyRequest> requests = new ArrayList<>();
+        RequestDispatcher dispatcher = new RequestDispatcher(executorServiceRepository, logManager);
 
         final CountDownLatch start = new CountDownLatch(amount);
         final CountDownLatch stopped = new CountDownLatch(amount);
         CallLogger<String> callLogger = new CallLoggerImpl<>(logManager, null, null);
         for (int i = 0; i < amount; i++) {
             final MyRequest request = new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, i, stopped);
-            requests.add(request);
-            Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        start.await();
-                        request.execute();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            Runnable r = () -> {
+                try {
+                    start.await();
+                    request.execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             };
 
@@ -89,12 +84,6 @@ public class Test {
             new MyRequest(dispatcher, new RequestContext<>("test", "test", 100), null, callLogger, 120 + i, stopped).execute();
             Thread.sleep(980);
         }
-        // new MyRequest(dispatcher, new RequestContext<String>("test", "test",
-        // 100), null, callLogger, i++, stopped);
-        // final MyRequest request = new MyRequest(dispatcher, new
-        // RequestContext<String>("test", "test", 100), null, callLogger, i,
-        // stopped);
-        //
         System.out.println(" *" + executorServiceRepository.getExecutor(request).getQueueStatistic().toString());
     }
 
