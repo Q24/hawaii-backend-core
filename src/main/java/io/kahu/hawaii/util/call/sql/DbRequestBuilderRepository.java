@@ -44,6 +44,7 @@ import java.net.URI;
 import java.nio.file.*;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DbRequestBuilderRepository {
@@ -225,11 +226,14 @@ public class DbRequestBuilderRepository {
 
     private DbCallType getCallType(String sql) {
         String command = sql.toUpperCase();
-        if (command.contains("UPDATE")) {
+        Pattern updatePattern = Pattern.compile("^UPDATE\\s");
+        Pattern deletePattern = Pattern.compile("^DELETE\\s");
+        Pattern insertPattern = Pattern.compile("^INSERT\\s");
+        if (updatePattern.matcher(command).find()) {
             return DbCallType.UPDATE;
-        } else if (command.contains("DELETE")) {
+        } else if (deletePattern.matcher(command).find()) {
             return DbCallType.DELETE;
-        } else if (command.contains("INSERT")) {
+        } else if (insertPattern.matcher(command).find()) {
             return DbCallType.INSERT;
         } else {
             return DbCallType.SELECT;
