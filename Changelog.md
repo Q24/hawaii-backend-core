@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.0 29 July 2016, Jonathan Brouwers
+ * fixed automated SQL call type detection
+
 ## 0.3.9 28 July 2016, Paul Klos
  * Remove deprecated contructor on HttpRequestBuilder
  * Remove deprecated contructor on HawaiiExecutorImpl
