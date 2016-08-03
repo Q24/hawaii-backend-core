@@ -25,15 +25,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UpdateIdResponseHandler implements ResponseHandler<PreparedStatement, String> {
+public class UpdateIdResponseHandler implements ResponseHandler<PreparedStatement, Long> {
     @Override
-    public void addToResponse(PreparedStatement payload, Response<String> response) throws ServerException {
+    public void addToResponse(PreparedStatement payload, Response<Long> response) throws ServerException {
         try {
             ResultSet keys  = payload.getGeneratedKeys();
             if (keys != null) {
                 try {
                     keys.next();
-                    String keyValue = keys.getString(1);
+                    Long keyValue = keys.getLong(1);
                     response.set(keyValue);
                 }
                 finally {

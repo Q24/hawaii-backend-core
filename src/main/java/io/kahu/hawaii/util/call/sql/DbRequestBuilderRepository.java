@@ -110,15 +110,15 @@ public class DbRequestBuilderRepository {
     public <T> DbRequestBuilder<T> get(String name, ResponseHandler<ResultSet, T> responseHandler) throws ServerException {
         return ((DbRequestBuilder<T>) get(name)).withResponseHandler(responseHandler);
     }
-    
+
     public <T> DbRequestBuilder<T> get(String name, ResultSetExtractor<T> resultSetExtractor) throws ServerException {
         return ((DbRequestBuilder<T>) get(name)).withResponseHandler(new ResultSetResponseHandler(resultSetExtractor));
     }
-    
+
     public DbRequestBuilder<Void> get(String name, RowCallbackHandler rowCallbackHandler) throws ServerException {
         return ((DbRequestBuilder<Void>) get(name)).withResponseHandler(new RowCallbackResponseHandler(rowCallbackHandler));
     }
-    
+
     public <T> DbRequestBuilder<List<T>> getList(String name, RowMapper<T> rowMapper) throws ServerException {
         return ((DbRequestBuilder<List<T>>) get(name)).withResponseHandler(new ListResponseHandler<>(rowMapper));
     }
@@ -141,7 +141,7 @@ public class DbRequestBuilderRepository {
 
     public <T> Page<T> getPage(String count, String fetch, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer, Long maxRows) throws ServerException {
         Assert.notNull(pageable);
-        
+
         // retrieve query...
         Long rowCount = getCount(count).withParams(params).withQueryEnhancer(queryEnhancer).withPageable(pageable).get();
         if (maxRows != null && (rowCount > maxRows)) {
@@ -156,9 +156,13 @@ public class DbRequestBuilderRepository {
         // return the page
         return new PageImpl<>(pageItems, pageable, rowCount);
     }
-    
+
     public DbRequestBuilder<Integer> updateOrDelete(String name) throws ServerException {
         return ((DbRequestBuilder<Integer>) get(name));
+    }
+
+    public DbRequestBuilder<Long> insert(String name) throws ServerException {
+        return ((DbRequestBuilder<Long>) get(name));
     }
 
     private void load(final String resourcePath) {

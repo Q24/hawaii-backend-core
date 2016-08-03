@@ -137,7 +137,9 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
         List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
         PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
 
-        pscf.setGeneratedKeysColumnNames(idColumn);
+        if (idColumn != null) {
+            pscf.setGeneratedKeysColumnNames(idColumn);
+        }
 
         return pscf.newPreparedStatementCreator(params);
     }
