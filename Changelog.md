@@ -1,5 +1,9 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.1 3 August 2016, Paul Klos
+ * Add support for INSERT sql in DbRequestBuilderRepository
+ * Remove deprecated constructors on HttpRequestBuilder
+
 ## 0.4.0 29 July 2016, Jonathan Brouwers
  * fixed automated SQL call type detection
 
