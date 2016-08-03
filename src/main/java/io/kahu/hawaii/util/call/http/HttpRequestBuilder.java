@@ -85,23 +85,9 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
     private String payload;
     private Map<String, Object> payloads;
 
-    @Deprecated
-    public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
-            CallLogger<T> logger, HttpHeaderProvider httpHeaderProvider) throws ServerException {
-        this(requestDispatcher, requestContext, responseHandler, logger);
-        this.httpHeaderProvider = httpHeaderProvider;
-    }
-
-    @Deprecated
-    public HttpRequestBuilder(RequestDispatcher requestDispatcher, HttpRequestContext<T> requestContext, ResponseHandler<HttpResponse, T> responseHandler,
-            CallLogger<T> logger) throws ServerException {
-        this(new RequestPrototype<>(requestDispatcher, requestContext, responseHandler, logger));
-    }
-
     public HttpRequestBuilder(RequestPrototype<HttpResponse, T> prototype, HttpHeaderProvider httpHeaderProvider, HttpRequestCredentials credentials) throws ServerException {
         this(prototype, httpHeaderProvider);
         this.credentials = credentials;
-
     }
 
     public HttpRequestBuilder(RequestPrototype<HttpResponse, T> prototype, HttpHeaderProvider httpHeaderProvider) throws ServerException {
@@ -115,7 +101,6 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
     }
 
     private RequestPrototype<HttpResponse, T>  prototype;
-
 
     private void setConstructor() throws ServerException {
         try {
