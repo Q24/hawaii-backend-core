@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.2 4 August 2016, Paul Klos
+ * Fix handling of INSERT statements with or without generated key values
+
 ## 0.4.1 3 August 2016, Paul Klos
  * Add support for INSERT sql in DbRequestBuilderRepository
  * Remove deprecated constructors on HttpRequestBuilder
