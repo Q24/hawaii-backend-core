@@ -78,12 +78,17 @@ public class AbortableQuery<T> extends AbstractAbortableRequest<ResultSet, T> im
 
             switch (callType) {
                 case INSERT:
-                    preparedStatement.executeUpdate();
-                    new UpdateIdResponseHandler().addToResponse(preparedStatement, response);
+                    int result = preparedStatement.executeUpdate();
+                    if (StringUtils.isNotBlank(idColumn)) {
+                        new UpdateIdResponseHandler().addToResponse(preparedStatement, response);
+                    } else {
+                        // No generated ID, so just set the result to the number of affected rows
+                        response.set(result);
+                    }
                     break;
 
                 case DELETE:
-                    // fall though
+                    // fall through
                 case UPDATE:
                     response.set(preparedStatement.executeUpdate());
                     break;
