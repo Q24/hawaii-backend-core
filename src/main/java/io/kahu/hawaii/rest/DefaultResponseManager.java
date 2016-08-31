@@ -36,7 +36,6 @@ import io.kahu.hawaii.util.logger.LoggingContext;
 public class DefaultResponseManager implements ResponseManager {
 
     protected static final String X_HAWAII_TRANSACTION_ID_HEADER = "X-Hawaii-Tx-Id";
-    protected static final String X_HAWAII_CALL_IDS_HEADER = "X-Hawaii-Call-Ids";
 
     private final LogManager logManager;
 
@@ -180,10 +179,8 @@ public class DefaultResponseManager implements ResponseManager {
             // logging.context.txid=
             LoggingContext loggingContext = LoggingContext.get();
             Object hawaiiTxId = loggingContext.get(this.loggingContentTxId);
-            Object callIds = loggingContext.get("call_ids");
             if (hawaiiTxId != null) {
                 headers.set(X_HAWAII_TRANSACTION_ID_HEADER, ObjectUtils.toString(hawaiiTxId));
-                headers.set(X_HAWAII_CALL_IDS_HEADER, ObjectUtils.toString(callIds));
             }
         }
         String json = response.toString();

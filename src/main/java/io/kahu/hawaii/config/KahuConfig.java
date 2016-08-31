@@ -303,7 +303,7 @@ public class KahuConfig {
     @Bean
     public RequestDispatcher requestDispatcher() throws IOException, JSONException {
         // TODO Inject HttpClientFactory
-        return new RequestDispatcher(executorServiceRepository(), logManager(), new LogCallIdListener());
+        return new RequestDispatcher(executorServiceRepository(), logManager());
     }
 
     @Bean
