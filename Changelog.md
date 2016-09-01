@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.3 1 September 2016, Paul Klos
+ * Do not collect all call id's within a transaction
+
 ## 0.4.2 4 August 2016, Paul Klos
  * Fix handling of INSERT statements with or without generated key values
 
