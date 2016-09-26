@@ -39,7 +39,7 @@ public class DbRequestLogger implements RequestLogger {
         StringBuilder builder = new StringBuilder(dbCall.getSql());
         appendValues(builder, dbCall.getParameters(), true);
 
-        logManager.logOutgoingCallStart(request.getCallName(), null, null, null, null, builder.toString(), null);
+        logManager.logOutgoingCallStart(request.getCallName(), request.getId(), null, null, null, builder.toString(), null);
     }
 
 
