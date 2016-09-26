@@ -33,4 +33,9 @@ public class TimeOut {
     public TimeUnit getUnit() {
         return unit;
     }
+
+    @Override
+    public String toString() {
+        return duration + " " + unit;
+    }
 }
