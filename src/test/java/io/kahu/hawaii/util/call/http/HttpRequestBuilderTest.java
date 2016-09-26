@@ -18,6 +18,7 @@ package io.kahu.hawaii.util.call.http;
 import io.kahu.hawaii.util.call.Request;
 import io.kahu.hawaii.util.call.RequestPrototype;
 import io.kahu.hawaii.util.call.ResponseHandler;
+import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.response.StringResponseHandler;
 import io.kahu.hawaii.util.call.log.CallLogger;
@@ -25,6 +26,7 @@ import io.kahu.hawaii.util.exception.ServerException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -47,7 +49,7 @@ public class HttpRequestBuilderTest {
     public void setUp() throws ServerException {
         requestDispatcher = mock(RequestDispatcher.class);
         responseHandler = mock(StringResponseHandler.class);
-        requestContext = new HttpRequestContext<>(HttpMethod.GET, "http://test.com", "/testUrl", "dynalean", "get_shop_locations", 1);
+        requestContext = new HttpRequestContext<>(HttpMethod.GET, "http://test.com", "/testUrl", "dynalean", "get_shop_locations", new TimeOut(1, TimeUnit.SECONDS));
         logger = mock(CallLogger.class);
 
         RequestPrototype<HttpResponse, String> prototype = new RequestPrototype<>(requestDispatcher, requestContext, responseHandler, logger);

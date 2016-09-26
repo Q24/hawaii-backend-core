@@ -25,10 +25,6 @@ public class HttpRequestContext<T> extends RequestContext<T> {
     private String baseUrl;
     private String path;
 
-    @Deprecated
-    public HttpRequestContext(HttpMethod method, String baseUrl, String path, String backendSystem, String methodName, int timeOut) {
-        this(method, baseUrl, path, backendSystem, methodName, new TimeOut(timeOut, TimeUnit.SECONDS));
-    }
     public HttpRequestContext(HttpMethod method, String baseUrl, String path, String backendSystem, String methodName, TimeOut timeOut) {
         super(backendSystem, methodName, timeOut);
         this.method = method;

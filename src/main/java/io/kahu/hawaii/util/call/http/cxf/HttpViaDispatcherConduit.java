@@ -15,6 +15,7 @@
  */
 package io.kahu.hawaii.util.call.http.cxf;
 
+import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
 import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
@@ -33,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.cxf.Bus;
@@ -116,7 +118,8 @@ public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit
                 }
             }
 
-            HttpRequestContext<String> context = new HttpRequestContext<>(HttpMethod.POST, baseUrl, path, systemName, methodName, 20);
+            HttpRequestContext<String> context = new HttpRequestContext<>(HttpMethod.POST, baseUrl, path, systemName, methodName, new TimeOut(20,
+                    TimeUnit.SECONDS));
 
             SoapRequest<String> soapRequest = new SoapRequest<>(requestDispatcher, context, url, soapMessage, soapAction, new SoapResponseHandler(),
                     new CallLoggerImpl<>(logManager, new HttpRequestLogger(), new SoapResponseLogger()));
