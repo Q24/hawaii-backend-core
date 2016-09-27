@@ -1,5 +1,11 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.4 27 September 2016, Paul Klos
+ * Add default call timeout on system level, implement for DB calls
+ * Remove deprecated constructor in HttpRequestContext
+ * Implement toString on TimeOut for better logging
+ * Log call.id on DB request start
+
 ## 0.4.3 1 September 2016, Paul Klos
  * Do not collect all call id's within a transaction
 
