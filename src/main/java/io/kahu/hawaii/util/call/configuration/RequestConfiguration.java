@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @NotThreadSafe
 public class RequestConfiguration {
     private String executorName;
-    private TimeOut defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
+    private TimeOut defaultTimeOut;
     private TimeOut timeOut = null;
     private RequestContext<?> context;
 
@@ -44,8 +44,19 @@ public class RequestConfiguration {
         this.timeOut = timeOut;
     }
 
+    public TimeOut getDefaultTimeOut() {
+        return defaultTimeOut;
+    }
+
+    public void setDefaultTimeOut(TimeOut defaultTimeOut) {
+        this.defaultTimeOut = defaultTimeOut;
+    }
+
     public TimeOut getTimeOutOrDefaultIfUnset() {
         if (timeOut == null) {
+            if (defaultTimeOut == null) {
+                defaultTimeOut = new TimeOut(10, TimeUnit.SECONDS);
+            }
             return defaultTimeOut;
         }
         return timeOut;

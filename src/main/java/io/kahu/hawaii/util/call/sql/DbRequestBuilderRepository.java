@@ -80,15 +80,21 @@ public class DbRequestBuilderRepository {
     }
 
     private void doAdd(DbRequestBuilder<?> requestBuilder) throws ServerException {
-        String name = requestBuilder.getRequestContext().getMethodName();
+        RequestContext requestContext = requestBuilder.getRequestContext();
+
+        String name = requestContext.getMethodName();
         if (builders.put(name, requestBuilder) != null) {
             throw new ServerException(ServerError.ILLEGAL_ARGUMENT, "DB Request with name '" + name + "' already exists.");
         }
 
-        RequestContext requestContext = requestBuilder.getRequestContext();
         String lookup = createLookup(requestContext.getBackendSystem(), requestContext.getMethodName());
 
         RequestConfiguration requestConfiguration = configurations.get(lookup);
+        if (requestConfiguration.getTimeOut() == null) {
+            // Use system timeout
+            RequestConfiguration systemConfiguration = configurations.get(requestContext.getBackendSystem());
+            requestConfiguration.setDefaultTimeOut(systemConfiguration.getTimeOut());
+        }
         requestContext.setConfiguration(requestConfiguration);
         requestConfiguration.setContext(requestContext);
         logManager.debug(CoreLoggers.SERVER,

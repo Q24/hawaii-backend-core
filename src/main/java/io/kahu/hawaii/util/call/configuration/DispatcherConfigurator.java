@@ -90,6 +90,12 @@ public class DispatcherConfigurator implements ApplicationListener<ContextRefres
         for (int i = 0; i < systems.length(); i++) {
             JSONObject system = systems.getJSONObject(i);
             String systemName = system.getString("name");
+            Integer systemTimeOutValue = system.optInt("default_timeout", -1);
+            TimeOut systemTimeOut;
+            if (systemTimeOutValue > 0) {
+                systemTimeOut = new TimeOut(systemTimeOutValue, TimeUnit.SECONDS);
+                requestConfigurations.get(systemName).setTimeOut(systemTimeOut);
+            }
 
             String defaultQueue = system.optString("default_queue");
             if (StringUtils.isNotBlank(defaultQueue)) {
