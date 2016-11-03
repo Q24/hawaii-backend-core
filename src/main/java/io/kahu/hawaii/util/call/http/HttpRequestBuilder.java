@@ -238,6 +238,9 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
                 ((HttpPost) request.getHttpRequest()).setEntity(httpEntity);
             }
             break;
+        case DELETE:
+            request = new DeleteRequest<T>(prototype, uri);
+            break;
         default:
             throw new ServerException(ServerError.METHOD_ERROR, "Method '" + method + "' is not supported.");
         }
