@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.5 3 November 2016, Wouter Eerdekens
+ * Add support for DELETE requests to HttpRequestBuilder
+
 ## 0.4.4 27 September 2016, Paul Klos
  * Add default call timeout on system level, implement for DB calls
  * Remove deprecated constructor in HttpRequestContext
