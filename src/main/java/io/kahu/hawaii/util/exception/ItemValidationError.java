@@ -23,7 +23,8 @@ public enum ItemValidationError implements HawaiiItemValidationError {
     NOT_A_DATE_IN_MILLIS,
     BIRTH_DATE_IN_THE_FUTURE,
     VALUE_BELOW_MINIMUM,
-    VALUE_ABOVE_MAXIMUM;
+    VALUE_ABOVE_MAXIMUM,
+    NUMBER_NOT_PORTABLE;
     // formatter: on
 
     @Override
