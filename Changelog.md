@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.6 25 November 2016, Paul Klos
+ * Specific error code for non-portable numbers
+
 ## 0.4.5 3 November 2016, Wouter Eerdekens
  * Add support for DELETE requests to HttpRequestBuilder
 
