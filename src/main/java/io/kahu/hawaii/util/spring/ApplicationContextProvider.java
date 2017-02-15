@@ -15,6 +15,7 @@
  */
 package io.kahu.hawaii.util.spring;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -39,9 +40,13 @@ public class ApplicationContextProvider implements ApplicationContextAware {
 
         String[] beanNamesForType = context.getBeanNamesForType(beanClass);
         assert beanNamesForType.length != 0 : "Found no bean for '" + beanClass + "'.";
-        assert beanNamesForType.length == 1 : "Found multiple beans for '" + beanClass + "' namely '" + beanNamesForType + "'.";
+        assert beanNamesForType.length == 1 : "Found multiple beans for '" + beanClass + "' namely '" + Arrays.toString(beanNamesForType) + "'.";
 
         return (T) context.getBean(beanNamesForType[0]);
+    }
+
+    public static <T> T getBean(final String beanName, final Class<T> beanClass) {
+        return context.getBean(beanName, beanClass);
     }
 
     public static <T> Collection<T> getBeans(Class<T> beanClass) {
