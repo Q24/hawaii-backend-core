@@ -15,18 +15,13 @@
  */
 package io.kahu.hawaii.domain.validation;
 
+import javax.validation.Constraint;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.*;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -41,5 +36,9 @@ public @interface Mandatory {
 
     String key() default "";
 
+    @Deprecated
     boolean protocolError() default false;
+
+    boolean requestValidation() default false;
+
 }

@@ -17,14 +17,11 @@ package io.kahu.hawaii.domain;
 
 import io.kahu.hawaii.domain.validation.Mandatory;
 import io.kahu.hawaii.domain.validation.Optional;
-import io.kahu.hawaii.util.exception.HawaiiRequestValidationError;
-import io.kahu.hawaii.util.exception.ItemValidation;
-import io.kahu.hawaii.util.exception.ItemValidationError;
-import io.kahu.hawaii.util.exception.RequestValidationError;
-import io.kahu.hawaii.util.exception.ServerException;
+import io.kahu.hawaii.util.exception.*;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -107,17 +104,19 @@ public class AbstractValidatableDomainObject implements Serializable, DomainObje
         Set<ConstraintViolation<AbstractValidatableDomainObject>> violations = getViolations();
         if (violations != null) {
             for (ConstraintViolation<AbstractValidatableDomainObject> constraintViolation : violations) {
-                String propertyKey = null;
+                String propertyKey;
 
                 Annotation ann = constraintViolation.getConstraintDescriptor().getAnnotation();
                 if (ann instanceof Mandatory) {
-                    propertyKey = ((Mandatory) ann).key();
-                    if (StringUtils.isBlank(propertyKey)) {
-                        throw new IllegalStateException(String.format("@Mandatory annotation without key on %s", constraintViolation.getPropertyPath()));
-                    }
                     if (((Mandatory) ann).protocolError()) {
                         requestValidations.add(RequestValidationError.PROTOCOL_ERROR);
+                    } else if (((Mandatory) ann).requestValidation()) {
+                        requestValidations.add(getRequestValidationForAnnotation(ann));
                     } else {
+                        propertyKey = ((Mandatory) ann).key();
+                        if (StringUtils.isBlank(propertyKey)) {
+                            throw new IllegalStateException(String.format("@Mandatory annotation without key on %s", constraintViolation.getPropertyPath()));
+                        }
                         Object invalidObject = constraintViolation.getInvalidValue();
                         if (invalidObject == null || ((ValueHolder) invalidObject).isEmpty()) {
                             itemValidations.add(new ItemValidation(propertyKey, ItemValidationError.REQUIRED));
@@ -127,43 +126,28 @@ public class AbstractValidatableDomainObject implements Serializable, DomainObje
                     }
                 } else if (ann instanceof Optional) {
                     propertyKey = ((Optional) ann).key();
-                    if (StringUtils.isBlank(propertyKey)) {
-                        throw new IllegalStateException(String.format("@Optional annotation without key on %s", constraintViolation.getPropertyPath()));
-                    }
                     if (((Optional) ann).protocolError()) {
                         requestValidations.add(RequestValidationError.PROTOCOL_ERROR);
+                    } else if (((Optional) ann).requestValidation()) {
+                        requestValidations.add(getRequestValidationForAnnotation(ann));
                     } else {
-                        itemValidations.add(new ItemValidation(propertyKey, ItemValidationError.INVALID));
+                        if (StringUtils.isBlank(propertyKey)) {
+                            throw new IllegalStateException(String.format("@Optional annotation without key on %s", constraintViolation.getPropertyPath()));
+                        }
+                        final HawaiiItemValidationError error = getItemValidationForAnnotation(ann);
+                        itemValidations.add(new ItemValidation(propertyKey, error));
                     }
                 } else if (ann.annotationType().isAnnotationPresent(HawaiiValidation.class)) {
                     try {
                         Method method;
-                        Boolean protocolError = Boolean.FALSE;
-                        try {
-                            method = ann.getClass().getMethod("protocolError");
-                            protocolError = (Boolean) method.invoke(ann);
-                        } catch (NoSuchMethodException e) {
-                            // ignore
-                        }
-                        if (protocolError) {
+                        if (isProtocolError(ann)) {
                             requestValidations.add(RequestValidationError.PROTOCOL_ERROR);
+                        } else if (isRequestValidation(ann)) {
+                            requestValidations.add(getRequestValidationForAnnotation(ann));
                         } else {
-
                             method = ann.getClass().getMethod("key");
                             propertyKey = (String) method.invoke(ann);
-                            // Default error is INVALID
-                            ItemValidationError error = ItemValidationError.INVALID;
-                            String message = null;
-                            try {
-                                method = ann.getClass().getMethod("message");
-                                message = (String) method.invoke(ann);
-                            } catch (NoSuchMethodException e) {
-                                // ignore
-                            }
-                            // Error override through annotation message
-                            if (StringUtils.isNotBlank(message)) {
-                                error = ItemValidationError.valueOf(message);
-                            }
+                            final HawaiiItemValidationError error = getItemValidationForAnnotation(ann);
                             itemValidations.add(new ItemValidation(propertyKey, error));
                         }
                     } catch (NoSuchMethodException e) {
@@ -172,13 +156,122 @@ public class AbstractValidatableDomainObject implements Serializable, DomainObje
                     } catch (Exception e) {
                         throw new IllegalStateException("Exception validating Class validation", e);
                     }
-                    continue;
-                } else {
-                    // ignored
-                    continue;
                 }
             }
         }
     }
 
+    private boolean isProtocolError(final Annotation annotation) {
+        return evaluateBooleanMethod(annotation, "protocolError");
+    }
+
+    private boolean isRequestValidation(final Annotation annotation) {
+        return evaluateBooleanMethod(annotation, "requestValidation");
+    }
+
+    private boolean evaluateBooleanMethod(final Annotation annotation, final String methodName) {
+        boolean result = false;
+        try {
+            Method method = annotation.getClass().getMethod(methodName);
+            result = (boolean) method.invoke(annotation);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            // ignore
+        }
+        return result;
+    }
+
+    private HawaiiItemValidationError getItemValidationForAnnotation(final Annotation annotation) {
+        try {
+            HawaiiItemValidationError error = null;
+            // Error override through annotation message
+            String message = getAnnotationMessage(annotation);
+            if (StringUtils.isNotBlank(message)) {
+                try {
+                    error = ItemValidationError.valueOf(message);
+                } catch (IllegalArgumentException e) {
+                    // message is not an ItemValidationError
+                }
+            }
+            if (error == null) {
+                error = resolveItemValidationError(message);
+            }
+            if (error == null) {
+                // Default error is INVALID
+                error = ItemValidationError.INVALID;
+            }
+            return error;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Exception validating annotation " + annotation, e);
+        }
+    }
+
+    /**
+     * Takes a message (from a validation Annotation) and resolves it to a {@link HawaiiItemValidationError}.
+     *
+     * Subclasses can override this method to use errors other than those
+     * in {@link ItemValidationError} in their validations.
+     *
+     * The default implementation returns null.
+     *
+     * If the subclass' implementation returns null, the error will
+     * default to {@link ItemValidationError#INVALID}.
+     *
+     * @param message the message to resolve
+     * @return the HawaiiItemValidationError
+     */
+    protected HawaiiItemValidationError resolveItemValidationError(final String message) {
+        return null;
+    }
+
+    private HawaiiRequestValidationError getRequestValidationForAnnotation(final Annotation annotation) {
+        try {
+            HawaiiRequestValidationError error = null;
+            String message = getAnnotationMessage(annotation);
+            if (StringUtils.isNotBlank(message)) {
+                try {
+                    error = RequestValidationError.valueOf(message);
+                } catch (IllegalArgumentException e) {
+                    // message is not an ItemValidationError
+                }
+            }
+            if (error == null) {
+                error = resolveRequestValidationError(message);
+            }
+            if (error == null) {
+                error = RequestValidationError.PROTOCOL_ERROR;
+            }
+            return error;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Exception validating annotation " + annotation, e);
+        }
+    }
+
+    /**
+     * Takes a message (from a validation Annotation) and resolves it to a {@link HawaiiRequestValidationError}.
+     *
+     * Subclasses can override this method to use errors other than those
+     * in {@link RequestValidationError} in their validations.
+     *
+     * The default implementation returns null.
+     *
+     * If the subclass' implementation returns null, the error will default
+     * to {@link RequestValidationError#PROTOCOL_ERROR}.
+     *
+     * @param message the message to resolve
+     * @return the HawaiiRequestValidationError
+     */
+    protected HawaiiRequestValidationError resolveRequestValidationError(final String message) {
+        return null;
+    }
+
+    private String getAnnotationMessage(final Annotation annotation) throws InvocationTargetException, IllegalAccessException {
+        String message = null;
+        try {
+            Method method = annotation.getClass().getMethod("message");
+            message = (String) method.invoke(annotation);
+        } catch (NoSuchMethodException e) {
+            // ignore
+        }
+        return message;
+    }
 }

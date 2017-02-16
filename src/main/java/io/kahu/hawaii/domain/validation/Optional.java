@@ -41,5 +41,8 @@ public @interface Optional {
 
     String key() default "";
 
+    @Deprecated
     boolean protocolError() default false;
+
+    boolean requestValidation() default false;
 }
