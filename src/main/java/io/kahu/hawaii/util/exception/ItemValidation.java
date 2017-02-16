@@ -55,4 +55,10 @@ public class ItemValidation {
         result = 31 * result + error.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("[ '%s', '%s' ]", key, error.getName());
+    }
+
 }
