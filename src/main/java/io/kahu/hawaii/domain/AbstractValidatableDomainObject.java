@@ -125,12 +125,12 @@ public class AbstractValidatableDomainObject implements Serializable, DomainObje
                         }
                     }
                 } else if (ann instanceof Optional) {
-                    propertyKey = ((Optional) ann).key();
                     if (((Optional) ann).protocolError()) {
                         requestValidations.add(RequestValidationError.PROTOCOL_ERROR);
                     } else if (((Optional) ann).requestValidation()) {
                         requestValidations.add(getRequestValidationForAnnotation(ann));
                     } else {
+                        propertyKey = ((Optional) ann).key();
                         if (StringUtils.isBlank(propertyKey)) {
                             throw new IllegalStateException(String.format("@Optional annotation without key on %s", constraintViolation.getPropertyPath()));
                         }

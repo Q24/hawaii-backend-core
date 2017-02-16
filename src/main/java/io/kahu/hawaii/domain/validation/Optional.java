@@ -41,6 +41,10 @@ public @interface Optional {
 
     String key() default "";
 
+    /**
+     * @deprecated use {@link #requestValidation()}
+     * @return true if a violation results in a protocol error
+     */
     @Deprecated
     boolean protocolError() default false;
 
