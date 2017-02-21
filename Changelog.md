@@ -1,4 +1,9 @@
 # Hawaii Backend Core Changelog
+## 0.4.7 15 February 2017, Paul Klos
+ * Add method to retrieve bean by name
+ * Allow subclasses of AbstractValidatableDomainObject to use their own
+   item and request validation errors
+ * Add toString on ItemValidation
 
 ## 0.4.6 25 November 2016, Paul Klos
  * Specific error code for non-portable numbers
