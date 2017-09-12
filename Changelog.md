@@ -1,4 +1,8 @@
 # Hawaii Backend Core Changelog
+
+## 0.4.8 12 September 2017, Ruben Pirotte
+ * Allow prefix for sitemap generater
+
 ## 0.4.7 15 February 2017, Paul Klos
  * Add method to retrieve bean by name
  * Allow subclasses of AbstractValidatableDomainObject to use their own
