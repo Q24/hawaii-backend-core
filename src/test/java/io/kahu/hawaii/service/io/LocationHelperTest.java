@@ -32,10 +32,10 @@ public class LocationHelperTest {
     }
 
     @Test
-    public void assureThatHawaiiClientWorkspaceRootIsRetrievedOkIf() {
+    public void assureThatHawaiiWorkspaceHomeIsRetrievedOkIf() {
         LocationHelper helper = new LocationHelper();
-        String workspaceRoot = helper.getHawaiiClientWorkspaceRoot();
-        assertThat("environment variable HAWAII_CLIENT_WORKSPACE_ROOT", workspaceRoot, is(notNullValue()));
+        String workspaceRoot = helper.getHawaiiWorkspaceHomeRoot();
+        assertThat("environment variable HAWAII_WORKSPACE_HOME", workspaceRoot, is(notNullValue()));
     }
     
     @Test

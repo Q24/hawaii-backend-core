@@ -21,13 +21,13 @@ import java.io.File;
 
 public class LocationHelper {
 
-    private String hawaiiClientWorkspaceRoot = null;
+    private String hawaiiWorkspaceHome = null;
 
-    public String getHawaiiClientWorkspaceRoot() {
-        if (hawaiiClientWorkspaceRoot == null) {
-            hawaiiClientWorkspaceRoot = System.getenv("HAWAII_CLIENT_WORKSPACE_ROOT");
+    public String getHawaiiWorkspaceHomeRoot() {
+        if (hawaiiWorkspaceHome == null) {
+            hawaiiWorkspaceHome = System.getenv("HAWAII__WORKSPACE_HOME");
         }
-        return hawaiiClientWorkspaceRoot;
+        return hawaiiWorkspaceHome;
     }
 
     private String hawaiiServerHome = null;
