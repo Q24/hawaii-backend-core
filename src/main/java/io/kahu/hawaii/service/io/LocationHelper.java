@@ -21,6 +21,15 @@ import java.io.File;
 
 public class LocationHelper {
 
+    private String hawaiiWorkspaceHome = null;
+
+    public String getHawaiiWorkspaceHome() {
+        if (hawaiiWorkspaceHome == null) {
+            hawaiiWorkspaceHome = System.getenv("HAWAII_WORKSPACE_HOME");
+        }
+        return hawaiiWorkspaceHome;
+    }
+
     private String hawaiiServerHome = null;
 
     public String getHawaiiServerHome() {
