@@ -25,7 +25,7 @@ public class LocationHelper {
 
     public String getHawaiiWorkspaceHomeRoot() {
         if (hawaiiWorkspaceHome == null) {
-            hawaiiWorkspaceHome = System.getenv("HAWAII__WORKSPACE_HOME");
+            hawaiiWorkspaceHome = System.getenv("HAWAII_WORKSPACE_HOME");
         }
         return hawaiiWorkspaceHome;
     }
