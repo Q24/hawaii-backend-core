@@ -1,5 +1,10 @@
 # Hawaii Backend Core Changelog
 
+
+## 0.4.10 18 September 2017, Ruben Pirotte
+ * Add HAWAII_CLIENT_SUPPORT_DOCROOT system variable to location helper
+ * Removed HAWAII_WORKSPACE_HOME system variable from location helper
+
 ## 0.4.9 13 September 2017, Ruben Pirotte
  * Add HAWAII_WORKSPACE_HOME system variable to location helper
 
