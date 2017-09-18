@@ -43,15 +43,6 @@ public class LocationHelper {
         return hawaiiClientDocRoot;
     }
 
-    private String hawaiiClientSupportDocRoot = null;
-
-    public String getHawaiiClientSupportDocRoot() {
-        if (hawaiiClientSupportDocRoot == null) {
-            hawaiiClientSupportDocRoot = System.getenv("HAWAII_CLIENT_SUPPORT_DOCROOT");
-        }
-        return hawaiiClientSupportDocRoot;
-    }
-
     private String hawaiiDocumentationDocRoot = null;
 
     public String getHawaiiDocumentationDocRoot() {

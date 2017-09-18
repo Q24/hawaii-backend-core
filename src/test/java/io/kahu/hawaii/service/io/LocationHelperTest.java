@@ -15,13 +15,13 @@
  */
 package io.kahu.hawaii.service.io;
 
-import org.junit.Test;
-
-import java.io.File;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import io.kahu.hawaii.service.io.LocationHelper;
+import java.io.File;
+
+import org.junit.Test;
 public class LocationHelperTest {
   
     @Test
@@ -29,13 +29,6 @@ public class LocationHelperTest {
         LocationHelper helper = new LocationHelper();
         String serverHome = helper.getHawaiiServerHome();
         assertThat("environment variable HAWAII_SERVER_HOME", serverHome, is(notNullValue()));
-    }
-
-    @Test
-    public void assureThatHawaiiClientSupportIsRetrievedOkIf() {
-        LocationHelper helper = new LocationHelper();
-        String hawaiiClientSupportHome = helper.getHawaiiClientSupportDocRoot();
-        assertThat("environment variable HAWAII_CLIENT_SUPPORT_DOCROOT", hawaiiClientSupportHome, is(notNullValue()));
     }
     
     @Test
