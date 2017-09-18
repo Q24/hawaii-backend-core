@@ -21,15 +21,6 @@ import java.io.File;
 
 public class LocationHelper {
 
-    private String hawaiiWorkspaceHome = null;
-
-    public String getHawaiiWorkspaceHome() {
-        if (hawaiiWorkspaceHome == null) {
-            hawaiiWorkspaceHome = System.getenv("HAWAII_WORKSPACE_HOME");
-        }
-        return hawaiiWorkspaceHome;
-    }
-
     private String hawaiiServerHome = null;
 
     public String getHawaiiServerHome() {
@@ -50,6 +41,15 @@ public class LocationHelper {
         }
 
         return hawaiiClientDocRoot;
+    }
+
+    private String hawaiiClientSupportDocRoot = null;
+
+    public String getHawaiiClientSupportDocRoot() {
+        if (hawaiiClientSupportDocRoot == null) {
+            hawaiiClientSupportDocRoot = System.getenv("HAWAII_CLIENT_SUPPORT_DOCROOT");
+        }
+        return hawaiiClientSupportDocRoot;
     }
 
     private String hawaiiDocumentationDocRoot = null;
