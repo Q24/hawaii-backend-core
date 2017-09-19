@@ -15,8 +15,15 @@
  */
 package io.kahu.hawaii.service.io;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,11 +34,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class SiteMapGenerator {
 
@@ -46,11 +51,8 @@ public class SiteMapGenerator {
         this.sitemapSkipPages = ((sitemapSkipPagesProp == null || "".equalsIgnoreCase(sitemapSkipPagesProp)) ? null : Arrays.asList(sitemapSkipPagesProp.split(",")));
     }
 
-    public void writeSitemap(Writer writer, List<String> fileList, String prefix) throws IOException {
+    public void writeSitemap(Writer writer, List<String> fileList) throws IOException {
         try {
-            if(prefix == null) {
-                prefix = "";
-            }
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
@@ -64,17 +66,17 @@ public class SiteMapGenerator {
 
             // URL elements
             for (String fileName : fileList) {
-            	// replace backslashes with forward slashes (on windows)
-            	fileName = fileName.replace('\\', '/');
-            	
-            	// if the file is part of the skip list, don't add it
-            	if (skipFilename(fileName)) continue;
+                // replace backslashes with forward slashes (on windows)
+                fileName = fileName.replace('\\', '/');
+
+                // if the file is part of the skip list, don't add it
+                if (skipFilename(fileName)) continue;
 
                 Element url = doc.createElement("url");
                 rootElement.appendChild(url);
 
                 Element loc = doc.createElement("loc");
-                loc.appendChild(doc.createTextNode(sitemapUrlDomain + prefix + fileName));
+                loc.appendChild(doc.createTextNode(sitemapUrlDomain + fileName));
                 url.appendChild(loc);
                 rootElement.appendChild(url);
             }
@@ -95,24 +97,17 @@ public class SiteMapGenerator {
         }
     }
 
-    public void writeSitemap(Writer writer, List<String> fileList) throws IOException {
-        writeSitemap(writer, fileList, null);
-    }
-
-    public void generateSiteMap(String rootDirectory, String prefix) throws IOException {
-        if(prefix==null){
-            prefix="";
-        }
+    public void generateSiteMap(String rootDirectory) throws IOException {
 
         HtmlFileListGenerator generator = new HtmlFileListGenerator();
         List<String> fileList = generator.createListOfHtmlFiles(new File(rootDirectory));
-        
+
         Collections.sort(fileList);
-        
+
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(rootDirectory + "/sitemap.xml"));
-            writeSitemap(writer, fileList, prefix);
+            writeSitemap(writer, fileList);
         } finally {
             try {
                 if (writer != null) {
@@ -126,10 +121,6 @@ public class SiteMapGenerator {
 
     }
 
-    public void generateSiteMap(String rootDirectory) throws IOException {
-        generateSiteMap(rootDirectory, null);
-    }
-
     public static void main(String[] args) {
 
         SiteMapGenerator sm = new SiteMapGenerator();
@@ -141,7 +132,7 @@ public class SiteMapGenerator {
             e.printStackTrace();
         }
     }
-    
+
     private boolean skipFilename(String fileName) {
         if (sitemapSkipPages != null) {
             for (String skipPage: sitemapSkipPages) {
