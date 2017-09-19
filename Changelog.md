@@ -1,5 +1,7 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.11 TBA, Ruben Pirotte
+ * Removed prefix for sitemap generator
 
 ## 0.4.10 18 September 2017, Ruben Pirotte
  * Add HAWAII_CLIENT_SUPPORT_DOCROOT system variable to location helper
@@ -9,7 +11,7 @@
  * Add HAWAII_WORKSPACE_HOME system variable to location helper
 
 ## 0.4.8 12 September 2017, Ruben Pirotte
- * Allow prefix for sitemap generater
+ * Allow prefix for sitemap generator
 
 ## 0.4.7 15 February 2017, Paul Klos
  * Add method to retrieve bean by name
