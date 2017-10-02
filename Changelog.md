@@ -1,7 +1,8 @@
 # Hawaii Backend Core Changelog
 
-## 0.4.11 TBA, Ruben Pirotte
+## 0.4.11 2 October 2017, Paul Klos
  * Removed prefix for sitemap generator
+ * Handle null value in formatting of logging output
 
 ## 0.4.10 18 September 2017, Ruben Pirotte
  * Add HAWAII_CLIENT_SUPPORT_DOCROOT system variable to location helper
