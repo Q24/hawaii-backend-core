@@ -296,6 +296,9 @@ public class LoggingContext {
      * @return The quoted string
      */
     private static String formatString(String value) {
+        if (value == null) {
+            return "null";
+        }
         if (value.length() == 0) {
             return "\"\"";
         }
