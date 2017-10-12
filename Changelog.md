@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.12 12 October 2017, Marcel Overdijk
+ * Upgraded Bouncy Castle dependency from bcprov-jdk16 to bcprov-jdk15on
+
 ## 0.4.11 2 October 2017, Paul Klos
  * Removed prefix for sitemap generator
  * Handle null value in formatting of logging output
