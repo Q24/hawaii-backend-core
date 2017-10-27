@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.13 27 October 2017, Paul Klos
+ * Make HttpResponseToStringConverter handle 204 responses without a response entity
+
 ## 0.4.12 12 October 2017, Marcel Overdijk
  * Upgraded Bouncy Castle dependency from bcprov-jdk16 to bcprov-jdk15on
 
