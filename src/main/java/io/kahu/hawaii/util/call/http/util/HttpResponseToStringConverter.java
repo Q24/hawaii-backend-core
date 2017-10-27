@@ -21,13 +21,18 @@ import io.kahu.hawaii.util.exception.ServerException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
 public class HttpResponseToStringConverter {
     public String toString(HttpResponse response) throws ServerException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            response.getEntity().writeTo(outputStream);
+            final HttpEntity responseEntity = response.getEntity();
+            // A 204 response doesn't have any content
+            if (responseEntity != null) {
+                responseEntity.writeTo(outputStream);
+            }
         } catch (IOException e) {
             throw new ServerException(ServerError.IO, e);
         }
