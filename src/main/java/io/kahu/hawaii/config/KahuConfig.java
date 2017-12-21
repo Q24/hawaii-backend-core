@@ -15,31 +15,6 @@
  */
 package io.kahu.hawaii.config;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.management.MBeanServer;
-
-import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.core.env.Environment;
-import org.springframework.jmx.export.MBeanExporter;
-import org.springframework.jmx.support.MBeanServerFactoryBean;
-import org.springframework.jmx.support.RegistrationPolicy;
-
 import io.kahu.hawaii.rest.DefaultResponseManager;
 import io.kahu.hawaii.rest.ResponseManager;
 import io.kahu.hawaii.service.io.FileChangeListener;
@@ -48,12 +23,11 @@ import io.kahu.hawaii.service.io.SiteMapGenerator;
 import io.kahu.hawaii.service.mail.DefaultMailSender;
 import io.kahu.hawaii.service.mail.FakeMailSender;
 import io.kahu.hawaii.service.mail.HawaiiProperties;
-import io.kahu.hawaii.service.mail.MailConnection;
 import io.kahu.hawaii.service.mail.MailSender;
-import io.kahu.hawaii.service.mail.SMTPMailConnection;
-import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
-import io.kahu.hawaii.util.call.dispatch.listener.LogCallIdListener;
+import io.kahu.hawaii.service.mail.MailSenderHelperImpl;
+import io.kahu.hawaii.util.call.configuration.DispatcherConfigurator;
 import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
+import io.kahu.hawaii.util.call.dispatch.ExecutorRepository;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.response.FileDownload;
 import io.kahu.hawaii.util.call.log.CallLoggerImpl;
@@ -75,6 +49,26 @@ import io.kahu.hawaii.util.logger.LogManagerConfiguration;
 import io.kahu.hawaii.util.logger.LoggingConfiguration;
 import io.kahu.hawaii.util.logger.LoggingConfigurationMBean;
 import io.kahu.hawaii.util.spring.ApplicationContextProvider;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
+import org.jolokia.jmx.JolokiaMBeanServerUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
+import org.springframework.jmx.export.MBeanExporter;
+import org.springframework.jmx.support.MBeanServerFactoryBean;
+import org.springframework.jmx.support.RegistrationPolicy;
+
+import javax.management.MBeanServer;
+import java.io.File;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 @Configuration
 public class KahuConfig {
@@ -208,15 +202,11 @@ public class KahuConfig {
     }
 
     @Bean
-    public MailConnection mailConnection() throws ServerException {
-        return new SMTPMailConnection(hawaiiMailProperties());
-    }
-
-    @Bean
     public MailSender mailSender() throws ServerException {
-        String impl = env.getProperty("mail.impl");
+        final String impl = env.getProperty("mail.impl");
         if ("default".equalsIgnoreCase(impl)) {
-            return new DefaultMailSender(hawaiiMailProperties(), mailConnection());
+            final HawaiiProperties mailProperties = hawaiiMailProperties();
+            return new DefaultMailSender(mailProperties, new MailSenderHelperImpl(mailProperties));
         } else if ("fake".equalsIgnoreCase(impl)) {
             logManager().info(CoreLoggers.SERVER, "Container configured to fake mail sending");
             return new FakeMailSender(logManager());
@@ -247,7 +237,7 @@ public class KahuConfig {
     }
 
     // *************************************************************************
-    // Hawaii repsonse manager
+    // Hawaii response manager
     // *************************************************************************
 
     @Bean
@@ -291,7 +281,7 @@ public class KahuConfig {
     }
 
     @Bean(destroyMethod = "stop")
-    public ExecutorRepository executorServiceRepository() throws IOException, JSONException {
+    public ExecutorRepository executorServiceRepository() {
         final ExecutorRepository executorRepository = new ExecutorRepository(logManager());
         DispatcherConfigurator dispatcherConfigurator = new DispatcherConfigurator(executorRepository, requestCongfigurations(), logManager());
         String config = env.getProperty("dispatcher.configuration.file");
@@ -301,7 +291,7 @@ public class KahuConfig {
     }
 
     @Bean
-    public RequestDispatcher requestDispatcher() throws IOException, JSONException {
+    public RequestDispatcher requestDispatcher() {
         // TODO Inject HttpClientFactory
         return new RequestDispatcher(executorServiceRepository(), logManager());
     }

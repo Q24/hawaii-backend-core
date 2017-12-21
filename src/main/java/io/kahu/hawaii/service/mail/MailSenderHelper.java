@@ -15,12 +15,22 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
-public interface MailConnection {
-    void disconnectFromMailServer();
-    void sendMail(MimeMessage message) throws MessagingException;
-    MimeMessage createMessage();
-    void connectToMailServer() throws MessagingException;
+/**
+ * Factory for creating a Mail Transport.
+ */
+public interface MailSenderHelper {
+
+    /**
+     * Create the transport.
+     */
+    Transport createTransport() throws NoSuchProviderException;
+
+    /**
+     * Create the MimeMessage.
+     */
+    MimeMessage createMimeMessage();
 }

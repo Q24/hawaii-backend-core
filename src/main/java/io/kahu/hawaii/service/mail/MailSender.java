@@ -15,9 +15,9 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import java.io.File;
-
 import io.kahu.hawaii.util.exception.ServerException;
+
+import java.io.File;
 
 public interface MailSender {
 

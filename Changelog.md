@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.14 21 December 2017, Rutger Lubbers / Jules Houben
+ * Make MailSender thread safe.
+
 ## 0.4.13 27 October 2017, Paul Klos
  * Make HttpResponseToStringConverter handle 204 responses without a response entity
 

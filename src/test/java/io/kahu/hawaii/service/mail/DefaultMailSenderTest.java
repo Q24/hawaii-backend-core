@@ -15,45 +15,52 @@
  */
 package io.kahu.hawaii.service.mail;
 
+import io.kahu.hawaii.util.exception.ServerError;
+import io.kahu.hawaii.util.exception.ServerException;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.util.Properties;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import io.kahu.hawaii.util.exception.ServerError;
-import io.kahu.hawaii.util.exception.ServerException;
-
-import java.io.File;
-import java.util.Properties;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 public class DefaultMailSenderTest {
-    private MailConnection mockedMailConnection;
+
+    private Transport transport;
+    private MimeMessage mimeMessage;
+
     private Properties mailProperties;
-    private MimeMessage mockedMimeMessage;
     private MailSender mailSender;
 
     @Before 
-    public void setUp() {
-        mockedMailConnection = mock(MailConnection.class);
-        mockedMimeMessage = mock(MimeMessage.class);
-        mailProperties = new Properties();
-        mailSender = new DefaultMailSender(new HawaiiProperties(mailProperties),mockedMailConnection);
+    public void setUp() throws Exception {
+        transport = mock(Transport.class);
 
+        mimeMessage = mock(MimeMessage.class);
+
+        mailProperties = new Properties();
+
+        final MailSenderHelper mailSenderHelper = mock(MailSenderHelper.class);
+        when(mailSenderHelper.createTransport()).thenReturn(transport);
+        when(mailSenderHelper.createMimeMessage()).thenReturn(mimeMessage);
+
+        mailSender = new DefaultMailSender(new HawaiiProperties(mailProperties), mailSenderHelper);
     }
 
     @Test
@@ -63,20 +70,20 @@ public class DefaultMailSenderTest {
         String subject = "unit test for mail sending";
         String content = "mail body";
         mailProperties.put("mail.from", mailFrom);
-        when(mockedMailConnection.createMessage()).thenReturn(mockedMimeMessage);
         mailSender.sendMail(to, subject, content);
 
-        verify(mockedMimeMessage).addRecipients(eq(Message.RecipientType.TO), eq(InternetAddress.parse(to)));
-        verify(mockedMimeMessage).setFrom(eq(new InternetAddress(mailFrom)));
-        verify(mockedMimeMessage).setSubject(eq(subject));
+        final InternetAddress[] addresses = InternetAddress.parse(to);
+        verify(mimeMessage).addRecipients(eq(Message.RecipientType.TO), eq(addresses));
+        verify(mimeMessage).setFrom(eq(new InternetAddress(mailFrom)));
+        verify(mimeMessage).setSubject(eq(subject));
 
-        verify(mockedMailConnection).sendMail(mockedMimeMessage);
-        verify(mockedMailConnection).connectToMailServer();
-        verify(mockedMailConnection).disconnectFromMailServer();
+
+        verify(transport).sendMessage(mimeMessage, addresses);
+        verify(transport).close();
     }
     
     @Test
-    public void assureThatMailWithAttachmentIsSent() throws Exception {
+    public void assureThatAttachmentsAreAddedToTheMail() throws Exception {
         String to = "hello@test.com";
         String mailFrom = "jopie@test.nl";
         String subject = "unit test for mail sending";
@@ -85,11 +92,10 @@ public class DefaultMailSenderTest {
         String attachment2 = File.separator + "tmp" + File.separator + "002" + File.separator + "demo1.txt";
         
         mailProperties.put("mail.from", mailFrom);
-        when(mockedMailConnection.createMessage()).thenReturn(mockedMimeMessage);
         mailSender.sendMail(to, subject, content, mailFrom, attachment1, attachment2);
         
         ArgumentCaptor<Multipart> arg = ArgumentCaptor.forClass(Multipart.class);
-        verify(mockedMimeMessage).setContent(arg.capture());
+        verify(mimeMessage).setContent(arg.capture());
         Multipart mp = arg.getValue();
         
         assertThat("Wrong number of body parts", mp.getCount(), is(equalTo(3)));        
@@ -101,7 +107,7 @@ public class DefaultMailSenderTest {
         String to = "hello@test.com";
         String subject = "unit test for mail sending";
         String content = "mail body";
-        doThrow(new MessagingException()).when(mockedMailConnection).connectToMailServer();
+        doThrow(new MessagingException()).when(transport).sendMessage(any(), any());
         try {
             mailSender.sendMail(to, subject, content);
         } catch (ServerException exception) {
@@ -111,7 +117,7 @@ public class DefaultMailSenderTest {
     }
 
     @Test
-    public void assureAttachmentFileNameIsCorrect() throws Exception {
+    public void assureAttachmentFileNameIsCorrect()  {
         String attachment1 = File.separator + "tmp" + File.separator + "001" + File.separator + "demo.txt";
         String expectedFileName = "demo.txt";
         String actualFileName1 = mailSender.getAttachmentFileName(attachment1);

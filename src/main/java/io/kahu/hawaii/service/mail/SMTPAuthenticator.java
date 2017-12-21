@@ -15,8 +15,19 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import io.kahu.hawaii.util.exception.ServerException;
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
 
-public interface MailFormatter {
-    String toPlainTextMail() throws ServerException;
+public class SMTPAuthenticator extends Authenticator {
+
+    private HawaiiProperties properties;
+
+    public SMTPAuthenticator(HawaiiProperties properties) {
+        this.properties = properties;
+    }
+
+
+    public PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(properties.getProperty("mail.user"), properties.getProperty("mail.password"));
+    }
 }

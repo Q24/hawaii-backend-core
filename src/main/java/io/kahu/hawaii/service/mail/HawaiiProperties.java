@@ -15,9 +15,9 @@
  */
 package io.kahu.hawaii.service.mail;
 
-import java.util.Properties;
-
 import org.jolokia.jmx.JsonMBean;
+
+import java.util.Properties;
 
 @JsonMBean
 public class HawaiiProperties {
