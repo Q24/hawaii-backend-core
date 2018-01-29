@@ -154,7 +154,7 @@ public class ResourceSqlQueryService implements SqlQueryService {
             }
 
             isComment = false;
-            if (line.startsWith("*/")) {
+            if (line.startsWith("*/") || line.endsWith("*/")) {
                 inBlockComment = false;
             }
         }
