@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.16 29 January 2018, Marc Boulanger
+ * Corrected query reader issue with block comments.
+
 ## 0.4.15 21 December 2017, Rutger Lubbers / Jules Houben
  * Make MailSender thread safe.
 
