@@ -25,7 +25,6 @@ import io.kahu.hawaii.util.call.example.domain.Person;
 import io.kahu.hawaii.util.call.example.service.ClientResource;
 import io.kahu.hawaii.util.call.example.handler.GetCustomerByIdResponseHandler;
 import io.kahu.hawaii.util.call.example.service.RestServer;
-import io.kahu.hawaii.util.call.http.HttpMethod;
 import io.kahu.hawaii.util.call.http.HttpRequestBuilder;
 import io.kahu.hawaii.util.call.http.HttpRequestContext;
 import io.kahu.hawaii.util.call.log.CallLogger;
@@ -38,6 +37,7 @@ import io.kahu.hawaii.util.logger.LogManagerConfiguration;
 import io.kahu.hawaii.util.logger.LoggingConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.springframework.http.HttpMethod;
 
 import java.util.concurrent.TimeUnit;
 
