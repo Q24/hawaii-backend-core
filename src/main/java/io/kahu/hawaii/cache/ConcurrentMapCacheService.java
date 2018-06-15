@@ -40,8 +40,8 @@ public class ConcurrentMapCacheService implements CacheService {
     }
 
     public ConcurrentMapCacheService(int defaultExpiration) {
-        this.store = new ConcurrentHashMap<String, Object>();
-        this.expirations = new ConcurrentHashMap<String, Long>();
+        this.store = new ConcurrentHashMap<>();
+        this.expirations = new ConcurrentHashMap<>();
         this.defaultExpiration = defaultExpiration;
     }
 
