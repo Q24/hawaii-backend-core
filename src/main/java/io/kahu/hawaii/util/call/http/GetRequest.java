@@ -15,23 +15,12 @@
  */
 package io.kahu.hawaii.util.call.http;
 
-import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.RequestPrototype;
-import io.kahu.hawaii.util.call.ResponseHandler;
-import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
-import io.kahu.hawaii.util.call.log.CallLogger;
+import org.apache.http.client.methods.HttpGet;
 
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-
 public class GetRequest<T> extends AbortableHttpRequest<T> {
-
-    public GetRequest(RequestDispatcher requestDispatcher, RequestContext<T> context, URI uri, ResponseHandler<HttpResponse, T> responseHandler,
-            CallLogger<T> logger) {
-        super(requestDispatcher, context, responseHandler, new HttpGet(uri), logger);
-    }
 
     public GetRequest(RequestPrototype prototype, URI uri) {
         super(prototype, new HttpGet(uri));

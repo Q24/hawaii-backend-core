@@ -17,8 +17,7 @@ package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.RequestContext;
 import io.kahu.hawaii.util.call.TimeOut;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.http.HttpMethod;
 
 public class HttpRequestContext<T> extends RequestContext<T> {
     private final HttpMethod method;

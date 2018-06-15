@@ -15,6 +15,15 @@
  */
 package io.kahu.hawaii.util.call.http;
 
-public enum HttpMethod {
-    OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT, PATCH;
+import io.kahu.hawaii.util.call.RequestPrototype;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPatch;
+
+import java.net.URI;
+
+public class PatchRequest<T> extends AbortableHttpRequest<T> {
+
+    public PatchRequest(RequestPrototype<HttpResponse, T> prototype, URI uri) {
+        super(prototype, new HttpPatch(uri));
+    }
 }

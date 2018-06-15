@@ -16,22 +16,9 @@
 package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.*;
-import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
 import io.kahu.hawaii.util.call.http.util.UriBuilder;
-import io.kahu.hawaii.util.call.log.CallLogger;
 import io.kahu.hawaii.util.exception.ServerError;
 import io.kahu.hawaii.util.exception.ServerException;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -42,7 +29,9 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
@@ -53,6 +42,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.plexus.util.StringUtils;
+import org.springframework.http.HttpMethod;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.net.URI;
+import java.util.*;
+import java.util.Map.Entry;
 
 @NotThreadSafe
 public class HttpRequestBuilder<T> implements RequestBuilder<T> {
@@ -204,9 +200,10 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
 
     public Request<T> build() throws ServerException {
         assert active : "Not active.";
-        AbortableHttpRequest<T> request = null;
+        AbortableHttpRequest<T> request;
         URI uri = getUri();
 
+        final HttpEntity httpEntity;
         HttpMethod method = getRequestContext().getMethod();
         switch (method) {
         case GET:
@@ -215,31 +212,27 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
             break;
         case POST:
             request = new PostRequest<>(prototype, uri);
-
-            HttpEntity httpEntity = null;
-            if (payload != null) {
-                httpEntity = new StringEntity(payload, ContentType.create(mimeType, characterEncoding));
-            }
-            if (payloads != null) {
-                List<NameValuePair> params = new ArrayList<>();
-                for (Entry<String, Object> entry : payloads.entrySet()) {
-                    entry.getValue();
-                    String stringValue = StringUtils.defaultString(entry.getValue());
-                    params.add(new BasicNameValuePair(entry.getKey(), stringValue));
-                }
-                try {
-                    httpEntity = new UrlEncodedFormEntity(params);
-                } catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+            httpEntity = getPayload();
             if (httpEntity != null) {
                 ((HttpPost) request.getHttpRequest()).setEntity(httpEntity);
             }
             break;
         case DELETE:
-            request = new DeleteRequest<T>(prototype, uri);
+            request = new DeleteRequest<>(prototype, uri);
+            break;
+        case PATCH:
+            request = new PatchRequest<>(prototype, uri);
+            httpEntity = getPayload();
+            if (httpEntity != null) {
+                ((HttpPatch) request.getHttpRequest()).setEntity(httpEntity);
+            }
+            break;
+        case PUT:
+            request = new PutRequest<>(prototype, uri);
+            httpEntity = getPayload();
+            if (httpEntity != null) {
+                ((HttpPut) request.getHttpRequest()).setEntity(httpEntity);
+            }
             break;
         default:
             throw new ServerException(ServerError.METHOD_ERROR, "Method '" + method + "' is not supported.");
@@ -258,6 +251,27 @@ public class HttpRequestBuilder<T> implements RequestBuilder<T> {
 
         request.setHttpClientBuilder(HTTP_CLIENT_BUILDER);
         return request;
+    }
+
+    private HttpEntity getPayload() {
+        HttpEntity httpEntity = null;
+        if (payload != null) {
+            httpEntity = new StringEntity(payload, ContentType.create(mimeType, characterEncoding));
+        }
+        if (payloads != null) {
+            List<NameValuePair> params = new ArrayList<>();
+            for (Entry<String, Object> entry : payloads.entrySet()) {
+                String stringValue = StringUtils.defaultString(entry.getValue());
+                params.add(new BasicNameValuePair(entry.getKey(), stringValue));
+            }
+            try {
+                httpEntity = new UrlEncodedFormEntity(params);
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return httpEntity;
     }
 
     private void addAuthentication(AbortableHttpRequest<T> request, URI uri) {

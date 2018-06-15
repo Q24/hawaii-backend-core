@@ -32,6 +32,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpMethod;
 
 import static org.mockito.Mockito.*;
 

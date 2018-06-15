@@ -67,7 +67,7 @@ public class ResponseHandlerTest extends AbstractDispatcherFrameworkTest {
 
         Response<String> response = dispatch(requestDispatcher, request);
 
-        Thread.sleep(30);
+        Thread.sleep(100);
         verifyStatistics(1, 0, 0, 0);
 
         request.proceed();

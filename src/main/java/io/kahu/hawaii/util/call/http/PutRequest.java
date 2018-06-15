@@ -17,12 +17,13 @@ package io.kahu.hawaii.util.call.http;
 
 import io.kahu.hawaii.util.call.RequestPrototype;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 
 import java.net.URI;
 
-public class PostRequest<T> extends AbortableHttpRequest<T> {
-    public PostRequest(RequestPrototype<HttpResponse, T> prototype, URI uri) {
-        super(prototype, new HttpPost(uri));
+public class PutRequest<T> extends AbortableHttpRequest<T> {
+
+    public PutRequest(RequestPrototype<HttpResponse, T> prototype, URI uri) {
+        super(prototype, new HttpPut(uri));
     }
 }

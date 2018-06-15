@@ -19,7 +19,6 @@ import io.kahu.hawaii.util.call.TimeOut;
 import io.kahu.hawaii.util.call.configuration.RequestConfiguration;
 import io.kahu.hawaii.util.call.configuration.RequestConfigurations;
 import io.kahu.hawaii.util.call.dispatch.RequestDispatcher;
-import io.kahu.hawaii.util.call.http.HttpMethod;
 import io.kahu.hawaii.util.call.http.HttpRequestContext;
 import io.kahu.hawaii.util.call.http.SoapRequest;
 import io.kahu.hawaii.util.call.http.response.SoapResponseHandler;
@@ -48,6 +47,7 @@ import org.apache.cxf.transport.Conduit;
 import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.http.HttpMethod;
 
 public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit {
     private static final HttpClientBuilder HTTP_CLIENT_BUILDER = HttpClientBuilder.create().disableContentCompression();
@@ -78,7 +78,7 @@ public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit
     }
 
     @Override
-    public void prepare(Message message) throws IOException {
+    public void prepare(Message message) {
         message.setContent(OutputStream.class, new ByteArrayOutputStream());
     }
 
@@ -139,6 +139,7 @@ public class HttpViaDispatcherConduit extends AbstractConduit implements Conduit
                 input.setContent(InputStream.class, inputStream);
                 observer.onMessage(input);
             } catch (ServerException e) {
+                // ignore
             }
         }
         super.close(message);
