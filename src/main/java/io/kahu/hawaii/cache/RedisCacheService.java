@@ -12,9 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Wouter Eerdekens
- * @since 0.4.17
  */
 package io.kahu.hawaii.cache;
 
@@ -26,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link CacheService} implementation using Redis.
+ *
+ * @author Wouter Eerdekens
+ * @since 0.4.17
  */
 public class RedisCacheService implements CacheService {
 
