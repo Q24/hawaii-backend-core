@@ -1,7 +1,8 @@
 # Hawaii Backend Core Changelog
 
-## 0.4.17 15 June 2018, Paul Klos
+## 0.4.17 15 June 2018, Paul Klos, Wouter Eerdekens
  * Make HttpRequestBuilder support PATCH and PUT methods.
+ * Added RedisCacheService.
 
 ## 0.4.16 29 January 2018, Marc Boulanger
  * Corrected query reader issue with block comments.

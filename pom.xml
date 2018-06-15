@@ -29,6 +29,7 @@
     <java.version>1.8</java.version>
     <spring.version>4.1.6.RELEASE</spring.version>
     <spring.data.commons.version>1.10.0.RELEASE</spring.data.commons.version>
+    <spring.data.redis.version>1.8.13.RELEASE</spring.data.redis.version>
     <jackson.version>2.5.2</jackson.version>
     <jolokia.version>1.1.0</jolokia.version>
     <cxf.version>2.7.11</cxf.version>
@@ -74,6 +75,11 @@
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
       <version>${spring.data.commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+      <version>${spring.data.redis.version}</version>
     </dependency>
     <!-- jackson object mapper -->
     <dependency>

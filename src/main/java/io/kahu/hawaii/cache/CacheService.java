@@ -22,15 +22,13 @@ public interface CacheService {
      *
      * @param key
      *            the key of the cache entry
-     * @param type
-     *            the type to cast the object to
      * @return the previously-stored object, or null if key not found
      * @throws CacheServiceException
      *             in case of any error
      * @throws ClassCastException
      *             in case object cannot be cast to type T
      */
-    public Object get(String key) throws CacheServiceException, ClassCastException;
+    Object get(String key) throws CacheServiceException, ClassCastException;
 
     /**
      * Stores an object into the cache using the given key. Uses default
@@ -43,7 +41,7 @@ public interface CacheService {
      * @throws CacheServiceException
      *             in case of any error
      */
-    public void put(String key, Object value) throws CacheServiceException;
+    void put(String key, Object object) throws CacheServiceException;
 
     /**
      * Stores an object into the cache using the given key.
@@ -64,19 +62,17 @@ public interface CacheService {
      * @throws CacheServiceException
      *             in case of any error
      */
-    public void put(String key, int expiration, Object object) throws CacheServiceException;
+    void put(String key, int expiration, Object object) throws CacheServiceException;
 
     /**
      * Removes the key from the cache.
      *
      * @param key
      *            the key of the cache entry
-     * @param type
-     *            the type of the cache entry
      * @throws CacheServiceException
      *             in case of any error
      */
-    public void delete(String key) throws CacheServiceException;
+    void delete(String key) throws CacheServiceException;
 
     /**
      * Flushes the cache (removing all items).
@@ -84,5 +80,5 @@ public interface CacheService {
      * @throws CacheServiceException
      *             in case of any error
      */
-    public void flush() throws CacheServiceException;
+    void flush() throws CacheServiceException;
 }
