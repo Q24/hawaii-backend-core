@@ -67,6 +67,10 @@ public class ExecutorRepository {
         assert executors.containsKey(DEFAULT_ASYNC_EXECUTOR_NAME) : "The system queue with name '" + DEFAULT_ASYNC_EXECUTOR_NAME + "' is not defined.";
     }
 
+    public HawaiiExecutor getExecutorByName(final String name) {
+        return executors.get(name);
+    }
+
     public <T> HawaiiExecutor getExecutor(AbortableRequest<T> request) {
         RequestContext<T> context = request.getContext();
 

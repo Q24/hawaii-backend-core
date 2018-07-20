@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.18 20 July 2018, Marcel Overdijk, Jules Houben
+ * Added `getExecutorByName` method to retrieve an executor by name to be used with Spring @Async.
+
 ## 0.4.17 15 June 2018, Paul Klos, Wouter Eerdekens
  * Make HttpRequestBuilder support PATCH and PUT methods.
  * Added RedisCacheService.
