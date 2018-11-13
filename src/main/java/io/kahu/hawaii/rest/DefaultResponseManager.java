@@ -63,7 +63,7 @@ public class DefaultResponseManager implements ResponseManager {
             return toResponse(new ServerException(ServerError.UNEXPECTED_EXCEPTION, throwable));
         }
         if (mustLog(throwable)) {
-            logManager.debug(CoreLoggers.SERVER_EXCEPTION, throwable.getMessage(), throwable);
+            logManager.warn(CoreLoggers.SERVER_EXCEPTION, throwable.getMessage(), throwable);
         }
         HawaiiException exception = (HawaiiException) throwable;
 

@@ -58,7 +58,7 @@ public class HawaiiControllerExceptionHandler extends ResponseEntityExceptionHan
         try {
             error = throwable.toJson();
         } catch (HawaiiException exc) {
-            logManager.info(CoreLoggers.SERVER_EXCEPTION, exc.getMessage(), exc);
+            logManager.error(CoreLoggers.SERVER_EXCEPTION, exc.getMessage(), exc);
         }
 
         return handleException(throwable, throwable.getStatus().value(), error);
@@ -82,7 +82,7 @@ public class HawaiiControllerExceptionHandler extends ResponseEntityExceptionHan
 
     private void log(Throwable throwable) {
         if (mustLog(throwable)) {
-            logManager.info(CoreLoggers.SERVER_EXCEPTION, throwable.getMessage(), throwable);
+            logManager.warn(CoreLoggers.SERVER_EXCEPTION, throwable.getMessage(), throwable);
         } else {
             if (throwable instanceof AuthorisationException) {
                 logManager.debug(CoreLoggers.SERVER, throwable.getMessage());
@@ -104,7 +104,7 @@ public class HawaiiControllerExceptionHandler extends ResponseEntityExceptionHan
             json.put("data", new JSONArray());
             json.put("error", error);
         } catch (JSONException exc) {
-            logManager.debug(CoreLoggers.SERVER_EXCEPTION, exc.getMessage(), exc);
+            logManager.error(CoreLoggers.SERVER_EXCEPTION, exc.getMessage(), exc);
         }
 
         log(throwable);
