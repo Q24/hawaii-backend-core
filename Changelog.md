@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.4.19 13 November 2018, Paul Klos
+ * Log exceptions at WARN level, and errors during error handling at ERROR level.
+
 ## 0.4.18 20 July 2018, Marcel Overdijk, Jules Houben
  * Added `getExecutorByName` method to retrieve an executor by name to be used with Spring @Async.
 
