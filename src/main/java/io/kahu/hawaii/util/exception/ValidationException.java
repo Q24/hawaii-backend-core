@@ -147,4 +147,8 @@ public class ValidationException extends HawaiiException implements ExceptionKey
             return "Unexpected Error, call Math";
         }
     }
+
+    public boolean containsRequestValidationError() {
+        return requestValidationErrors != null && requestValidationErrors.stream().anyMatch(it -> it instanceof RequestValidationError);
+    }
 }

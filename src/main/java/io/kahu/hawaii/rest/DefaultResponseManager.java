@@ -100,7 +100,7 @@ public class DefaultResponseManager implements ResponseManager {
 
     private boolean mustLog(Throwable throwable) {
         if (throwable instanceof ValidationException) {
-            return false;
+            return ((ValidationException)throwable).containsRequestValidationError();
         }
         if (throwable instanceof AuthorisationException) {
             return false;
