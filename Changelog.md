@@ -1,5 +1,11 @@
 # Hawaii Backend Core Changelog
 
+## 0.5.0 10 December 2018, Paul Klos
+ * Protocol error logging in HawaiiControllerExceptionHandler
+
+## 0.4.20 19 November 2018, Marcel Overdijk
+ * verbose loggin for PROTOCOL_ERROR & NO_MORE_DATA
+
 ## 0.4.19 13 November 2018, Paul Klos
  * Log exceptions at WARN level, and errors during error handling at ERROR level.
 
