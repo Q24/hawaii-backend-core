@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.5.1 12 february 2019, Cedric Roijakkers
+ * Allowed smtp port to be something else than 25 according to configuration
+
 ## 0.5.0 10 December 2018, Paul Klos
  * Protocol error logging in HawaiiControllerExceptionHandler
 
