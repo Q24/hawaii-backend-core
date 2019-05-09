@@ -141,6 +141,10 @@ public class DbRequestBuilderRepository {
         return getPage(name + "_count", name + "_paged", params, rowMapper, pageable, queryEnhancer, null);
     }
 
+    public <T> Page<T> getPage(String name, final Long rowCount, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer) throws ServerException {
+        return getPage(rowCount, name + "_paged", params, rowMapper, pageable, queryEnhancer, null);
+    }
+
     public <T> Page<T> getPage(String count, String fetch, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer) throws ServerException {
         return getPage(count, fetch, params, rowMapper, pageable, queryEnhancer, null);
     }
@@ -148,8 +152,17 @@ public class DbRequestBuilderRepository {
     public <T> Page<T> getPage(String count, String fetch, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer, Long maxRows) throws ServerException {
         Assert.notNull(pageable);
 
+        // retrieve total number of records
+        final Long rowCount = getCount(count).withParams(params).withQueryEnhancer(queryEnhancer).withPageable(pageable).get();
+
+        // return the page
+        return getPage(rowCount, fetch, params, rowMapper, pageable, queryEnhancer, maxRows);
+    }
+
+    public <T> Page<T> getPage(Long rowCount, String fetch, Map<String, Object> params, RowMapper<T> rowMapper, Pageable pageable, QueryEnhancer queryEnhancer, Long maxRows) throws ServerException {
+        Assert.notNull(pageable);
+
         // retrieve query...
-        Long rowCount = getCount(count).withParams(params).withQueryEnhancer(queryEnhancer).withPageable(pageable).get();
         if (maxRows != null && (rowCount > maxRows)) {
             // Threshold defined and total number of records is higher
             return new PageImpl<>(new ArrayList<>(), new PageRequest(0, 1), rowCount);
