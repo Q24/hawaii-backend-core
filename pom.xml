@@ -22,7 +22,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.kahu</groupId>
   <artifactId>hawaii-backend-core</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.6.0</version>
 
   <!-- defining versions of multiple dependencies to prevent version conflicts set generic encoding standards -->
   <properties>
@@ -415,12 +415,12 @@
     <repository>
       <id>hawaii-releases</id>
       <name>hawaii-releases</name>
-      <url>http://localhost:6001/artifactory/releases</url>
+      <url>http://localhost:8088/artifactory/releases</url>
     </repository>
     <snapshotRepository>
       <id>hawaii-snapshots</id>
       <name>hawaii-snapshots</name>
-      <url>http://localhost:6001/artifactory/snapshots</url>
+      <url>http://localhost:8088/artifactory/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 

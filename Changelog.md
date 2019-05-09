@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.6.0 9 May 2019, Paul Klos
+ * Allow retrieving a page of data with a known total number of elements, i.e. without retrieving the count for each page
+
 ## 0.5.1 12 february 2019, Cedric Roijakkers
  * Allowed smtp port to be something else than 25 according to configuration
 
