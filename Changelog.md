@@ -1,5 +1,8 @@
 # Hawaii Backend Core Changelog
 
+## 0.7.0 26 March 2020, Wouter Eerdekens
+ * Add extra methods to CryptoUtil to allow URL Safe Base64 encoding
+
 ## 0.6.0 9 May 2019, Paul Klos
  * Allow retrieving a page of data with a known total number of elements, i.e. without retrieving the count for each page
 

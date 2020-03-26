@@ -63,15 +63,31 @@ public class CryptoUtil {
     }
 
     public static String encrypt(String unencrypted) throws ServerException {
-        return encrypt(unencrypted, getKey(), getInitVector());
+        return encrypt(unencrypted, getKey(), getInitVector(), false);
+    }
+
+    public static String encryptUrlSafe(String unencrypted) throws ServerException {
+        return encrypt(unencrypted, getKey(), getInitVector(), true);
     }
 
     public static String encrypt(String unencrypted, String key, String initVector) throws ServerException {
+        return encrypt(unencrypted, key, initVector, false);
+    }
+
+    public static String encryptUrlSafe(String unencrypted, String key, String initVector) throws ServerException {
+        return encrypt(unencrypted, key, initVector, true);
+    }
+
+    public static String encrypt(String unencrypted, String key, String initVector, boolean urlSafe) throws ServerException {
         try {
             Cipher cipher = initCipher(Cipher.ENCRYPT_MODE, key, initVector);
 
             byte[] encrypted = cipher.doFinal(unencrypted.getBytes());
-            return Base64.encodeBase64String(encrypted);
+            if (urlSafe) {
+                return Base64.encodeBase64URLSafeString(encrypted);
+            } else {
+                return Base64.encodeBase64String(encrypted);
+            }
         } catch (GeneralSecurityException e) {
             throw new ServerException(ServerError.ENCRYPTION, e);
         }
