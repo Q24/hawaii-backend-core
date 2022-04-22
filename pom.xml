@@ -27,7 +27,7 @@
   <!-- defining versions of multiple dependencies to prevent version conflicts set generic encoding standards -->
   <properties>
     <java.version>1.8</java.version>
-    <spring.version>4.1.6.RELEASE</spring.version>
+    <spring.version>5.3.19</spring.version>
     <spring.data.commons.version>1.10.0.RELEASE</spring.data.commons.version>
     <spring.data.redis.version>1.8.13.RELEASE</spring.data.redis.version>
     <jackson.version>2.5.2</jackson.version>
